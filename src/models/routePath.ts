@@ -4,6 +4,18 @@ export const ROUTE = {
   LOGIN: "login",
   REGISTER: "register",
   DOCUMENTS: "documents",
+
+  APP: "app",
+  DASHBOARD: "dashboard",
+  MY_DOCUMENTS: "mydocuments",
+  UPLOAD_DOCUMENT: "uploaddocument",
+  COMMUNITY: "community",
+  AI_CHAT: "aichat",
+  BOOKMARKS: "bookmarks",
+  NOTIFICATIONS: "notifications",
+  LEADERBOARD: "leaderboard",
+  PROFILE: "profile",
+  SETTINGS: "settings",
 };
 
 export const NAVIGATE_KEY = [{}];

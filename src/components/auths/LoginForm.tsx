@@ -39,7 +39,7 @@ function LoginForm() {
 
       toast.success(SUCCESS_MESSAGE.LOGIN_SUCCESS);
 
-      navigate(ROUTE.HOME);
+      navigate(`/${ROUTE.APP}`);
     },
 
     onError: (error) => {
