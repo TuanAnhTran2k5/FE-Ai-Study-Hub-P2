@@ -28,12 +28,14 @@ export function AvatarDropdown({ user }: AvatarDropdownProps) {
     navigate(ROUTE.HOME);
   };
 
-  const fallbackName = user.fullName
-    .split(" ")
-    .map((word) => word[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const fallbackName = user?.fullName
+    ? user.fullName
+        .split(" ")
+        .map((word) => word[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "US";
 
   return (
     <DropdownMenu>

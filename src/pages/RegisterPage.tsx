@@ -1,4 +1,3 @@
-import React from "react";
 import RegisterForm from "../components/auths/RegisterForm";
 import RegisterHero from "../components/auths/RegisterHero";
 

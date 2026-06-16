@@ -1,28 +1,15 @@
-import HomePage from "@/pages/HomePage";
-import LoginPage from "@/pages/LoginPage";
-import RegisterPage from "@/pages/RegisterPage";
-import AuthLayout from "@/layouts/AuthLayout";
-import MainLayout from "@/layouts/PublicLayout";
 import { ROUTE } from "@/models/routePath";
 import { createBrowserRouter } from "react-router-dom";
-import DocumentsPage from "@/pages/DocumentsPage";
 import UserLayout from "@/layouts/UserLayout";
+import MainLayout from "@/layouts/PublicLayout";
+import AuthLayout from "@/layouts/AuthLayout";
+import HomePage from "@/pages/HomePage";
+import DocumentsPage from "@/pages/DocumentsPage";
+import LoginPage from "@/pages/LoginPage";
+import RegisterPage from "@/pages/RegisterPage";
+import CommunityPage from "@/pages/CommunityPage";
 
 export const router = createBrowserRouter([
-  {
-    path: ROUTE.AUTH,
-    element: <AuthLayout />,
-    children: [
-      {
-        path: ROUTE.LOGIN,
-        element: <LoginPage />,
-      },
-      {
-        path: ROUTE.REGISTER,
-        element: <RegisterPage />,
-      },
-    ],
-  },
   {
     path: ROUTE.HOME,
     element: <MainLayout />,
@@ -38,7 +25,21 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: ROUTE.APP,
+    path: `/${ROUTE.AUTH}`,
+    element: <AuthLayout />,
+    children: [
+      {
+        path: ROUTE.LOGIN,
+        element: <LoginPage />,
+      },
+      {
+        path: ROUTE.REGISTER,
+        element: <RegisterPage />,
+      },
+    ],
+  },
+  {
+    path: `/${ROUTE.APP}`,
     element: <UserLayout />,
     children: [
       {
@@ -59,7 +60,7 @@ export const router = createBrowserRouter([
       },
       {
         path: ROUTE.COMMUNITY,
-        element: <div> </div>,
+        element: <CommunityPage />,
       },
       {
         path: ROUTE.AI_CHAT,
@@ -100,14 +101,14 @@ export const NAVIGATE_KEY = [
   },
   {
     name: "Community",
-    path: <div></div>,
+    path: ROUTE.COMMUNITY,
   },
   // {
   //   name: "AI Chat",
-  //   path: <div></div>,
+  //   path: ROUTE.AI_CHAT,
   // },
   // {
   //   name: "Leaderboard",
-  //   path: <div></div>,
+  //   path: ROUTE.LEADERBOARD,
   // },
 ];

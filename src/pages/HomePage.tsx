@@ -1,4 +1,3 @@
-import React from "react";
 import HeroSection from "../components/homes/HeroSection";
 import TopSubjectsSection from "@/components/homes/TopSubjectsSection";
 
