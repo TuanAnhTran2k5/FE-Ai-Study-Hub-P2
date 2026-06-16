@@ -1,0 +1,281 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* FONT */
+  --font-heading: var(--font-sans);
+  --font-sans: "Geist Variable", sans-serif;
+
+  /* MAIN THEME COLORS*/
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* CHART COLORS*/
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /*SIDEBAR*/
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /*HOVER EFFECTS*/
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-bg-hover: var(--primary-bg-hover);
+
+  /* SUCCESS COLORS */
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+
+  /* LOGIN BUTTON GRADIENT*/
+  --color-primary-start: var(--primary-start);
+  --color-primary-end: var(--primary-end);
+
+  --color-primary-start-hover: var(--primary-start-hover);
+  --color-primary-end-hover: var(--primary-end-hover);
+
+  /* REGISTER BUTTON GRADIENT*/
+  --color-success-start: var(--success-start);
+  --color-success-end: var(--success-end);
+
+  --color-success-start-hover: var(--success-start-hover);
+  --color-success-end-hover: var(--success-end-hover);
+
+  /*BORDER RADIUS*/
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* FOOTER */
+  --color-footer-start: var(--footer-start);
+  --color-footer-middle: var(--footer-middle);
+  --color-footer-end: var(--footer-end);
+
+  --color-footer-foreground: var(--footer-foreground);
+  --color-footer-muted: var(--footer-muted);
+  --color-footer-link: var(--footer-link);
+  --color-footer-link-hover: var(--footer-link-hover);
+  --color-footer-dot: var(--footer-dot);
+  --color-footer-border: var(--footer-border);
+  --color-footer-copyright: var(--footer-copyright);
+
+  /* LINK */
+  --color-link: var(--link);
+  --color-link-hover: var(--link-hover);
+}
+
+:root {
+  /* PAGE (Toàn bộ website) */
+  --background: rgb(196, 226, 255);
+  --foreground: rgb(71, 85, 105);
+
+  /* CARD / FORM / MODAL */
+  --card: rgb(255, 255, 255);
+  --card-foreground: rgb(15, 23, 42);
+
+  /* POPOVER / DROPDOWN / TOOLTIP */
+  --popover: rgb(255, 255, 255);
+  --popover-foreground: rgb(15, 23, 42);
+
+  /* PRIMARY BRAND (Màu thương hiệu AI Study Hub) */
+  --primary: rgb(3, 105, 161);
+  --primary-foreground: rgb(255, 255, 255);
+
+  /* Hover cho text, border */
+  --primary-hover: rgb(125, 211, 252);
+
+  /* Hover cho background */
+  --primary-bg-hover: rgb(240, 249, 255);
+
+  /* SUCCESS (Success, Register, Completed) */
+  --success: rgb(16, 185, 129);
+  --success-foreground: rgb(255, 255, 255);
+
+  /* SECONDARY (Màu phụ) */
+  --secondary: rgb(224, 242, 254);
+  --secondary-foreground: rgb(7, 89, 133);
+
+  /* MUTED (Text phụ, mô tả, placeholder) */
+  --muted: rgb(241, 245, 249);
+  --muted-foreground: rgb(71, 85, 105);
+
+  /* ACCENT (Hover nhẹ, highlight) */
+  --accent: rgb(224, 242, 254);
+  --accent-foreground: rgb(7, 89, 133);
+
+  /* ERROR / DELETE */
+  --destructive: rgb(239, 68, 68);
+
+  /* BORDER / INPUT */
+  --border: rgb(226, 232, 240);
+  --input: rgb(203, 213, 225);
+
+  /* FOCUS RING */
+  --ring: rgb(2, 132, 199);
+
+  /* CHART COLORS */
+  --chart-1: rgb(14, 165, 233);
+  --chart-2: rgb(59, 130, 246);
+  --chart-3: rgb(16, 185, 129);
+  --chart-4: rgb(245, 158, 11);
+  --chart-5: rgb(239, 68, 68);
+
+  /* BORDER RADIUS */
+  --radius: 0.625rem;
+
+  /* SIDEBAR */
+  --sidebar: rgb(255, 255, 255);
+  --sidebar-foreground: rgb(15, 23, 42);
+
+  --sidebar-primary: rgb(3, 105, 161);
+  --sidebar-primary-foreground: rgb(255, 255, 255);
+
+  --sidebar-accent: rgb(224, 242, 254);
+  --sidebar-accent-foreground: rgb(7, 89, 133);
+
+  --sidebar-border: rgb(226, 232, 240);
+  --sidebar-ring: rgb(2, 132, 199);
+
+  /* LOGIN BUTTON (Gradient Blue)*/
+  --primary-start: rgb(2, 132, 199);
+  --primary-end: rgb(29, 78, 216);
+
+  --primary-start-hover: rgb(14, 165, 233);
+  --primary-end-hover: rgb(37, 99, 235);
+
+  /* REGISTER BUTTON (Gradient Green)*/
+  --success-start: rgb(16, 185, 129);
+  --success-end: rgb(22, 163, 74);
+
+  --success-start-hover: rgb(52, 211, 153);
+  --success-end-hover: rgb(34, 197, 94);
+
+  /* FOOTER */
+  --footer-start: rgb(15, 23, 42);
+  --footer-middle: rgb(2, 6, 23);
+  --footer-end: rgb(15, 23, 42);
+
+  --footer-foreground: rgb(255, 255, 255);
+  --footer-muted: rgb(148, 163, 184);
+  --footer-link: rgb(203, 213, 225);
+  --footer-link-hover: rgb(125, 211, 252);
+  --footer-dot: rgb(71, 85, 105);
+  --footer-border: rgb(255, 255, 255, 0.1);
+  --footer-copyright: rgb(100, 116, 139);
+
+  /* LINK */
+  --link: rgb(37, 99, 235); /* blue-600 */
+  --link-hover: rgb(29, 78, 216); /* blue-700 */
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+  /* CUSTOM HOVER */
+  --primary-hover: rgb(56, 189, 248);
+  --primary-bg-hover: rgb(15, 23, 42);
+
+  /* SUCCESS */
+  --success: rgb(16, 185, 129);
+  --success-foreground: rgb(255, 255, 255);
+
+  /* LOGIN BUTTON */
+  --primary-start: rgb(2, 132, 199);
+  --primary-end: rgb(30, 64, 175);
+  --primary-start-hover: rgb(14, 165, 233);
+  --primary-end-hover: rgb(37, 99, 235);
+
+  /* REGISTER BUTTON */
+  --success-start: rgb(16, 185, 129);
+  --success-end: rgb(21, 128, 61);
+  --success-start-hover: rgb(52, 211, 153);
+  --success-end-hover: rgb(34, 197, 94);
+
+  /* LINK */
+  --link: rgb(96, 165, 250); /* blue-400 */
+  --link-hover: rgb(147, 197, 253); /* blue-300 */
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
