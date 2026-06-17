@@ -8,6 +8,7 @@ import DocumentsPage from "@/pages/DocumentsPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import CommunityPage from "@/pages/CommunityPage";
+import AIChatPage from "@/pages/AIChatPage";
 
 export const router = createBrowserRouter([
   {
@@ -25,7 +26,7 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: `/${ROUTE.AUTH}`,
+    path: ROUTE.AUTH,
     element: <AuthLayout />,
     children: [
       {
@@ -39,7 +40,7 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    path: `/${ROUTE.APP}`,
+    path: ROUTE.APP,
     element: <UserLayout />,
     children: [
       {
@@ -64,7 +65,7 @@ export const router = createBrowserRouter([
       },
       {
         path: ROUTE.AI_CHAT,
-        element: <div> </div>,
+        element: <AIChatPage />,
       },
       {
         path: ROUTE.BOOKMARKS,
