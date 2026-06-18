@@ -3,14 +3,17 @@ import { useQuery } from "@tanstack/react-query";
 
 import DocumentGrid from "@/components/documents/DocumentGrid";
 import DocumentSearch from "@/components/documents/DocumentSearch";
-import { VisibilityStatus } from "@/models/document.enum";
 import { getDocuments } from "@/services/documentService";
+import { Button } from "@/components/ui/button";
+import { Upload } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-function DocumentsPage() {
+function MyDocumentsPage() {
   const [keyword, setKeyword] = useState("");
-  const [searchKeyword, setSearchKeyword] = useState("");
   const [subjectCode, setSubjectCode] = useState("ALL");
   const [semesterNo, setSemesterNo] = useState("ALL");
+  const [visibilityStatus, setVisibilityStatus] = useState("ALL");
+  const navigate = useNavigate();
 
   const {
     data: documents = [],
@@ -21,16 +24,14 @@ function DocumentsPage() {
     queryFn: getDocuments,
   });
 
-  const publicDocuments = useMemo(() => {
-    return documents.filter(
-      (document) => document.visibilityStatus === VisibilityStatus.PUBLIC,
-    );
+  const allDocuments = useMemo(() => {
+    return documents;
   }, [documents]);
 
   const subjects = useMemo(() => {
     const subjectMap = new Map<string, string>();
 
-    publicDocuments.forEach((document) => {
+    allDocuments.forEach((document) => {
       subjectMap.set(document.subjectCode, document.subjectName);
     });
 
@@ -40,18 +41,18 @@ function DocumentsPage() {
         subjectName,
       }),
     );
-  }, [publicDocuments]);
+  }, [allDocuments]);
 
   const semesters = useMemo(() => {
     return Array.from(
-      new Set(publicDocuments.map((document) => document.semesterNo)),
+      new Set(allDocuments.map((document) => document.semesterNo)),
     ).sort((a, b) => a - b);
-  }, [publicDocuments]);
+  }, [allDocuments]);
 
   const filteredDocuments = useMemo(() => {
-    const q = searchKeyword.trim().toLowerCase();
+    const q = keyword.trim().toLowerCase();
 
-    return publicDocuments.filter((document) => {
+    return allDocuments.filter((document) => {
       const matchesKeyword =
         !q ||
         document.title.toLowerCase().includes(q) ||
@@ -68,17 +69,19 @@ function DocumentsPage() {
       const matchesSemester =
         semesterNo === "ALL" || document.semesterNo === Number(semesterNo);
 
-      return matchesKeyword && matchesSubject && matchesSemester;
+      const matchesVisibility =
+        visibilityStatus === "ALL" ||
+        document.visibilityStatus === visibilityStatus;
+
+      return (
+        matchesKeyword && matchesSubject && matchesSemester && matchesVisibility
+      );
     });
-  }, [publicDocuments, searchKeyword, subjectCode, semesterNo]);
+  }, [allDocuments, keyword, subjectCode, semesterNo, visibilityStatus]);
 
-  const handleSearch = () => {
-    setSearchKeyword(keyword);
-  };
-
-  const handleViewDocument = (documentId: string) => {
-    console.log("View document:", documentId);
-  };
+ const handleViewDocument = (documentId: string) => {
+  navigate(`/app/mydocuments/${documentId}`);
+};
 
   if (isLoading) {
     return (
@@ -108,24 +111,35 @@ function DocumentsPage() {
       <div className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary">
-            Documents
+            My Documents
           </p>
 
           <h1 className="mt-2 text-4xl font-bold text-card-foreground">
-            Explore Study Documents
+            Manage Your Documents
           </h1>
 
           <p className="mt-3 max-w-2xl text-muted-foreground">
-            Browse public study materials shared by students in AI Study Hub.
+            View, organize, and manage all documents you have uploaded to AI
+            Study Hub.
           </p>
         </div>
 
-        <div className="text-sm text-muted-foreground">
-          Showing{" "}
-          <span className="font-bold text-card-foreground">
-            {filteredDocuments.length}
-          </span>{" "}
-          documents
+        <div className="flex flex-col items-start gap-3 md:items-end">
+          <Button
+            type="button"
+            className="h-11 rounded-xl bg-gradient-to-r from-primary-start to-primary-end px-5 font-bold text-primary-foreground shadow-sm hover:from-primary-start-hover hover:to-primary-end-hover cursor-pointer"
+          >
+            <Upload className="mr-2 h-4 w-4" />
+            Upload Document
+          </Button>
+
+          <div className="text-sm text-muted-foreground">
+            Showing{" "}
+            <span className="font-bold text-card-foreground">
+              {filteredDocuments.length}
+            </span>{" "}
+            documents
+          </div>
         </div>
       </div>
 
@@ -133,12 +147,13 @@ function DocumentsPage() {
         keyword={keyword}
         subjectCode={subjectCode}
         semesterNo={semesterNo}
+        visibilityStatus={visibilityStatus}
         subjects={subjects}
         semesters={semesters}
         onKeywordChange={setKeyword}
         onSubjectChange={setSubjectCode}
         onSemesterChange={setSemesterNo}
-        onSearch={handleSearch}
+        onVisibilityChange={setVisibilityStatus}
       />
 
       <DocumentGrid
@@ -149,4 +164,4 @@ function DocumentsPage() {
   );
 }
 
-export default DocumentsPage;
+export default MyDocumentsPage;

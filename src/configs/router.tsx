@@ -5,8 +5,14 @@ import AuthLayout from "@/layouts/AuthLayout";
 import MainLayout from "@/layouts/PublicLayout";
 import { ROUTE } from "@/models/routePath";
 import { createBrowserRouter } from "react-router-dom";
-import DocumentsPage from "@/pages/DocumentsPage";
 import UserLayout from "@/layouts/UserLayout";
+import MyDocumentsPage from "@/pages/MyDocumentsPage";
+import CommunityPage from "@/pages/CommunityPage";
+import AIChatPage from "@/pages/AIChatPage";
+import BookmarksPage from "@/pages/BookmarksPage";
+import LeaderboardPage from "@/pages/LeaderboardPage";
+import ProfilePage from "@/pages/ProfilePage";
+import DocumentDetailPage from "@/pages/DocumentDetailPage";
 
 export const router = createBrowserRouter([
   {
@@ -32,8 +38,8 @@ export const router = createBrowserRouter([
         element: <HomePage />,
       },
       {
-        path: ROUTE.DOCUMENTS,
-        element: <DocumentsPage />,
+        path: ROUTE.COMMUNITY,
+        element: <CommunityPage />,
       },
     ],
   },
@@ -42,32 +48,28 @@ export const router = createBrowserRouter([
     element: <UserLayout />,
     children: [
       {
-        index: true,
-        element: <div> </div>,
+        path: ROUTE.MY_DOCUMENTS,
+        element: <MyDocumentsPage />,
+      },
+      {
+        path: ROUTE.DOCUMENT_DETAIL,
+        element: <DocumentDetailPage />,
       },
       {
         path: ROUTE.DASHBOARD,
-        element: <div> </div>,
-      },
-      {
-        path: ROUTE.MY_DOCUMENTS,
-        element: <div> </div>,
-      },
-      {
-        path: ROUTE.UPLOAD_DOCUMENT,
-        element: <div> </div>,
+        element: <div></div>,
       },
       {
         path: ROUTE.COMMUNITY,
-        element: <div> </div>,
+        element: <CommunityPage />,
       },
       {
         path: ROUTE.AI_CHAT,
-        element: <div> </div>,
+        element: <AIChatPage />,
       },
       {
         path: ROUTE.BOOKMARKS,
-        element: <div> </div>,
+        element: <BookmarksPage />,
       },
       {
         path: ROUTE.NOTIFICATIONS,
@@ -75,11 +77,11 @@ export const router = createBrowserRouter([
       },
       {
         path: ROUTE.LEADERBOARD,
-        element: <div> </div>,
+        element: <LeaderboardPage />,
       },
       {
         path: ROUTE.PROFILE,
-        element: <div> </div>,
+        element: <ProfilePage />,
       },
       {
         path: ROUTE.SETTINGS,
@@ -95,19 +97,7 @@ export const NAVIGATE_KEY = [
     path: ROUTE.HOME,
   },
   {
-    name: "Document",
-    path: ROUTE.DOCUMENTS,
-  },
-  {
     name: "Community",
-    path: <div></div>,
+    path: ROUTE.COMMUNITY,
   },
-  // {
-  //   name: "AI Chat",
-  //   path: <div></div>,
-  // },
-  // {
-  //   name: "Leaderboard",
-  //   path: <div></div>,
-  // },
 ];

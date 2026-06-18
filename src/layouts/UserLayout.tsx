@@ -12,7 +12,7 @@ function UserLayout() {
         <div className="flex min-h-0 flex-1 overflow-hidden">
           <AppSidebar />
 
-          <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-background p-6">
+          <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-background">
             <Outlet />
           </main>
         </div>
