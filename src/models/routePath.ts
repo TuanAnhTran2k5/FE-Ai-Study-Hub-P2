@@ -3,12 +3,11 @@ export const ROUTE = {
   AUTH: "auth",
   LOGIN: "login",
   REGISTER: "register",
-  DOCUMENTS: "documents",
 
   APP: "app",
   DASHBOARD: "dashboard",
   MY_DOCUMENTS: "mydocuments",
-  UPLOAD_DOCUMENT: "uploaddocument",
+  DOCUMENT_DETAIL: "mydocuments/:id",
   COMMUNITY: "community",
   AI_CHAT: "aichat",
   BOOKMARKS: "bookmarks",

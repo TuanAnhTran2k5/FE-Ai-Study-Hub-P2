@@ -55,6 +55,7 @@ export interface DocumentResponse {
   bookmarkCount: number;
 
   createdAt: string;
+  isBookmarked?: boolean;
 }
 
 export interface DocumentFilter {

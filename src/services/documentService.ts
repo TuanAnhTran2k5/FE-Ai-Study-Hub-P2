@@ -1,12 +1,23 @@
-import axios from "axios";
-import type { DocumentResponse } from "@/types/document.type";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import api from "@/configs/api";
+import type { DocumentRequest, DocumentResponse } from "@/types/document.type";
 
 export const getDocuments = async (): Promise<DocumentResponse[]> => {
-  const response = await axios.get<DocumentResponse[]>(
-    `${API_URL}/documents`
-  );
+  const response = await api.get<DocumentResponse[]>("/documents");
 
+  return response.data;
+};
+
+export const createDocument = async (
+  data: DocumentRequest,
+): Promise<DocumentResponse> => {
+  const response = await api.post<DocumentResponse>("/documents", data);
+
+  return response.data;
+};
+
+export const getDocumentById = async (
+  id: string,
+): Promise<DocumentResponse> => {
+  const response = await api.get<DocumentResponse>(`/documents/${id}`);
   return response.data;
 };

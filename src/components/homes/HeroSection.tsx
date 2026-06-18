@@ -25,7 +25,7 @@ function HeroSection() {
   const navigate = useNavigate();
   return (
     <section className="relative overflow-hidden py-4">
-      <div className="mx-auto grid items-center gap-5 bg-card/80 py-5 shadow-sm backdrop-blur-sm lg:grid-cols-[1.05fr_0.95fr] lg:px-10">
+      <div className="mx-auto grid items-center gap-5 py-5 backdrop-blur-sm lg:grid-cols-[1.05fr_0.95fr] lg:px-10">
         <div className="max-w-xl space-y-5">
           <div className="space-y-2">
             <h1 className="max-w-xl text-5xl font-black leading-tight tracking-tight text-card-foreground lg:text-[64px]">

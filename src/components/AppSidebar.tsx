@@ -27,19 +27,9 @@ import { Link, useLocation } from "react-router-dom";
 
 const menuItems = [
   {
-    title: "Dashboard",
-    url: ROUTE.DASHBOARD,
-    icon: LayoutDashboard,
-  },
-  {
     title: "My Documents",
     url: ROUTE.MY_DOCUMENTS,
     icon: FileText,
-  },
-  {
-    title: "Upload Document",
-    url: ROUTE.UPLOAD_DOCUMENT,
-    icon: Upload,
   },
   {
     title: "Community",
@@ -73,6 +63,11 @@ const menuItems = [
     icon: User,
   },
   {
+    title: "Dashboard",
+    url: ROUTE.DASHBOARD,
+    icon: LayoutDashboard,
+  },
+  {
     title: "Settings",
     url: ROUTE.SETTINGS,
     icon: Settings,
@@ -94,7 +89,7 @@ function AppSidebar() {
       <SidebarContent className="bg-sidebar px-4 py-5 text-sidebar-foreground group-data-[collapsible=icon]:px-0">
         <SidebarGroup className="p-0">
           <SidebarGroupContent>
-            <SidebarMenu className="flex flex-col items-stretch gap-3 group-data-[collapsible=icon]:items-center">
+            <SidebarMenu className="flex flex-col items-stretch gap-1 group-data-[collapsible=icon]:items-center">
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === `/app/${item.url}`;
@@ -107,7 +102,7 @@ function AppSidebar() {
                     <SidebarMenuButton asChild>
                       <Link
                         to={item.url}
-                        className={`relative flex h-12 items-center gap-3 rounded-2xl px-4 text-[15px] font-semibold transition-all duration-300 group-data-[collapsible=icon]:size-13 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 ${
+                        className={`relative flex h-11 items-center gap-3 rounded-2xl px-4 text-[15px] font-semibold transition-all duration-300 group-data-[collapsible=icon]:size-13 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 ${
                           isActive
                             ? "bg-primary text-primary-foreground shadow-md hover:bg-primary hover:text-primary-foreground"
                             : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"

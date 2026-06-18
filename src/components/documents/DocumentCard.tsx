@@ -1,12 +1,15 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { VisibilityStatus } from "@/models/document.enum";
 import type { DocumentResponse } from "@/types/document.type";
 import {
   Bookmark,
   Download,
   Eye,
   FileText,
+  Globe,
+  Lock,
   Star,
   UserRound,
 } from "lucide-react";
@@ -29,9 +32,27 @@ function DocumentCard({ document, onView }: DocumentCardProps) {
             <FileText className="h-6 w-6" />
           </div>
 
-          <Badge className="absolute right-5 top-5 rounded-full bg-card px-3 py-1 text-xs font-bold text-primary shadow-sm hover:bg-card">
-            {document.fileType}
-          </Badge>
+          <div className="absolute right-5 top-5 flex gap-2">
+  <Badge className="rounded-full bg-card px-3 py-1 text-xs font-bold text-primary shadow-sm hover:bg-card">
+    {document.fileType}
+  </Badge>
+
+  <Badge
+    className={`rounded-full px-3 py-1 text-xs font-bold shadow-sm ${
+      document.visibilityStatus === VisibilityStatus.PUBLIC
+        ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-100"
+        : "bg-orange-100 text-orange-700 hover:bg-orange-100"
+    }`}
+  >
+    {document.visibilityStatus === VisibilityStatus.PUBLIC ? (
+      <Globe className="mr-1 h-3 w-3" />
+    ) : (
+      <Lock className="mr-1 h-3 w-3" />
+    )}
+
+    {document.visibilityStatus}
+  </Badge>
+</div>
         </div>
 
         <CardContent className="flex flex-1 flex-col p-6">
@@ -116,11 +137,11 @@ function DocumentCard({ document, onView }: DocumentCardProps) {
           <Button
             type="button"
             variant="outline"
-            className="mt-5 h-12 w-full rounded-2xl border border-primary/30 bg-secondary text-base font-bold text-secondary-foreground shadow-sm transition hover:bg-primary-bg-hover hover:text-primary"
+            className="mt-5 h-12 w-full cursor-pointer rounded-2xl border border-primary/30 bg-secondary text-base font-bold text-secondary-foreground shadow-sm transition hover:bg-primary-bg-hover hover:text-primary"
             onClick={() => onView?.(document)}
           >
             <Eye className="mr-2 h-4 w-4" />
-            View Document
+            View Document 
           </Button>
         </CardContent>
       </div>

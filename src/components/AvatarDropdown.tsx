@@ -1,4 +1,3 @@
-import { Avatar, AvatarBadge, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,6 +12,7 @@ import type { User } from "@/models/user";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { ROUTE } from "@/models/routePath";
+import AvatarFrame from "./avatarFrame/AvatarFrame";
 
 type AvatarDropdownProps = {
   user: User;
@@ -28,12 +28,9 @@ export function AvatarDropdown({ user }: AvatarDropdownProps) {
     navigate(ROUTE.HOME);
   };
 
-  const fallbackName = user.fullName
-    .split(" ")
-    .map((word) => word[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  const handleProfile = () => {
+    navigate(`/${ROUTE.APP}/${ROUTE.PROFILE}`);
+  };
 
   return (
     <DropdownMenu>
@@ -42,11 +39,12 @@ export function AvatarDropdown({ user }: AvatarDropdownProps) {
           variant="ghost"
           className=" cursor-pointer flex h-11 items-center gap-3 rounded-full px-3 hover:bg-accent"
         >
-          <Avatar className="h-9 w-9">
-            <AvatarImage src={user.avatarUrl} alt={user.fullName} />
-            <AvatarFallback>{fallbackName}</AvatarFallback>
-             <AvatarBadge className="w-3 h-3 bg-success" />
-          </Avatar>
+          <AvatarFrame
+            score={user.totalScore ?? 0}
+            avatarUrl={user.avatarUrl}
+            fullName={user.fullName}
+            size="sm"
+          />
 
           <span className="max-w-[130px] truncate text-sm font-semibold text-foreground">
             {user.fullName}
@@ -56,7 +54,7 @@ export function AvatarDropdown({ user }: AvatarDropdownProps) {
 
       <DropdownMenuContent className="w-40" align="end">
         <DropdownMenuGroup>
-          <DropdownMenuItem>Profile</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleProfile}>Profile</DropdownMenuItem>
           <DropdownMenuItem>Settings</DropdownMenuItem>
         </DropdownMenuGroup>
 

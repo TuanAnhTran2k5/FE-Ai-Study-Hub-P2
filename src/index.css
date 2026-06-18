@@ -212,60 +212,102 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
-  /* CUSTOM HOVER */
-  --primary-hover: rgb(56, 189, 248);
-  --primary-bg-hover: rgb(15, 23, 42);
+  /* PAGE */
+  --background: rgb(10, 25, 47);
+  --foreground: rgb(226, 232, 240);
+
+  /* CARD */
+  --card: rgb(15, 32, 57);
+  --card-foreground: rgb(248, 250, 252);
+
+  /* POPOVER */
+  --popover: rgb(15, 32, 57);
+  --popover-foreground: rgb(248, 250, 252);
+
+  /* PRIMARY */
+  --primary: rgb(56, 189, 248);
+  --primary-foreground: rgb(8, 15, 28);
+
+  /* SECONDARY */
+  --secondary: rgb(21, 44, 79);
+  --secondary-foreground: rgb(226, 232, 240);
+
+  /* MUTED */
+  --muted: rgb(18, 38, 67);
+  --muted-foreground: rgb(148, 163, 184);
+
+  /* ACCENT */
+  --accent: rgb(21, 44, 79);
+  --accent-foreground: rgb(226, 232, 240);
+
+  /* ERROR */
+  --destructive: rgb(248, 113, 113);
+
+  /* BORDER */
+  --border: rgb(30, 58, 95);
+  --input: rgb(37, 60, 95);
+
+  /* RING */
+  --ring: rgb(56, 189, 248);
+
+  /* CHART */
+  --chart-1: rgb(56, 189, 248);
+  --chart-2: rgb(96, 165, 250);
+  --chart-3: rgb(16, 185, 129);
+  --chart-4: rgb(245, 158, 11);
+  --chart-5: rgb(248, 113, 113);
+
+  /* SIDEBAR */
+  --sidebar: rgb(15, 32, 57);
+  --sidebar-foreground: rgb(248, 250, 252);
+
+  --sidebar-primary: rgb(56, 189, 248);
+  --sidebar-primary-foreground: rgb(8, 15, 28);
+
+  --sidebar-accent: rgb(21, 44, 79);
+  --sidebar-accent-foreground: rgb(226, 232, 240);
+
+  --sidebar-border: rgb(30, 58, 95);
+  --sidebar-ring: rgb(56, 189, 248);
+
+  /* HOVER */
+  --primary-hover: rgb(125, 211, 252);
+  --primary-bg-hover: rgb(21, 44, 79);
 
   /* SUCCESS */
   --success: rgb(16, 185, 129);
   --success-foreground: rgb(255, 255, 255);
 
   /* LOGIN BUTTON */
-  --primary-start: rgb(2, 132, 199);
-  --primary-end: rgb(30, 64, 175);
-  --primary-start-hover: rgb(14, 165, 233);
-  --primary-end-hover: rgb(37, 99, 235);
+  --primary-start: rgb(14, 165, 233);
+  --primary-end: rgb(37, 99, 235);
+
+  --primary-start-hover: rgb(56, 189, 248);
+  --primary-end-hover: rgb(59, 130, 246);
 
   /* REGISTER BUTTON */
   --success-start: rgb(16, 185, 129);
-  --success-end: rgb(21, 128, 61);
+  --success-end: rgb(34, 197, 94);
+
   --success-start-hover: rgb(52, 211, 153);
-  --success-end-hover: rgb(34, 197, 94);
+  --success-end-hover: rgb(74, 222, 128);
+
+  /* FOOTER */
+  --footer-start: rgb(2, 6, 23);
+  --footer-middle: rgb(1, 10, 30);
+  --footer-end: rgb(2, 6, 23);
+
+  --footer-foreground: rgb(248, 250, 252);
+  --footer-muted: rgb(148, 163, 184);
+  --footer-link: rgb(125, 211, 252);
+  --footer-link-hover: rgb(186, 230, 253);
+  --footer-dot: rgb(71, 85, 105);
+  --footer-border: rgb(255 255 255 / 0.08);
+  --footer-copyright: rgb(148, 163, 184);
 
   /* LINK */
-  --link: rgb(96, 165, 250); /* blue-400 */
-  --link-hover: rgb(147, 197, 253); /* blue-300 */
+  --link: rgb(96, 165, 250);
+  --link-hover: rgb(147, 197, 253);
 }
 
 @layer base {

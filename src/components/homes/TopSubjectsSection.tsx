@@ -62,7 +62,7 @@ function TopSubjectsSection() {
           </div>
 
           <Link
-            to={ROUTE.DOCUMENTS}
+            to={ROUTE.COMMUNITY}
             className="font-semibold text-link hover:text-link-hover"
           >
             View all →

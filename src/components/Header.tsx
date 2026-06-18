@@ -9,6 +9,7 @@ import type { RootState } from "@/redux/store";
 import { useSelector } from "react-redux";
 import { AvatarDropdown } from "./AvatarDropdown";
 import NotificationBell from "./NotificationBell";
+import ThemeToggle from "./ui/ThemeToggle";
 
 // THÊM ĐOẠN NÀY
 interface HeaderProps {
@@ -32,7 +33,6 @@ function Header({ sticky = true }: HeaderProps) {
       {/* logo 1/4 */}
       <div className="flex items-center">
         <img
-          onClick={() => navigate(ROUTE.HOME)}
           src="/img/LOGO.png"
           alt="ASH Logo"
           className="cursor-pointer h-14 w-auto object-contain transition duration-300 hover:scale-105"
@@ -77,8 +77,9 @@ function Header({ sticky = true }: HeaderProps) {
           </>
         ) : user ? (
           <>
+            
             <NotificationBell />
-
+             <ThemeToggle />
             <AvatarDropdown user={user} />
           </>
         ) : (
@@ -96,6 +97,7 @@ function Header({ sticky = true }: HeaderProps) {
             >
               Register
             </Button>
+             <ThemeToggle />
           </>
         )}
       </div>
