@@ -3,6 +3,7 @@ export const ROUTE = {
   AUTH: "auth",
   LOGIN: "login",
   REGISTER: "register",
+  VERIFY_OTP: "verify-otp",
 
   APP: "app",
   DASHBOARD: "dashboard",

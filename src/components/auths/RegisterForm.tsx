@@ -6,16 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { useMutation } from "@tanstack/react-query";
-import type { UserResponse } from "@/types/user.type";
-import type { RegisterRequest } from "@/types/auth";
-import { authRegister } from "@/services/authService";
+import type { RegisterRequest, RegisterResponse } from "@/types/auth";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { SUCCESS_MESSAGE } from "@/constants/successMessage";
 import {
   registerSchema,
   type RegisterFormValues,
 } from "@/validations/auth.validation";
+import { ROUTE } from "@/models/routePath";
+import { authRegister } from "@/services/authService";
 
 type RegisterErrors = Partial<Record<keyof RegisterFormValues, string>>;
 
@@ -34,18 +33,31 @@ function RegisterForm() {
 
   const navigate = useNavigate();
 
-  const registerMutation = useMutation<UserResponse, Error, RegisterRequest>({
-    mutationFn: authRegister,
+ const registerMutation = useMutation<
+  RegisterResponse,
+  Error,
+  RegisterRequest
+>({
+  mutationFn: authRegister,
 
-    onSuccess: () => {
-      toast.success(SUCCESS_MESSAGE.REGISTER_SUCCESS);
-      navigate("/auth/login");
-    },
+  onSuccess: (data) => {
+    toast.success("OTP has been sent to your email");
 
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
+    navigate(`/${ROUTE.AUTH}/${ROUTE.REGISTER}/${ROUTE.VERIFY_OTP}`, {
+      state: {
+        email: data.email,
+        otpExpiredAt: data.otpExpiredAt,
+      },
+    });
+  },
+
+  onError: (error: any) => {
+    const message =
+      error.response?.data?.message || error.message;
+
+    toast.error(message);
+  },
+});
 
   const handleChange = (field: keyof RegisterFormValues, value: string) => {
     setFormData({

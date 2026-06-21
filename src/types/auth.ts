@@ -1,6 +1,3 @@
-import type { User } from "@/models/user";
-
-
 export interface APIResponse<T> {
   code: number;
   message: string;
@@ -19,7 +16,25 @@ export interface RegisterRequest {
   confirmPassword: string;
 }
 
-export interface LoginResponse {
-  user: User;
-  token: string;
+export interface RegisterResponse {
+  email: string;
+  otpExpiredAt: string;
+  status: "PENDING" | "ACTIVE" | "BANNED";
+}
+
+export interface VerifyOtpRequest {
+  email: string;
+  otpCode: string;
+}
+
+
+export interface ResendOtpRequest {
+  email: string;
+  purpose: "REGISTER";
+}
+
+export interface ResendOtpResponse {
+  email: string;
+  purpose: "REGISTER";
+  otpExpiredAt: string;
 }

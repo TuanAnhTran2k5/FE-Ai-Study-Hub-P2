@@ -13,6 +13,8 @@ import BookmarksPage from "@/pages/BookmarksPage";
 import LeaderboardPage from "@/pages/LeaderboardPage";
 import ProfilePage from "@/pages/ProfilePage";
 import DocumentDetailPage from "@/pages/DocumentDetailPage";
+import VerifyOtpForm from "@/components/auths/VerifyOtpForm";
+import RegisterForm from "@/components/auths/RegisterForm";
 
 export const router = createBrowserRouter([
   {
@@ -26,6 +28,16 @@ export const router = createBrowserRouter([
       {
         path: ROUTE.REGISTER,
         element: <RegisterPage />,
+        children: [
+          {
+            index: true,
+            element: <RegisterForm />,
+          },
+          {
+            path: ROUTE.VERIFY_OTP,
+            element: <VerifyOtpForm />,
+          },
+        ],
       },
     ],
   },
