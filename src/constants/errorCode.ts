@@ -18,6 +18,18 @@ export const ERROR_CODE = {
 
   ACCOUNT_INACTIVE: "Your account is inactive",
 
+  EMAIL_NOT_VERIFIED: "Please verify your email",
+
+  OTP_INVALID: "Invalid OTP code",
+
+  OTP_EXPIRED: "OTP code has expired",
+
+  OTP_SENT: "OTP has been sent to your email",
+
+  OTP_RESENT: "OTP has been resent to your email",
+
+  OTP_REQUIRED: "OTP code is required",
+
   UNAUTHORIZED: "You are not authorized",
 
   FORBIDDEN: "Access denied",

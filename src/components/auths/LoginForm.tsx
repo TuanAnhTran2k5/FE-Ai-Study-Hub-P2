@@ -6,7 +6,7 @@ import { FcGoogle } from "react-icons/fc";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useMutation } from "@tanstack/react-query";
-import type { LoginRequest, LoginResponse } from "@/types/auth";
+import type { LoginRequest } from "@/types/auth";
 import { authLogin } from "@/services/authService";
 import { login } from "@/redux/features/userSlice";
 import { toast } from "react-toastify";
@@ -17,6 +17,8 @@ import {
   loginSchema,
   type LoginFormValues,
 } from "@/validations/auth.validation";
+import type { User } from "@/models/user";
+import { ERROR_CODE } from "@/constants/errorCode";
 
 type LoginErrors = Partial<Record<keyof LoginFormValues, string>>;
 function LoginForm() {
@@ -29,21 +31,38 @@ function LoginForm() {
   //useNavigate để điều hướng
   const navigate = useNavigate();
 
-  const loginMutation = useMutation<LoginResponse, Error, LoginRequest>({
+  const loginMutation = useMutation<User, Error, LoginRequest>({
     mutationFn: authLogin,
     //khi mà call API thành công, trả cho data
     onSuccess: (data) => {
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("accessToken", data.accessToken);
 
-      dispatch(login(data.user));
+      dispatch(login(data));
 
       toast.success(SUCCESS_MESSAGE.LOGIN_SUCCESS);
 
       navigate(`/${ROUTE.APP}/${ROUTE.MY_DOCUMENTS}`);
     },
 
-    onError: (error) => {
-      toast.error(error.message);
+    onError: (error: any) => {
+      const serverMessage = error.response?.data?.message;
+
+      if (serverMessage === "Account is banned") {
+        toast.error(ERROR_CODE.ACCOUNT_BANNED);
+        return;
+      }
+
+      if (serverMessage === "Email not verified") {
+        toast.error("Please verify your email before logging in");
+        return;
+      }
+
+      if (serverMessage === "Invalid credentials") {
+        toast.error(ERROR_CODE.INVALID_CREDENTIALS);
+        return;
+      }
+
+      toast.error(serverMessage || ERROR_CODE.SERVER_ERROR);
     },
   });
 

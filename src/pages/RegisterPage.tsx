@@ -1,6 +1,6 @@
 import React from "react";
-import RegisterForm from "../components/auths/RegisterForm";
 import RegisterHero from "../components/auths/RegisterHero";
+import { Outlet } from "react-router-dom";
 
 function RegisterPage() {
   return (
@@ -11,7 +11,7 @@ function RegisterPage() {
 
       <div className="flex min-h-[650px] items-center justify-center">
         <div className="w-full p-2">
-          <RegisterForm />
+          <Outlet />
         </div>
       </div>
     </>

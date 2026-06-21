@@ -1,16 +1,19 @@
 export interface User {
-  id: string;
+  userId: number;
 
   fullName: string;
-  avatarUrl: string;
+  avatarUrl: string | null;
 
   totalScore: number;
 
   email: string;
 
-  role: "USER" | "ADMIN";
+  role: "US" | "AD";
 
-  status: "ACTIVE" | "INACTIVE" | "BANNED";
+  storageUsed: number;
+  storageLimit: number;
 
-  authProvider: "LOCAL" | "GOOGLE";
+  status: "PENDING" | "ACTIVE" | "BANNED";
+
+  accessToken: string;
 }
