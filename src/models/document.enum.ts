@@ -18,9 +18,9 @@ export type VisibilityStatus =
   (typeof VisibilityStatus)[keyof typeof VisibilityStatus];
 
 export const ModerationStatus = {
-  PENDING: "PENDING",
-  APPROVED: "APPROVED",
-  REJECTED: "REJECTED",
+  NORMAL: "NORMAL",
+  HIDDEN: "HIDDEN",
+  REMOVED: "REMOVED",
 } as const;
 
 export type ModerationStatus =

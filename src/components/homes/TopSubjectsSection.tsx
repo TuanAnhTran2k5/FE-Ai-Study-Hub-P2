@@ -3,9 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 
 import DocumentCarousel from "@/components/documents/DocumentCarousel";
-import { VisibilityStatus } from "@/models/document.enum";
 import { ROUTE } from "@/models/routePath";
-import { getDocuments } from "@/services/documentService";
+import { searchPublicDocuments } from "@/services/documentService";
 
 function TopSubjectsSection() {
   const {
@@ -13,22 +12,18 @@ function TopSubjectsSection() {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["documents"],
-    queryFn: getDocuments,
+    queryKey: ["topSubjectDocuments"],
+    queryFn: () => searchPublicDocuments("a"),
   });
 
   const topSubjectDocuments = useMemo(() => {
-    const subjectMap = new Map<string, (typeof documents)[number]>();
+    const subjectMap = new Map<number, (typeof documents)[number]>();
 
-    documents
-      .filter(
-        (document) => document.visibilityStatus === VisibilityStatus.PUBLIC,
-      )
-      .forEach((document) => {
-        if (!subjectMap.has(document.subjectCode)) {
-          subjectMap.set(document.subjectCode, document);
-        }
-      });
+    documents.forEach((document) => {
+      if (!subjectMap.has(document.subjectId)) {
+        subjectMap.set(document.subjectId, document);
+      }
+    });
 
     return Array.from(subjectMap.values()).slice(0, 6);
   }, [documents]);
@@ -48,7 +43,7 @@ function TopSubjectsSection() {
   }
 
   return (
-    <section className="py-10 ">
+    <section className="py-10">
       <div className="mx-auto max-w-7xl px-6">
         <div className="mb-8 flex items-center justify-between">
           <div>

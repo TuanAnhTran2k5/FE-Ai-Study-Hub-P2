@@ -2,6 +2,7 @@ interface SilverAvatarFrameProps {
   avatarUrl?: string | null;
   fullName?: string;
   size?: "sm" | "md" | "lg";
+  isOnline?: boolean;
 }
 
 const sizeClass = {
@@ -32,6 +33,7 @@ function SilverAvatarFrame({
   avatarUrl,
   fullName = "User",
   size = "md",
+  isOnline = false,
 }: SilverAvatarFrameProps) {
   const classes = sizeClass[size];
 
@@ -85,6 +87,13 @@ function SilverAvatarFrame({
 
       <div className="pointer-events-none absolute left-3 top-3 h-2 w-2 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.9)] dark:bg-sky-100" />
       <div className="pointer-events-none absolute bottom-5 right-4 h-1.5 w-1.5 rounded-full bg-sky-200 shadow-[0_0_10px_rgba(56,189,248,0.8)]" />
+
+      {isOnline && (
+        <span className="absolute bottom-0 right-1 z-20 flex h-3 w-3">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+          <span className="relative inline-flex h-3 w-3 rounded-full border-2 border-card bg-green-500 shadow-sm" />
+        </span>
+      )}
     </div>
   );
 }
