@@ -53,7 +53,7 @@ function LoginForm() {
       }
 
       if (serverMessage === "Email not verified") {
-        toast.error("Please verify your email before logging in");
+        toast.error(ERROR_CODE.EMAIL_NOT_VERIFIED);
         return;
       }
 

@@ -4,6 +4,9 @@ export const ROUTE = {
   LOGIN: "login",
   REGISTER: "register",
   VERIFY_OTP: "verify-otp",
+  FORGOT_PASSWORD: "forgot-password",
+  FORGOT_PASSWORD_VERIFY_OTP: "forgot-password-verify-otp",
+  FORGOT_PASSWORD_RESET: "forgot-password-reset",
 
   APP: "app",
   DASHBOARD: "dashboard",

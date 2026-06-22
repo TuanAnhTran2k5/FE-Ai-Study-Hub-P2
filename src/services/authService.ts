@@ -2,11 +2,15 @@ import api from "@/configs/api";
 import type { User } from "@/models/user";
 import {
   type APIResponse,
+  type ForgotPasswordRequest,
+  type ForgotPasswordResponse,
   type LoginRequest,
+  type LogoutRequest,
   type RegisterRequest,
   type RegisterResponse,
   type ResendOtpRequest,
   type ResendOtpResponse,
+  type ResetPasswordRequest,
   type VerifyOtpRequest,
 } from "@/types/auth";
 
@@ -46,3 +50,33 @@ export const resendOtp = async (
 
   return response.data.result;
 };
+
+// Forgot password: send OTP
+export const forgotPassword = async (
+  data: ForgotPasswordRequest,
+): Promise<ForgotPasswordResponse> => {
+  const response = await api.post<APIResponse<ForgotPasswordResponse>>(
+    "/auth/forgot-password",
+    data,
+  );
+
+  return response.data.result;
+};
+
+// Forgot password: reset password
+export const resetPassword = async (
+  data: ResetPasswordRequest,
+): Promise<boolean> => {
+  const response = await api.post<APIResponse<boolean>>(
+    "/auth/forgot-password/reset",
+    data,
+  );
+
+  return response.data.result;
+};
+
+export const authLogout = async (data: LogoutRequest): Promise<boolean> => {
+  const response = await api.post<APIResponse<boolean>>("/auth/logout", data);
+  return response.data.result;
+};
+

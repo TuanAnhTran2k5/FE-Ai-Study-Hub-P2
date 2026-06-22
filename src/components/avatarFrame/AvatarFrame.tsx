@@ -5,9 +5,10 @@ import EliteAvatarFrame from "./EliteAvatarFrame";
 
 interface AvatarFrameProps {
   score: number;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
   fullName?: string;
   size?: "sm" | "md" | "lg";
+  isOnline?: boolean;
 }
 
 function AvatarFrame({
@@ -15,6 +16,7 @@ function AvatarFrame({
   avatarUrl,
   fullName,
   size = "md",
+  isOnline = false,
 }: AvatarFrameProps) {
   if (score >= 701) {
     return (
@@ -22,6 +24,7 @@ function AvatarFrame({
         avatarUrl={avatarUrl}
         fullName={fullName}
         size={size}
+        isOnline={isOnline}
       />
     );
   }
@@ -32,6 +35,7 @@ function AvatarFrame({
         avatarUrl={avatarUrl}
         fullName={fullName}
         size={size}
+        isOnline={isOnline}
       />
     );
   }
@@ -42,6 +46,7 @@ function AvatarFrame({
         avatarUrl={avatarUrl}
         fullName={fullName}
         size={size}
+        isOnline={isOnline}
       />
     );
   }
@@ -51,6 +56,7 @@ function AvatarFrame({
       avatarUrl={avatarUrl}
       fullName={fullName}
       size={size}
+      isOnline={isOnline}
     />
   );
 }

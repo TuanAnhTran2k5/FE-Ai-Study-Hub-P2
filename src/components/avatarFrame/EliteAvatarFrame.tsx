@@ -2,6 +2,7 @@ interface EliteAvatarFrameProps {
   avatarUrl?: string | null;
   fullName?: string;
   size?: "sm" | "md" | "lg";
+  isOnline?: boolean;
 }
 
 const sizeClass = {
@@ -28,6 +29,7 @@ function EliteAvatarFrame({
   avatarUrl,
   fullName = "User",
   size = "md",
+  isOnline = false,
 }: EliteAvatarFrameProps) {
   const classes = sizeClass[size];
 
@@ -87,6 +89,13 @@ function EliteAvatarFrame({
           ELITE
         </div>
       </div>
+
+      {isOnline && (
+        <span className="absolute bottom-0 right-1 z-20 flex h-3 w-3">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+          <span className="relative inline-flex h-3 w-3 rounded-full border-2 border-card bg-green-500 shadow-sm" />
+        </span>
+      )}
     </div>
   );
 }

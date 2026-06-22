@@ -2,7 +2,7 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import { Outlet } from "react-router-dom";
 
-function MainLayout() {
+function PublicLayout() {
   return (
     //khách tham quan = Home  Documents public, Community 
     <div>
@@ -15,4 +15,4 @@ function MainLayout() {
   );
 }
 
-export default MainLayout;
+export default PublicLayout;
