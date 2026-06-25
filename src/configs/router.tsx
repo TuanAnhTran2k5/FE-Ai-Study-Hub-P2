@@ -13,12 +13,12 @@ import BookmarksPage from "@/pages/BookmarksPage";
 import LeaderboardPage from "@/pages/LeaderboardPage";
 import ProfilePage from "@/pages/ProfilePage";
 import DocumentDetailPage from "@/pages/DocumentDetailPage";
-import VerifyOtpForm from "@/components/auths/VerifyOtpForm";
-import RegisterForm from "@/components/auths/RegisterForm";
+import VerifyOtpForm from "@/components/auth/VerifyOtpForm";
+import RegisterForm from "@/components/auth/RegisterForm";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
-import ForgotPasswordForm from "@/components/auths/ForgotPasswordForm";
-import ForgotPasswordVerifyOtpForm from "@/components/auths/ForgotPasswordVerifyOtpForm";
-import ResetPasswordForm from "@/components/auths/ResetPasswordForm";
+import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
+import ForgotPasswordVerifyOtpForm from "@/components/auth/ForgotPasswordVerifyOtpForm";
+import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
 
 export const router = createBrowserRouter([
   {

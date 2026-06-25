@@ -189,7 +189,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search, PanelRightClose, PanelRightOpen } from "lucide-react";
 
-import DocumentGrid from "@/components/documents/DocumentGrid";
+import DocumentGrid from "@/components/document/DocumentGrid";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { searchPublicDocuments } from "@/services/documentService";
