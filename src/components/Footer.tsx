@@ -45,7 +45,7 @@ function Footer() {
           <div className="text-center text-sm text-footer-muted">
             <p>
               <span className="font-medium text-footer-link">Email:</span>{" "}
-              aistudyhub@gmail.com
+              aistudyhub062026@gmail.com
             </p>
 
             <p className="mt-1">Ho Chi Minh City, Vietnam</p>
