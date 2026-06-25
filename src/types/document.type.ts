@@ -1,47 +1,33 @@
-import {
-  FileType,
-  ModerationStatus,
-  VisibilityStatus,
-} from "@/models/document.enum";
+import { ModerationStatus, VisibilityStatus } from "@/models/document.enum";
 
-export interface DocumentResponse {
+//Sài
+export interface MyDocumentResponse {
   documentId: number;
-
   ownerId: number;
-  ownerName?: string;
-  ownerAvatar?: string | null;
+  ownerName: string;
+  ownerAvatar: string | null;
 
   subjectId: number;
-  subjectCode?: string;
-  subjectName?: string;
+  subjectCode: string;
+  subjectName: string;
 
   title: string;
-  description?: string | null;
-
   fileName: string;
   fileUrl: string;
-  fileType: FileType;
+  fileType: string;
   fileSize: number;
 
   visibilityStatus: VisibilityStatus;
   moderationStatus?: ModerationStatus;
 
-  averageRating?: number;
-  ratingCount?: number;
-  downloadCount?: number;
-  bookmarkCount?: number;
-  reportCount?: number;
+  averageRating: number;
+  ratingCount: number;
+  downloadCount: number;
+  bookmarkCount: number;
+  reportCount: number;
 
   createdAt: string;
-  updatedAt?: string | null;
-  deletedAt?: string | null;
-
-  semesterNo?: number | null;
-
-  comboCode?: string | null;
-  comboName?: string | null;
-
-  isBookmarked?: boolean;
+  updatedAt: string;
 }
 
 export interface DocumentUploadRequest {
@@ -127,4 +113,3 @@ export interface BookmarkResponse {
 export interface BookmarkRequest {
   documentId: number;
 }
-
