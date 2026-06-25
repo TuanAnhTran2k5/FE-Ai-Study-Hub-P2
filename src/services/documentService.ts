@@ -5,17 +5,17 @@ import type {
   BookmarkResponse,
   DeleteDocumentResponse,
   DocumentDownloadResponse,
-  DocumentResponse,
   DocumentUpdateRequest,
   DocumentUpdateResponse,
   DocumentUploadRequest,
   DocumentUploadResponse,
+  MyDocumentResponse,
   RatingRequest,
   RatingResponse,
 } from "@/types/document.type";
 
-export const getMyDocuments = async (): Promise<DocumentResponse[]> => {
-  const response = await api.get<APIResponse<DocumentResponse[]>>(
+export const getMyDocuments = async (): Promise<MyDocumentResponse[]> => {
+  const response = await api.get<APIResponse<MyDocumentResponse[]>>(
     "/user/document/my-documents",
   );
 
@@ -24,8 +24,8 @@ export const getMyDocuments = async (): Promise<DocumentResponse[]> => {
 
 export const getDocumentById = async (
   documentId: number,
-): Promise<DocumentResponse> => {
-  const response = await api.get<APIResponse<DocumentResponse>>(
+): Promise<MyDocumentResponse> => {
+  const response = await api.get<APIResponse<MyDocumentResponse>>(
     `/user/document/${documentId}`,
   );
 
