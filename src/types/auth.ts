@@ -59,3 +59,7 @@ export interface ResetPasswordRequest {
 export interface LogoutRequest {
   token: string;
 }
+
+export interface GoogleLoginRequest {
+  token: string;
+}
