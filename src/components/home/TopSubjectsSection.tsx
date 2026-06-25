@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 
-import DocumentCarousel from "@/components/documents/DocumentCarousel";
+import DocumentCarousel from "@/components/document/DocumentCarousel";
 import { ROUTE } from "@/models/routePath";
 import { searchPublicDocuments } from "@/services/documentService";
 

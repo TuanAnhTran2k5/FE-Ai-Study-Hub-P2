@@ -1,6 +1,6 @@
-import ChatArea from "@/components/aichat/ChatArea";
-import ChatHistorySidebar from "@/components/aichat/ChatHistorySidebar";
-import ContextSidebar from "@/components/aichat/ContextSidebar";
+import ChatArea from "@/components/ai-chat/ChatArea";
+import ChatHistorySidebar from "@/components/ai-chat/ChatHistorySidebar";
+import ContextSidebar from "@/components/ai-chat/ContextSidebar";
 
 
 function AIChatPage() {

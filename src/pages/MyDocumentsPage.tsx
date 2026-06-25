@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-import DocumentGrid from "@/components/documents/DocumentGrid";
-import DocumentSearch from "@/components/documents/DocumentSearch";
+import DocumentGrid from "@/components/document/DocumentGrid";
+import DocumentSearch from "@/components/document/DocumentSearch";
 import { Button } from "@/components/ui/button";
 import { getMyDocuments } from "@/services/documentService";
 

@@ -1,4 +1,4 @@
-import ForgotPasswordHero from '@/components/auths/ForgotPasswordHero'
+import ForgotPasswordHero from '@/components/auth/ForgotPasswordHero'
 import { Outlet } from 'react-router-dom'
 
 
