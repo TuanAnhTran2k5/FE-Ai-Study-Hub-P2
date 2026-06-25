@@ -34,5 +34,7 @@ export const ERROR_CODE = {
 
   FORBIDDEN: "Access denied",
 
+   GOOGLE_LOGIN_FAILED: "Google login failed",
+
   SERVER_ERROR: "Something went wrong. Please try again later",
 };

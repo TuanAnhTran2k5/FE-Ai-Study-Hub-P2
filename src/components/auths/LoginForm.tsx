@@ -6,8 +6,8 @@ import { FcGoogle } from "react-icons/fc";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useMutation } from "@tanstack/react-query";
-import type { LoginRequest } from "@/types/auth";
-import { authLogin } from "@/services/authService";
+import type { GoogleLoginRequest, LoginRequest } from "@/types/auth";
+import { authLogin, googleLogin } from "@/services/authService";
 import { login } from "@/redux/features/userSlice";
 import { toast } from "react-toastify";
 
@@ -19,12 +19,18 @@ import {
 } from "@/validations/auth.validation";
 import type { User } from "@/models/user";
 import { ERROR_CODE } from "@/constants/errorCode";
+import { useGoogleLogin } from "@react-oauth/google";
 
 type LoginErrors = Partial<Record<keyof LoginFormValues, string>>;
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
 
   const [errors, setErrors] = useState<LoginErrors>({});
+
+  const [rememberMe, setRememberMe] = useState(false);
+  const [emailValue, setEmailValue] = useState(
+    localStorage.getItem("rememberEmail") || "",
+  );
 
   //useDispatch để sài
   const dispatch = useDispatch();
@@ -36,6 +42,12 @@ function LoginForm() {
     //khi mà call API thành công, trả cho data
     onSuccess: (data) => {
       localStorage.setItem("accessToken", data.accessToken);
+
+      if (rememberMe) {
+        localStorage.setItem("rememberEmail", data.email);
+      } else {
+        localStorage.removeItem("rememberEmail");
+      }
 
       dispatch(login(data));
 
@@ -63,6 +75,37 @@ function LoginForm() {
       }
 
       toast.error(serverMessage || ERROR_CODE.SERVER_ERROR);
+    },
+  });
+
+  const googleLoginMutation = useMutation<User, Error, GoogleLoginRequest>({
+    mutationFn: googleLogin,
+
+    onSuccess: (data) => {
+      localStorage.setItem("accessToken", data.accessToken);
+
+      dispatch(login(data));
+
+      toast.success(SUCCESS_MESSAGE.LOGIN_SUCCESS);
+
+      navigate(`/${ROUTE.APP}/${ROUTE.MY_DOCUMENTS}`);
+    },
+
+    onError: (error: any) => {
+      const serverMessage = error.response?.data?.message;
+      toast.error(serverMessage || ERROR_CODE.SERVER_ERROR);
+    },
+  });
+
+  const handleGoogleLogin = useGoogleLogin({
+    onSuccess: (tokenResponse) => {
+      googleLoginMutation.mutate({
+        token: tokenResponse.access_token,
+      });
+    },
+
+    onError: () => {
+      toast.error(ERROR_CODE.GOOGLE_LOGIN_FAILED);
     },
   });
 
@@ -114,7 +157,7 @@ function LoginForm() {
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} autoComplete="on" className="space-y-5">
         {/* Email */}
         <div>
           <label className="mb-2 block text-sm font-medium text-card-foreground">
@@ -126,7 +169,10 @@ function LoginForm() {
             <Input
               name="email"
               type="email"
+              value={emailValue}
+              onChange={(e) => setEmailValue(e.target.value)}
               placeholder="Enter your email"
+              autoComplete="email"
               className={`h-12 rounded-lg border-border pl-11 text-sm ${
                 errors.email
                   ? "border-destructive focus-visible:ring-destructive/20"
@@ -151,6 +197,7 @@ function LoginForm() {
             <Lock className="absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               name="password"
+              autoComplete="current-password"
               type={showPassword ? "text" : "password"}
               placeholder="Enter your password"
               className={`h-12 rounded-lg border-border px-11 text-sm ${
@@ -181,7 +228,12 @@ function LoginForm() {
         {/* Remember + Forgot */}
         <div className="flex items-center justify-between">
           <label className="flex items-center gap-2 text-sm text-foreground">
-            <input type="checkbox" className="size-4 rounded border-border" />
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="size-4 rounded border-border"
+            />
             Remember me
           </label>
 
@@ -216,10 +268,14 @@ function LoginForm() {
         <Button
           type="button"
           variant="outline"
+          disabled={googleLoginMutation.isPending}
+          onClick={() => handleGoogleLogin()}
           className="h-12 w-full cursor-pointer rounded-lg border-border bg-card text-[16px] font-medium text-foreground hover:bg-accent"
         >
           <FcGoogle className="size-7" />
-          Continue with Google
+          {googleLoginMutation.isPending
+            ? "Signing in..."
+            : "Continue with Google"}
         </Button>
 
         {/* Register */}

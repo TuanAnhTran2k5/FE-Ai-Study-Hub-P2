@@ -4,6 +4,7 @@ import {
   type APIResponse,
   type ForgotPasswordRequest,
   type ForgotPasswordResponse,
+  type GoogleLoginRequest,
   type LoginRequest,
   type LogoutRequest,
   type RegisterRequest,
@@ -80,3 +81,11 @@ export const authLogout = async (data: LogoutRequest): Promise<boolean> => {
   return response.data.result;
 };
 
+export const googleLogin = async (data: GoogleLoginRequest): Promise<User> => {
+  const response = await api.post<APIResponse<User>>(
+    "/auth/google-login",
+    data,
+  );
+
+  return response.data.result;
+};
