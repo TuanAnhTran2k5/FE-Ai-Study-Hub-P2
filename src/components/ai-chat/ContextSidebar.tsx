@@ -17,6 +17,11 @@ import { getMyDocuments } from "@/services/documentService";
 import { indexRagDocument } from "@/services/ragService";
 import type { MyDocumentResponse } from "@/types/document.type";
 
+interface ContextSidebarProps {
+  selectedDocumentIds: number[];
+  onSelectedDocumentIdsChange: (documentIds: number[]) => void;
+}
+
 const SUGGESTED_PROMPTS = [
   "Explain inheritance with an example",
   "What is polymorphism in Java?",
@@ -42,7 +47,10 @@ function getFileColor(fileType: string) {
   return "text-gray-500 bg-gray-100";
 }
 
-function ContextSidebar() {
+function ContextSidebar({
+  selectedDocumentIds,
+  onSelectedDocumentIdsChange,
+}: ContextSidebarProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [keyword, setKeyword] = useState("");
   const [contextDocuments, setContextDocuments] = useState<
@@ -96,6 +104,10 @@ function ContextSidebar() {
         return [...prev, selectedDocument];
       });
 
+      if (!selectedDocumentIds.includes(documentId)) {
+        onSelectedDocumentIdsChange([...selectedDocumentIds, documentId]);
+      }
+
       toast.success("Document added to AI context.");
     },
 
@@ -110,7 +122,7 @@ function ContextSidebar() {
       (doc) => doc.documentId === documentId,
     );
 
-    if (existed) {
+    if (existed || selectedDocumentIds.includes(documentId)) {
       toast.info("This document is already in context.");
       return;
     }
@@ -122,21 +134,25 @@ function ContextSidebar() {
     setContextDocuments((prev) =>
       prev.filter((doc) => doc.documentId !== documentId),
     );
+
+    onSelectedDocumentIdsChange(
+      selectedDocumentIds.filter((id) => id !== documentId),
+    );
   };
 
   return (
     <>
-      <div className="flex h-full flex-col gap-4 overflow-y-auto pr-2 pb-4">
-        <Card className="shrink-0 border-border/50 shadow-sm">
+      <div className="flex h-full flex-col gap-4 overflow-y-auto pb-4 pr-1">
+        <Card className="shrink-0 overflow-hidden border-border/60 bg-card shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between p-4 pb-3">
             <CardTitle className="text-sm font-bold">
-              Context Documents ({contextDocuments.length})
+              Context Documents ({selectedDocumentIds.length})
             </CardTitle>
 
             <button
               type="button"
               onClick={() => setIsDialogOpen(true)}
-              className="text-xs font-medium text-primary hover:underline"
+              className="text-xs font-semibold text-primary hover:underline"
             >
               Manage
             </button>
@@ -144,7 +160,7 @@ function ContextSidebar() {
 
           <CardContent className="space-y-3 p-4 pt-0">
             {contextDocuments.length === 0 ? (
-              <div className="rounded-lg border border-dashed border-border p-4 text-center">
+              <div className="rounded-2xl border border-dashed border-border bg-muted/20 p-4 text-center">
                 <p className="text-xs text-muted-foreground">
                   No documents selected for AI context.
                 </p>
@@ -154,11 +170,11 @@ function ContextSidebar() {
                 {contextDocuments.map((doc) => (
                   <div
                     key={doc.documentId}
-                    className="group flex items-start justify-between rounded-lg p-2 transition-colors hover:bg-muted/50"
+                    className="group flex items-start justify-between gap-2 rounded-2xl p-2 transition-colors hover:bg-muted/60"
                   >
                     <div className="flex min-w-0 gap-3">
                       <div
-                        className={`mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg ${getFileColor(
+                        className={`mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl ${getFileColor(
                           doc.fileType,
                         )}`}
                       >
@@ -182,7 +198,7 @@ function ContextSidebar() {
                     <button
                       type="button"
                       onClick={() => handleRemoveContext(doc.documentId)}
-                      className="shrink-0 p-1 text-muted-foreground opacity-0 transition-opacity hover:text-destructive group-hover:opacity-100"
+                      className="shrink-0 rounded-full p-1 text-muted-foreground opacity-0 transition-all hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
                     >
                       <X className="size-3.5" />
                     </button>
@@ -203,9 +219,9 @@ function ContextSidebar() {
           </CardContent>
         </Card>
 
-        <Card className="shrink-0 border-border/50 shadow-sm">
+        <Card className="shrink-0 border-border/60 bg-card shadow-sm">
           <CardHeader className="p-4 pb-3">
-            <CardTitle className="flex items-center gap-2 text-sm font-bold">
+            <CardTitle className="text-sm font-bold">
               Suggested Prompts
             </CardTitle>
           </CardHeader>
@@ -216,7 +232,7 @@ function ContextSidebar() {
                 <button
                   key={prompt}
                   type="button"
-                  className="w-full truncate rounded-lg bg-muted/30 p-2.5 text-left text-xs text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground"
+                  className="w-full truncate rounded-xl bg-muted/40 p-2.5 text-left text-xs text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
                   title={prompt}
                 >
                   {prompt}
@@ -228,7 +244,7 @@ function ContextSidebar() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl rounded-2xl">
+        <DialogContent className="max-w-2xl rounded-3xl">
           <DialogHeader>
             <DialogTitle>Select documents for AI context</DialogTitle>
           </DialogHeader>
@@ -240,7 +256,7 @@ function ContextSidebar() {
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
                 placeholder="Search your documents..."
-                className="h-10 pl-9 text-sm"
+                className="h-10 rounded-xl pl-9 text-sm"
               />
             </div>
 
@@ -264,9 +280,10 @@ function ContextSidebar() {
 
             <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
               {filteredDocuments.map((doc) => {
-                const isAdded = contextDocuments.some(
-                  (item) => item.documentId === doc.documentId,
-                );
+                const isAdded =
+                  contextDocuments.some(
+                    (item) => item.documentId === doc.documentId,
+                  ) || selectedDocumentIds.includes(doc.documentId);
 
                 const isIndexing =
                   indexMutation.isPending &&
@@ -275,7 +292,7 @@ function ContextSidebar() {
                 return (
                   <div
                     key={doc.documentId}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-border/60 p-3 hover:bg-muted/40"
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-border/60 p-3 transition-colors hover:bg-muted/50"
                   >
                     <div className="flex min-w-0 gap-3">
                       <div
@@ -291,7 +308,7 @@ function ContextSidebar() {
                           {doc.title}
                         </p>
 
-                        <p className="text-xs text-muted-foreground">
+                        <p className="truncate text-xs text-muted-foreground">
                           {doc.fileName}
                         </p>
 
