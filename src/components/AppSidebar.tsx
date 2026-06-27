@@ -14,7 +14,6 @@ import { ROUTE } from "@/models/routePath";
 import {
   LayoutDashboard,
   FileText,
-  Upload,
   Users,
   Bot,
   Bookmark,
