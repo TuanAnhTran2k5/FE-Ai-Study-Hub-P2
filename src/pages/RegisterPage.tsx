@@ -1,4 +1,3 @@
-import React from "react";
 import RegisterHero from "../components/auth/RegisterHero";
 import { Outlet } from "react-router-dom";
 

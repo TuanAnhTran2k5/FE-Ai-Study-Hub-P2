@@ -1,3 +1,14 @@
+export const FileType = {
+  PDF: "PDF",
+  DOCX: "DOCX",
+  PPTX: "PPTX",
+  XLSX: "XLSX",
+  PNG: "PNG",
+  JPG: "JPG",
+} as const;
+
+export type FileType = (typeof FileType)[keyof typeof FileType];
+
 export const VisibilityStatus = {
   PUBLIC: "PUBLIC",
   PRIVATE: "PRIVATE",

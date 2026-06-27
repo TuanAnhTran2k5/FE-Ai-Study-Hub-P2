@@ -1,34 +1,169 @@
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
-import DocumentGrid from "@/components/document/DocumentGrid";
-import DocumentSearch from "@/components/document/DocumentSearch";
+import DocumentGrid from "@/components/documents/DocumentGrid";
+import DocumentSearch from "@/components/documents/DocumentSearch";
+import DocumentUploadForm from "@/components/documents/DocumentUploadForm";
 import { Button } from "@/components/ui/button";
-import { getMyDocuments } from "@/services/documentService";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { VisibilityStatus } from "@/models/document.enum";
+import { getAllAcademicSubjects, getSemesters } from "@/services/academicService";
+import { getMyDocuments, uploadDocument } from "@/services/documentService";
+import type {
+  DocumentResponse,
+  DocumentUploadRequest,
+  DocumentUploadResponse,
+} from "@/types/document.type";
+
+const MAX_UPLOAD_SIZE = 20 * 1024 * 1024;
+const ALLOWED_UPLOAD_TYPES = [
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "text/plain",
+];
+
+function getUploadErrorMessage(error: any) {
+  const status = error.response?.status;
+  const serverMessage = error.response?.data?.message;
+
+  if (serverMessage) {
+    return serverMessage;
+  }
+
+  if (status === 401) {
+    return "Please login again before uploading";
+  }
+
+  if (status === 404) {
+    return "Selected subject was not found";
+  }
+
+  if (status === 413) {
+    return "File is too large";
+  }
+
+  if (error.request) {
+    return "Cannot connect to backend server";
+  }
+
+  return "Upload document failed";
+}
+
+function getDocumentsErrorMessage(error: any) {
+  const status = error.response?.status;
+  const serverMessage = error.response?.data?.message;
+
+  if (serverMessage) {
+    return serverMessage;
+  }
+
+  if (status === 401) {
+    return "Please login again to view your documents";
+  }
+
+  if (error.request) {
+    return "Cannot connect to backend server";
+  }
+
+  return "Failed to load documents";
+}
 
 function MyDocumentsPage() {
   const [keyword, setKeyword] = useState("");
   const [subjectCode, setSubjectCode] = useState("ALL");
   const [semesterNo, setSemesterNo] = useState("ALL");
   const [visibilityStatus, setVisibilityStatus] = useState("ALL");
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const {
     data: documents = [],
-    isLoading,
-    isError,
-  } = useQuery({
+    isLoading: isDocumentsLoading,
+    isError: isDocumentsError,
+    error: documentsError,
+    refetch: refetchDocuments,
+  } = useQuery<DocumentResponse[], Error>({
     queryKey: ["myDocuments"],
     queryFn: getMyDocuments,
+    retry: 1,
   });
+
+  const { data: semesters = [], isLoading: isSemestersLoading } = useQuery({
+    queryKey: ["academic", "semesters"],
+    queryFn: getSemesters,
+    retry: 1,
+  });
+
+  const { data: academicSubjects = [], isLoading: isSubjectsLoading } =
+    useQuery({
+      queryKey: ["academic", "subjects"],
+      queryFn: getAllAcademicSubjects,
+      retry: 1,
+    });
+
+  const uploadMutation = useMutation<
+    DocumentUploadResponse,
+    Error,
+    DocumentUploadRequest
+  >({
+    mutationFn: (data) => uploadDocument(data, setUploadProgress),
+    onMutate: () => {
+      setUploadProgress(0);
+    },
+    onSuccess: () => {
+      setUploadProgress(100);
+      toast.success("Upload document successfully");
+      setIsUploadOpen(false);
+      setUploadProgress(0);
+      queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
+    },
+    onError: (error: any) => {
+      setUploadProgress(0);
+      toast.error(getUploadErrorMessage(error), {
+        toastId: "upload-document-error",
+      });
+    },
+  });
+
+  const enrichedDocuments = useMemo(() => {
+    const subjectMap = new Map(
+      academicSubjects.map((subject) => [subject.subjectId, subject]),
+    );
+
+    return documents.map((document) => {
+      const subject = subjectMap.get(document.subjectId);
+
+      if (!subject) {
+        return document;
+      }
+
+      return {
+        ...document,
+        subjectCode: document.subjectCode ?? subject.subjectCode,
+        subjectName: document.subjectName ?? subject.subjectName,
+        semesterNo: document.semesterNo ?? subject.semesterNo,
+        comboCode: document.comboCode ?? subject.comboCode,
+        comboName: document.comboName ?? subject.comboName,
+      };
+    });
+  }, [academicSubjects, documents]);
 
   const subjects = useMemo(() => {
     const subjectMap = new Map<string, string>();
 
-    documents.forEach((document) => {
+    enrichedDocuments.forEach((document) => {
       const code = document.subjectCode ?? String(document.subjectId);
       const name = document.subjectName ?? `Subject ${document.subjectId}`;
 
@@ -41,22 +176,25 @@ function MyDocumentsPage() {
         subjectName,
       }),
     );
-  }, [documents]);
+  }, [enrichedDocuments]);
 
-  const semesters = useMemo(() => {
+  const semesterOptions = useMemo(() => {
     return Array.from(
       new Set(
-        documents
+        enrichedDocuments
           .map((document) => document.semesterNo)
-          .filter((semester): semester is number => typeof semester === "number"),
+          .filter(
+            (semester): semester is number | string =>
+              typeof semester === "number" || typeof semester === "string",
+          ),
       ),
-    ).sort((a, b) => a - b);
-  }, [documents]);
+    ).sort((a, b) => Number(a) - Number(b));
+  }, [enrichedDocuments]);
 
   const filteredDocuments = useMemo(() => {
     const q = keyword.trim().toLowerCase();
 
-    return documents.filter((document) => {
+    return enrichedDocuments.filter((document) => {
       const subjectCodeValue = document.subjectCode ?? String(document.subjectId);
       const subjectNameValue = document.subjectName ?? "";
       const descriptionValue = document.description ?? "";
@@ -79,7 +217,7 @@ function MyDocumentsPage() {
         subjectCode === "ALL" || subjectCodeValue === subjectCode;
 
       const matchesSemester =
-        semesterNo === "ALL" || document.semesterNo === Number(semesterNo);
+        semesterNo === "ALL" || String(document.semesterNo) === semesterNo;
 
       const matchesVisibility =
         visibilityStatus === "ALL" ||
@@ -89,37 +227,75 @@ function MyDocumentsPage() {
         matchesKeyword && matchesSubject && matchesSemester && matchesVisibility
       );
     });
-  }, [documents, keyword, subjectCode, semesterNo, visibilityStatus]);
+  }, [enrichedDocuments, keyword, subjectCode, semesterNo, visibilityStatus]);
 
   const handleViewDocument = (documentId: number) => {
     navigate(`/app/mydocuments/${documentId}`);
   };
 
-  if (isLoading) {
-    return (
-      <section className="mx-auto w-full max-w-7xl px-6 py-10">
-        <p className="text-muted-foreground">Loading documents...</p>
-      </section>
-    );
-  }
+  const handleUploadSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
-  if (isError) {
-    return (
-      <section className="mx-auto w-full max-w-7xl px-6 py-10">
-        <div className="rounded-3xl border border-border bg-card p-8 text-center shadow-sm">
-          <p className="text-lg font-bold text-card-foreground">
-            Failed to load documents
-          </p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Please check BE API or server connection.
-          </p>
-        </div>
-      </section>
+    if (uploadMutation.isPending) {
+      return;
+    }
+
+    const formData = new FormData(event.currentTarget);
+    const file = formData.get("file");
+    const title = String(formData.get("title") ?? "").trim();
+    const subjectId = Number(formData.get("subjectId"));
+    const visibilityValue = String(
+      formData.get("visibilityStatus") ?? VisibilityStatus.PRIVATE,
     );
-  }
+
+    if (!(file instanceof File) || file.size === 0) {
+      toast.error("Please choose a file", {
+        toastId: "upload-document-validation",
+      });
+      return;
+    }
+
+    if (!ALLOWED_UPLOAD_TYPES.includes(file.type)) {
+      toast.error("Only PDF, DOCX, and TXT files are supported", {
+        toastId: "upload-document-validation",
+      });
+      return;
+    }
+
+    if (file.size > MAX_UPLOAD_SIZE) {
+      toast.error("File must be 20MB or smaller", {
+        toastId: "upload-document-validation",
+      });
+      return;
+    }
+
+    if (!title) {
+      toast.error("Please enter document title", {
+        toastId: "upload-document-validation",
+      });
+      return;
+    }
+
+    if (!Number.isFinite(subjectId) || subjectId <= 0) {
+      toast.error("Please select subject", {
+        toastId: "upload-document-validation",
+      });
+      return;
+    }
+
+    uploadMutation.mutate({
+      file,
+      title,
+      subjectId,
+      visibilityStatus:
+        visibilityValue === VisibilityStatus.PUBLIC
+          ? VisibilityStatus.PUBLIC
+          : VisibilityStatus.PRIVATE,
+    });
+  };
 
   return (
-    <section className="mx-auto w-full max-w-7xl px-6 py-10">
+    <section className="w-full px-8 py-10">
       <div className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary">
@@ -139,6 +315,7 @@ function MyDocumentsPage() {
         <div className="flex flex-col items-start gap-3 md:items-end">
           <Button
             type="button"
+            onClick={() => setIsUploadOpen(true)}
             className="h-11 cursor-pointer rounded-xl bg-gradient-to-r from-primary-start to-primary-end px-5 font-bold text-primary-foreground shadow-sm hover:from-primary-start-hover hover:to-primary-end-hover"
           >
             <Upload className="mr-2 h-4 w-4" />
@@ -161,17 +338,68 @@ function MyDocumentsPage() {
         semesterNo={semesterNo}
         visibilityStatus={visibilityStatus}
         subjects={subjects}
-        semesters={semesters}
+        semesters={semesterOptions}
         onKeywordChange={setKeyword}
         onSubjectChange={setSubjectCode}
         onSemesterChange={setSemesterNo}
         onVisibilityChange={setVisibilityStatus}
       />
 
-      <DocumentGrid
-        documents={filteredDocuments}
-        onView={(document) => handleViewDocument(document.documentId)}
-      />
+      {isDocumentsLoading ? (
+        <div className="rounded-2xl border border-border bg-card p-10 text-center shadow-sm">
+          <p className="text-lg font-bold text-card-foreground">
+            Loading documents...
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Please wait while your uploaded documents are loaded.
+          </p>
+        </div>
+      ) : isDocumentsError ? (
+        <div className="rounded-2xl border border-border bg-card p-10 text-center shadow-sm">
+          <p className="text-lg font-bold text-card-foreground">
+            Failed to load documents
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {getDocumentsErrorMessage(documentsError)}
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-5 h-10 rounded-xl"
+            onClick={() => refetchDocuments()}
+          >
+            Retry
+          </Button>
+        </div>
+      ) : (
+        <DocumentGrid
+          documents={filteredDocuments}
+          onView={(document) => handleViewDocument(document.documentId)}
+        />
+      )}
+
+      <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
+        <DialogContent className="max-h-[94vh] overflow-y-auto p-6 sm:max-w-[1120px]">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-black">
+              Upload Document
+            </DialogTitle>
+            <DialogDescription>
+              Add a file and complete the document details.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DocumentUploadForm
+            isSubmitting={uploadMutation.isPending}
+            uploadProgress={uploadProgress}
+            isAcademicLoading={isSemestersLoading || isSubjectsLoading}
+            semesters={semesters}
+            subjects={academicSubjects}
+            onCancel={() => setIsUploadOpen(false)}
+            onSubmit={handleUploadSubmit}
+          />
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

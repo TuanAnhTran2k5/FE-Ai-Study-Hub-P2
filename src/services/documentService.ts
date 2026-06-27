@@ -4,12 +4,13 @@ import type {
   BookmarkRequest,
   BookmarkResponse,
   DeleteDocumentResponse,
+  MyDocumentResponse,
   DocumentDownloadResponse,
+  DocumentResponse,
   DocumentUpdateRequest,
   DocumentUpdateResponse,
   DocumentUploadRequest,
   DocumentUploadResponse,
-  MyDocumentResponse,
   RatingRequest,
   RatingResponse,
 } from "@/types/document.type";
@@ -34,7 +35,9 @@ export const getDocumentById = async (
 
 export const uploadDocument = async (
   data: DocumentUploadRequest,
+  onUploadProgress?: (progress: number) => void,
 ): Promise<DocumentUploadResponse> => {
+  // Backend upload nhận multipart/form-data nên phải tự tạo FormData ở đây.
   const formData = new FormData();
 
   formData.append("file", data.file);
@@ -49,8 +52,18 @@ export const uploadDocument = async (
     "/user/document/upload",
     formData,
     {
-      headers: {
-        "Content-Type": "multipart/form-data",
+      // Axios trả tiến độ upload theo byte; đổi sang phần trăm để UI hiển thị progress bar.
+      onUploadProgress: (progressEvent) => {
+        if (!progressEvent.total) {
+          return;
+        }
+
+        onUploadProgress?.(
+          Math.min(
+            100,
+            Math.round((progressEvent.loaded * 100) / progressEvent.total),
+          ),
+        );
       },
     },
   );
@@ -60,8 +73,8 @@ export const uploadDocument = async (
 
 export const searchPublicDocuments = async (
   keyword: string,
-): Promise<DocumentUploadResponse[]> => {
-  const response = await api.get<APIResponse<DocumentUploadResponse[]>>(
+): Promise<DocumentResponse[]> => {
+  const response = await api.get<APIResponse<DocumentResponse[]>>(
     "/user/document/search",
     {
       params: {
@@ -77,6 +90,8 @@ export const updateDocument = async (
   documentId: number,
   data: DocumentUpdateRequest,
 ): Promise<DocumentUpdateResponse> => {
+  // API update đang tạm chưa gọi từ UI vì backend chưa lưu ổn định.
+  // Giữ service lại để nối lại nhanh khi backend sửa xong.
   const response = await api.patch<APIResponse<DocumentUpdateResponse>>(
     `/user/document/${documentId}`,
     data,
@@ -108,7 +123,19 @@ export const downloadPublicDocument = async (
 export const cloudDownloadDocument = async (
   documentId: number,
 ): Promise<Blob> => {
+  // Endpoint này dùng cho nút Download, trả file dạng Blob để trình duyệt tải xuống.
   const response = await api.get(`/user/document/${documentId}/cloud-download`, {
+    responseType: "blob",
+  });
+
+  return response.data;
+};
+
+export const viewDocumentContent = async (
+  documentId: number,
+): Promise<Blob> => {
+  // Endpoint này dùng để preview file ngay trong web, không tải xuống trực tiếp.
+  const response = await api.get(`/user/document/${documentId}/view-content`, {
     responseType: "blob",
   });
 

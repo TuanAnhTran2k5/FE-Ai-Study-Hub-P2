@@ -1,4 +1,3 @@
-import React from "react";
 import HeroSection from "../components/home/HeroSection";
 import TopSubjectsSection from "@/components/home/TopSubjectsSection";
 import { useSelector } from "react-redux";
