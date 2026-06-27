@@ -1,13 +1,39 @@
-import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { Bot, PlusCircle, Trash2, Paperclip, Send, User } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Bot,
+  FileText,
+  Loader2,
+  PlusCircle,
+  Send,
+  Sparkles,
+  Trash2,
+  User,
+} from "lucide-react";
 import { toast } from "react-toastify";
 
 import { Button } from "@/components/ui/button";
-import { askRagQuestion } from "@/services/ragService";
-
 import { ERROR_CODE } from "@/constants/errorCode";
-import type { RagChatRequest, RagChatResponse } from "@/types/rag.type";
+import {
+  askRagQuestion,
+  askRagSessionQuestion,
+  createRagChatSession,
+  getRagSessionMessages,
+} from "@/services/ragService";
+import type {
+  RagChatMessagesPageResponse,
+  RagChatRequest,
+  RagChatResponse,
+  RagChatSessionResponse,
+  RagSessionAskResponse,
+} from "@/types/rag.type";
+
+interface ChatAreaProps {
+  activeSessionId: number | null;
+  selectedDocumentIds: number[];
+  onSessionCreated: (sessionId: number) => void;
+  onNewChat: () => void;
+}
 
 interface ChatMessage {
   id: number;
@@ -16,15 +42,56 @@ interface ChatMessage {
   sources?: string[];
 }
 
-function ChatArea() {
-  const [question, setQuestion] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+function ChatArea({
+  activeSessionId,
+  selectedDocumentIds,
+  onSessionCreated,
+  onNewChat,
+}: ChatAreaProps) {
+  const queryClient = useQueryClient();
 
-  const askMutation = useMutation<RagChatResponse, Error, RagChatRequest>({
+  const [question, setQuestion] = useState("");
+  const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
+
+  const hasActiveSession = activeSessionId !== null;
+
+  const {
+    data: sessionMessagesPage,
+    isLoading: isLoadingMessages,
+    isFetching: isFetchingMessages,
+  } = useQuery<RagChatMessagesPageResponse>({
+    queryKey: ["ragSessionMessages", activeSessionId],
+    queryFn: () => getRagSessionMessages(activeSessionId as number, 0, 50),
+    enabled: hasActiveSession,
+  });
+
+  const sessionMessages = useMemo<ChatMessage[]>(() => {
+    if (!sessionMessagesPage?.content) return [];
+
+    return sessionMessagesPage.content.map((message) => ({
+      id: message.messageId,
+      role: message.senderType === "USER" ? "user" : "assistant",
+      content: message.content,
+    }));
+  }, [sessionMessagesPage]);
+
+  const messages = hasActiveSession ? sessionMessages : localMessages;
+
+  useEffect(() => {
+    if (hasActiveSession) {
+      setLocalMessages([]);
+    }
+  }, [hasActiveSession]);
+
+  const askWithoutSessionMutation = useMutation<
+    RagChatResponse,
+    Error,
+    RagChatRequest
+  >({
     mutationFn: askRagQuestion,
 
     onSuccess: (data) => {
-      setMessages((prev) => [
+      setLocalMessages((prev) => [
         ...prev,
         {
           id: Date.now(),
@@ -41,66 +108,134 @@ function ChatArea() {
     },
   });
 
-  const handleSendMessage = () => {
+  const createSessionMutation = useMutation<
+    RagChatSessionResponse,
+    Error,
+    { documentIds: number[] }
+  >({
+    mutationFn: createRagChatSession,
+  });
+
+  const askInSessionMutation = useMutation<
+    RagSessionAskResponse,
+    Error,
+    { sessionId: number; question: string }
+  >({
+    mutationFn: ({ sessionId, question }) =>
+      askRagSessionQuestion(sessionId, { question }),
+
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ["ragSessionMessages", variables.sessionId],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["ragChatSessions"],
+      });
+    },
+
+    onError: (error: any) => {
+      const serverMessage = error.response?.data?.message;
+      toast.error(serverMessage || ERROR_CODE.SERVER_ERROR);
+    },
+  });
+
+  const isSending =
+    askWithoutSessionMutation.isPending ||
+    createSessionMutation.isPending ||
+    askInSessionMutation.isPending;
+
+  const handleSendMessage = async () => {
     const trimmedQuestion = question.trim();
 
-    if (!trimmedQuestion) return;
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        role: "user",
-        content: trimmedQuestion,
-      },
-    ]);
+    if (!trimmedQuestion || isSending) return;
 
     setQuestion("");
 
-    askMutation.mutate({
-      question: trimmedQuestion,
-    });
+    if (!activeSessionId && selectedDocumentIds.length === 0) {
+      setLocalMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          role: "user",
+          content: trimmedQuestion,
+        },
+      ]);
+
+      askWithoutSessionMutation.mutate({
+        question: trimmedQuestion,
+      });
+
+      return;
+    }
+
+    try {
+      let sessionId = activeSessionId;
+
+      if (!sessionId) {
+        const createdSession = await createSessionMutation.mutateAsync({
+          documentIds: selectedDocumentIds,
+        });
+
+        sessionId = createdSession.sessionId;
+        onSessionCreated(createdSession.sessionId);
+
+        queryClient.invalidateQueries({
+          queryKey: ["ragChatSessions"],
+        });
+      }
+
+      await askInSessionMutation.mutateAsync({
+        sessionId,
+        question: trimmedQuestion,
+      });
+    } catch (error: any) {
+      const serverMessage = error.response?.data?.message;
+      toast.error(serverMessage || ERROR_CODE.SERVER_ERROR);
+    }
   };
 
   const handleEnterSend = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !askMutation.isPending) {
+    if (e.key === "Enter" && !isSending) {
       handleSendMessage();
     }
   };
 
   const handleClearChat = () => {
-    setMessages([]);
+    setLocalMessages([]);
     setQuestion("");
   };
 
   const handleNewChat = () => {
-    setMessages([]);
+    setLocalMessages([]);
     setQuestion("");
+    onNewChat();
   };
 
   return (
-    <div className="flex h-full flex-1 flex-col overflow-hidden bg-transparent">
-      {/* Header */}
-      <div className="flex shrink-0 items-center justify-between px-2 pb-6 pt-2">
-        <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-primary/10 p-2">
+    <div className="flex h-full flex-1 flex-col overflow-hidden rounded-3xl bg-white/30">
+      <div className="flex shrink-0 items-center justify-between border-b border-white/40 px-5 py-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/15">
             <Bot className="size-6 text-primary" />
           </div>
 
-          <div>
-            <h2 className="text-xl font-bold">AI Study Assistant</h2>
-            <p className="text-sm text-muted-foreground">
-              Ask questions, get explanations, and learn with AI.
+          <div className="min-w-0">
+            <h2 className="truncate text-xl font-bold text-card-foreground">
+              AI Study Assistant
+            </h2>
+            <p className="truncate text-sm text-muted-foreground">
+              Ask questions based on your study materials.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2">
           <Button
             type="button"
             variant="ghost"
             onClick={handleNewChat}
-            className="cursor-pointer rounded-full border border-border/50 bg-white/50 text-sm font-semibold text-primary shadow-sm hover:bg-white"
+            className="rounded-full border border-border/60 bg-card/80 px-4 text-sm font-semibold text-primary shadow-sm hover:bg-card"
           >
             <PlusCircle className="mr-2 size-4" />
             New Chat
@@ -110,23 +245,44 @@ function ChatArea() {
             type="button"
             variant="ghost"
             onClick={handleClearChat}
-            className="cursor-pointer rounded-full border border-destructive/20 bg-white/50 text-sm font-semibold text-destructive shadow-sm hover:bg-white hover:text-destructive"
+            className="rounded-full border border-destructive/20 bg-card/80 px-4 text-sm font-semibold text-destructive shadow-sm hover:bg-card hover:text-destructive"
           >
             <Trash2 className="mr-2 size-4" />
-            Clear Chat
+            Clear
           </Button>
         </div>
       </div>
 
-      {/* Messages Area */}
-      <div className="flex-1 space-y-5 overflow-y-auto p-4">
-        {messages.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center text-muted-foreground opacity-50">
-            <Bot className="mb-4 size-12" />
-            <p className="text-sm">Start a new conversation...</p>
+      <div className="flex-1 overflow-y-auto px-5 py-5">
+        {isLoadingMessages || isFetchingMessages ? (
+          <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
+            <Loader2 className="mb-3 size-8 animate-spin" />
+            <p className="text-sm">Loading messages...</p>
+          </div>
+        ) : messages.length === 0 ? (
+          <div className="flex h-full flex-col items-center justify-center text-center text-muted-foreground">
+            <div className="mb-4 flex size-16 items-center justify-center rounded-3xl bg-card/70 shadow-sm">
+              <Sparkles className="size-8 text-primary" />
+            </div>
+
+            <h3 className="text-base font-bold text-card-foreground">
+              Start learning with AI
+            </h3>
+
+            <p className="mt-1 max-w-md text-sm">
+              Choose context documents, then ask AI to explain, summarize, or
+              create quizzes from your materials.
+            </p>
+
+            {selectedDocumentIds.length > 0 && (
+              <div className="mt-4 flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-xs font-semibold text-primary">
+                <FileText className="size-4" />
+                {selectedDocumentIds.length} document(s) selected
+              </div>
+            )}
           </div>
         ) : (
-          <>
+          <div className="mx-auto flex max-w-4xl flex-col gap-5">
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -135,31 +291,31 @@ function ChatArea() {
                 }`}
               >
                 {message.role === "assistant" && (
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                    <Bot className="size-4 text-primary" />
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-2xl bg-primary/10">
+                    <Bot className="size-5 text-primary" />
                   </div>
                 )}
 
                 <div
-                  className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+                  className={`max-w-[78%] rounded-3xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
                     message.role === "user"
                       ? "bg-primary text-primary-foreground"
-                      : "border border-border bg-card text-card-foreground"
+                      : "border border-border/70 bg-card text-card-foreground"
                   }`}
                 >
                   <p className="whitespace-pre-line">{message.content}</p>
 
                   {message.sources && message.sources.length > 0 && (
                     <div className="mt-3 border-t border-border/60 pt-2">
-                      <p className="mb-1 text-xs font-semibold text-muted-foreground">
-                        Sources:
+                      <p className="mb-2 text-xs font-semibold text-muted-foreground">
+                        Sources
                       </p>
 
                       <div className="flex flex-wrap gap-2">
                         {message.sources.map((source, index) => (
                           <span
                             key={`${source}-${index}`}
-                            className="rounded-full bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary"
+                            className="rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary"
                           >
                             {source}
                           </span>
@@ -170,77 +326,66 @@ function ChatArea() {
                 </div>
 
                 {message.role === "user" && (
-                  <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary">
-                    <User className="size-4 text-white" />
+                  <div className="flex size-9 shrink-0 items-center justify-center rounded-2xl bg-primary">
+                    <User className="size-5 text-white" />
                   </div>
                 )}
               </div>
             ))}
 
-            {askMutation.isPending && (
+            {isSending && (
               <div className="flex justify-start gap-3">
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                  <Bot className="size-4 text-primary" />
+                <div className="flex size-9 shrink-0 items-center justify-center rounded-2xl bg-primary/10">
+                  <Bot className="size-5 text-primary" />
                 </div>
 
-                <div className="rounded-2xl border border-border bg-card px-4 py-3 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 rounded-3xl border border-border/70 bg-card px-4 py-3 text-sm text-muted-foreground shadow-sm">
+                  <Loader2 className="size-4 animate-spin" />
                   AI is thinking...
                 </div>
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
 
-      {/* Input Area */}
-      <div className="shrink-0 px-2 pb-2 pt-2">
-        <div className="relative flex flex-col gap-4 rounded-[2rem] border border-border bg-card p-4 shadow-md">
+      <div className="shrink-0 px-5 pb-5">
+        <div className="mx-auto max-w-4xl rounded-[1.75rem] border border-border/70 bg-card p-3 shadow-lg">
           <input
             type="text"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             onKeyDown={handleEnterSend}
             placeholder="Ask anything about your study materials..."
-            disabled={askMutation.isPending}
-            className="w-full border-none bg-transparent px-2 text-[15px] outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
+            disabled={isSending}
+            className="w-full border-none bg-transparent px-3 py-2 text-[15px] outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
           />
 
-          <div className="flex items-center justify-between px-1">
-            <div className="flex items-center gap-3">
-              <Button
-                type="button"
-                size="sm"
-                disabled
-                className="h-9 rounded-full bg-primary/10 text-xs font-semibold text-primary shadow-none hover:bg-primary/20"
-              >
-                <Paperclip className="mr-1.5 size-4" />
-                Attach Document
-              </Button>
-
-              <Button
-                type="button"
-                size="sm"
-                disabled
-                className="h-9 rounded-full bg-primary/10 text-xs font-semibold text-primary shadow-none hover:bg-primary/20"
-              >
-                <PlusCircle className="mr-1.5 size-4" />
-                Add Context
-              </Button>
+          <div className="mt-2 flex items-center justify-between gap-3 px-1">
+            <div className="flex min-w-0 items-center gap-2">
+              <div className="hidden items-center gap-1.5 rounded-full bg-muted px-3 py-2 text-xs font-medium text-muted-foreground sm:flex">
+                <FileText className="size-4" />
+                {selectedDocumentIds.length} context docs
+              </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <span className="hidden text-[10px] text-muted-foreground sm:inline-block">
+              <span className="hidden text-[11px] text-muted-foreground md:inline-block">
                 Press Enter to send
               </span>
 
               <Button
                 type="button"
                 size="icon"
-                disabled={askMutation.isPending || !question.trim()}
+                disabled={isSending || !question.trim()}
                 onClick={handleSendMessage}
-                className="size-8 rounded-full bg-primary hover:bg-primary/90"
+                className="size-10 rounded-full bg-primary hover:bg-primary/90"
               >
-                <Send className="size-4 text-white" />
+                {isSending ? (
+                  <Loader2 className="size-4 animate-spin text-white" />
+                ) : (
+                  <Send className="size-4 text-white" />
+                )}
               </Button>
             </div>
           </div>
