@@ -6,12 +6,12 @@ import {
   History,
   Maximize2,
   MessageSquare,
+  PlusCircle,
   Trash2,
 } from "lucide-react";
 import { toast } from "react-toastify";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ChatHistoryDialog from "@/components/ai-chat/ChatHistoryDialog";
 import {
   deleteRagChatSession,
@@ -25,6 +25,8 @@ interface ChatHistorySidebarProps {
   onToggleCollapse: () => void;
   onSelectSession: (sessionId: number) => void;
   onDeletedActiveSession: () => void;
+  onNewChat: () => void;
+  onClearChat: () => void;
 }
 
 function ChatHistorySidebar({
@@ -33,6 +35,8 @@ function ChatHistorySidebar({
   onToggleCollapse,
   onSelectSession,
   onDeletedActiveSession,
+  onNewChat,
+  onClearChat,
 }: ChatHistorySidebarProps) {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -55,7 +59,13 @@ function ChatHistorySidebar({
     mutationFn: deleteRagChatSession,
 
     onSuccess: (_, sessionId) => {
-      queryClient.invalidateQueries({ queryKey: ["ragChatSessions"] });
+      queryClient.removeQueries({
+        queryKey: ["ragSessionMessages", sessionId],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["ragChatSessions"],
+      });
 
       if (activeSessionId === sessionId) {
         onDeletedActiveSession();
@@ -74,29 +84,45 @@ function ChatHistorySidebar({
     deleteMutation.mutate(sessionId);
   };
 
+  const handleClearChat = () => {
+    if (activeSessionId) {
+      queryClient.removeQueries({
+        queryKey: ["ragSessionMessages", activeSessionId],
+      });
+    }
+    
+    onClearChat();
+  };
+
   const renderSessionItem = (session: RagChatSessionResponse) => {
     const isActive = activeSessionId === session.sessionId;
 
     return (
       <div
         key={session.sessionId}
-        className={`group flex items-center gap-2 rounded-2xl transition-colors ${
-          isActive ? "bg-primary/15 text-primary" : "hover:bg-muted/70"
+        className={`group flex items-center gap-1 rounded-2xl transition-all duration-150 ${
+          isActive
+            ? "bg-primary/15 text-primary shadow-sm"
+            : "hover:bg-primary/5 text-card-foreground"
         }`}
       >
         <button
           type="button"
           onClick={() => onSelectSession(session.sessionId)}
-          className="flex min-w-0 flex-1 items-center gap-3 px-3 py-2.5 text-left"
+          className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2.5 text-left"
         >
-          <MessageSquare className="size-4 shrink-0" />
+          <MessageSquare
+            className={`size-4 shrink-0 ${isActive ? "text-primary" : "text-muted-foreground"}`}
+          />
 
           {!isCollapsed && (
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold">
+              <p
+                className={`truncate text-sm font-semibold ${isActive ? "text-primary" : "text-card-foreground"}`}
+              >
                 {session.sessionTitle || "Untitled chat"}
               </p>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
                 {new Date(session.updatedAt).toLocaleDateString()}
               </p>
             </div>
@@ -110,9 +136,9 @@ function ChatHistorySidebar({
             size="icon"
             disabled={deleteMutation.isPending}
             onClick={() => handleDeleteSession(session.sessionId)}
-            className="mr-1 size-8 opacity-0 hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
+            className="mr-1.5 size-7 shrink-0 rounded-xl opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
           >
-            <Trash2 className="size-4" />
+            <Trash2 className="size-3.5" />
           </Button>
         )}
       </div>
@@ -121,57 +147,98 @@ function ChatHistorySidebar({
 
   return (
     <>
-      <Card className="flex h-full flex-col overflow-hidden border-sidebar-border bg-card shadow-sm">
-        <CardHeader className="flex shrink-0 flex-row items-center justify-between p-4 pb-2">
+      <div
+        className={`flex h-full flex-col overflow-hidden rounded-3xl border border-border/40 bg-card/60 shadow-xl backdrop-blur-sm transition-all duration-300 ${
+          isCollapsed ? "w-14" : "w-full"
+        }`}
+      >
+        {/* Header */}
+        <div className="shrink-0 p-4 pb-3">
+          <div
+            className={`flex items-center gap-2 ${isCollapsed ? "justify-center" : "justify-between"}`}
+          >
+            {!isCollapsed && (
+              <p className="text-base font-black text-card-foreground">
+                Chat History
+              </p>
+            )}
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={onToggleCollapse}
+              className="size-8 shrink-0 rounded-xl hover:bg-primary/10 hover:text-primary"
+            >
+              {isCollapsed ? (
+                <ChevronRight className="size-4" />
+              ) : (
+                <ChevronLeft className="size-4" />
+              )}
+            </Button>
+          </div>
+
           {!isCollapsed && (
-            <CardTitle className="flex items-center gap-2 text-base font-bold">
-              Chat History
-            </CardTitle>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={onNewChat}
+                className="h-9 rounded-2xl border border-primary/25 bg-primary/10 text-xs font-bold text-primary hover:bg-primary/20"
+              >
+                <PlusCircle className="mr-1.5 size-3.5" />
+                New
+              </Button>
+
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={handleClearChat}
+                className="h-9 rounded-2xl border border-destructive/25 bg-destructive/10 text-xs font-bold text-destructive hover:bg-destructive/20 hover:text-destructive"
+              >
+                <Trash2 className="mr-1.5 size-3.5" />
+                Clear
+              </Button>
+            </div>
           )}
 
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={onToggleCollapse}
-            className="size-8"
-          >
-            {isCollapsed ? (
-              <ChevronRight className="size-4" />
-            ) : (
-              <ChevronLeft className="size-4" />
-            )}
-          </Button>
-        </CardHeader>
+          {!isCollapsed && <div className="mt-3 h-px bg-border/50" />}
+        </div>
 
-        <CardContent className="flex-1 space-y-2 overflow-y-auto p-3">
+        {/* Session List */}
+        <div className="flex-1 space-y-1 overflow-y-auto px-2 pb-2">
           {isLoading ? (
-            <p className="px-2 py-4 text-center text-xs text-muted-foreground">
-              Loading...
-            </p>
+            <div className="flex h-full items-center justify-center">
+              <p className="text-xs text-muted-foreground">Loading...</p>
+            </div>
           ) : latestSessions.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center text-center text-muted-foreground">
-              <History className="mb-2 size-8 opacity-50" />
-              {!isCollapsed && <p className="text-xs">No chat history yet.</p>}
+            <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
+              <div className="flex size-10 items-center justify-center rounded-2xl bg-muted/50">
+                <History className="size-5 opacity-50" />
+              </div>
+              {!isCollapsed && (
+                <p className="text-xs font-medium">No chat history yet.</p>
+              )}
             </div>
           ) : (
             latestSessions.map(renderSessionItem)
           )}
-        </CardContent>
+        </div>
 
+        {/* Footer — View All */}
         {!isCollapsed && (
-          <div className="shrink-0 p-3">
+          <div className="shrink-0 border-t border-border/40 p-3">
             <Button
               type="button"
               onClick={() => setIsDialogOpen(true)}
-              className="flex h-10 w-full items-center justify-center gap-2 rounded-2xl bg-primary/15 font-semibold text-primary shadow-none hover:bg-primary/25"
+              className="flex h-9 w-full items-center justify-center gap-2 rounded-2xl bg-primary/10 text-xs font-bold text-primary shadow-none hover:bg-primary/20"
             >
-              <Maximize2 className="size-4" />
+              <Maximize2 className="size-3.5" />
               View All History
             </Button>
           </div>
         )}
-      </Card>
+      </div>
 
       <ChatHistoryDialog
         open={isDialogOpen}

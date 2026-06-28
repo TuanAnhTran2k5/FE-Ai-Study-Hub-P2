@@ -77,9 +77,7 @@ export const getRagSessionMessages = async (
 export const deleteRagChatSession = async (
   sessionId: number,
 ): Promise<void> => {
-  await api.delete<APIResponse<void>>(
-    `/user/rag/chat/sessions/${sessionId}`,
-  );
+  await api.delete<APIResponse<void>>(`/user/rag/chat/sessions/${sessionId}`);
 };
 
 export const indexRagDocument = async (
@@ -107,6 +105,19 @@ export const deleteRagDocument = async (
 ): Promise<RagDeleteResponse> => {
   const response = await api.delete<APIResponse<RagDeleteResponse>>(
     `/user/rag/documents/${documentId}`,
+  );
+
+  return response.data.result;
+};
+
+export const getSuggestedPrompts = async (
+  documentIds: number[],
+): Promise<string[]> => {
+  const response = await api.post<APIResponse<string[]>>(
+    "/user/rag/chat/suggest-prompts",
+    {
+      documentIds,
+    },
   );
 
   return response.data.result;
