@@ -8,9 +8,21 @@ function AIChatPage() {
   const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<number[]>([]);
   const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false);
+  const [pendingPrompt, setPendingPrompt] = useState("");
+  const [chatResetKey, setChatResetKey] = useState(0);
 
   const handleNewChat = () => {
     setActiveSessionId(null);
+    setSelectedDocumentIds([]);
+    setPendingPrompt("");
+    setChatResetKey((prev) => prev + 1);
+  };
+
+  const handleClearChat = () => {
+    setActiveSessionId(null);
+    setSelectedDocumentIds([]);
+    setPendingPrompt("");
+    setChatResetKey((prev) => prev + 1);
   };
 
   return (
@@ -26,15 +38,19 @@ function AIChatPage() {
           onToggleCollapse={() => setIsHistoryCollapsed((prev) => !prev)}
           onSelectSession={setActiveSessionId}
           onDeletedActiveSession={handleNewChat}
+          onNewChat={handleNewChat}
+          onClearChat={handleClearChat}
         />
       </div>
 
       <div className="flex h-full min-w-0 flex-1 flex-col">
         <ChatArea
+          key={chatResetKey}
           activeSessionId={activeSessionId}
           selectedDocumentIds={selectedDocumentIds}
+          pendingPrompt={pendingPrompt}
+          onPendingPromptConsumed={() => setPendingPrompt("")}
           onSessionCreated={setActiveSessionId}
-          onNewChat={handleNewChat}
         />
       </div>
 
@@ -42,6 +58,7 @@ function AIChatPage() {
         <ContextSidebar
           selectedDocumentIds={selectedDocumentIds}
           onSelectedDocumentIdsChange={setSelectedDocumentIds}
+          onPromptClick={setPendingPrompt}
         />
       </div>
     </div>

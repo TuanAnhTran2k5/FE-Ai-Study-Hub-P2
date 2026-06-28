@@ -1,0 +1,1 @@
+export const MAX_CONTEXT_DOCUMENTS = 5;
