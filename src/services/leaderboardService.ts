@@ -1,56 +1,54 @@
 import api from "@/configs/api";
-import type { LeaderboardUser } from "@/types/leaderboard.type";
-import type { UserResponse } from "@/types/user.type";
-import type { DocumentResponse } from "@/types/document.type";
+import type { APIResponse } from "@/types/auth";
+import type {
+  BadgeResponse,
+  RankResponse,
+  TopWeeklyUserResponse,
+  UserBadgeResponse,
+  UserRankHistoryResponse,
+} from "@/types/leaderboard.type";
 
-function getRankTitle(score: number) {
-  if (score >= 700) return "Elite Scholar";
-  if (score >= 301) return "Gold Mentor";
-  if (score >= 101) return "Silver Contributor";
-  return "Bronze Student";
-}
+export const getTopWeeklyUsers = async (
+  limit = 10,
+): Promise<TopWeeklyUserResponse[]> => {
+  const response = await api.get<APIResponse<TopWeeklyUserResponse[]>>(
+    "/user/top-weekly",
+    {
+      params: { limit },
+    },
+  );
 
-export const getLeaderboard = async (): Promise<LeaderboardUser[]> => {
-  const [usersResponse, documentsResponse] = await Promise.all([
-    api.get<UserResponse[]>("/users"),
-    api.get<DocumentResponse[]>("/documents"),
-  ]);
+  return response.data.result;
+};
 
-  const users = usersResponse.data;
-  const documents = documentsResponse.data;
+export const getRanks = async (): Promise<RankResponse[]> => {
+  const response = await api.get<APIResponse<RankResponse[]>>("/user/ranks");
 
-  return users
-    .filter((user) => user.role === "USER" && user.status === "ACTIVE")
-    .map((user) => {
-      const userDocuments = documents.filter(
-        (document) => String(document.ownerId) === String(user.id),
-      );
+  return response.data.result;
+};
 
-      const totalDownloads = userDocuments.reduce(
-        (sum, document) => sum + (document.downloadCount ?? 0),
-        0,
-      );
+export const getBadges = async (): Promise<BadgeResponse[]> => {
+  const response = await api.get<APIResponse<BadgeResponse[]>>("/user/badges");
 
-      const totalBookmarks = userDocuments.reduce(
-        (sum, document) => sum + (document.bookmarkCount ?? 0),
-        0,
-      );
+  return response.data.result;
+};
 
-      return {
-        id: user.id,
-        rank: 0,
-        fullName: user.fullName,
-        avatarUrl: user.avatarUrl,
-        title: getRankTitle(user.totalScore ?? 0),
-        points: user.totalScore ?? 0,
-        documents: userDocuments.length,
-        bookmarks: totalBookmarks,
-        downloads: totalDownloads,
-      };
-    })
-    .sort((a, b) => b.points - a.points)
-    .map((user, index) => ({
-      ...user,
-      rank: index + 1,
-    }));
+export const getUserRankHistory = async (
+  userId: number,
+): Promise<UserRankHistoryResponse> => {
+  const response = await api.get<APIResponse<UserRankHistoryResponse>>(
+    `/user/users/${userId}/ranks/history`,
+  );
+
+  return response.data.result;
+};
+
+export const getUserBadges = async (
+  userId: number,
+): Promise<UserBadgeResponse[]> => {
+  const response = await api.get<APIResponse<UserBadgeResponse[]>>(
+    `/user/users/${userId}/badges`,
+  );
+
+  return response.data.result;
 };
