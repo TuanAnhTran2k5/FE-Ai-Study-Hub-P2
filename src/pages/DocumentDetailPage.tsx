@@ -11,11 +11,11 @@ import { toast } from "react-toastify";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import DocumentDeleteDialog from "@/components/documents/detail/DocumentDeleteDialog";
-import DocumentDetailHeader from "@/components/documents/detail/DocumentDetailHeader";
-import DocumentDetailSidebar from "@/components/documents/detail/DocumentDetailSidebar";
-import DocumentPreview from "@/components/documents/detail/DocumentPreview";
-import DocumentUpdateDialog from "@/components/documents/detail/DocumentUpdateDialog";
+import DocumentDeleteDialog from "@/components/document/detail/DocumentDeleteDialog";
+import DocumentDetailHeader from "@/components/document/detail/DocumentDetailHeader";
+import DocumentDetailSidebar from "@/components/document/detail/DocumentDetailSidebar";
+import DocumentPreview from "@/components/document/detail/DocumentPreview";
+import DocumentUpdateDialog from "@/components/document/detail/DocumentUpdateDialog";
 import { VisibilityStatus } from "@/models/document.enum";
 import { getAllAcademicSubjects } from "@/services/academicService";
 import {

@@ -21,7 +21,7 @@ interface DocumentSearchProps {
     subjectName: string;
   }[];
 
-  semesters: number[];
+  semesters: Array<number | string>;
 
   onKeywordChange: (value: string) => void;
   onSubjectChange: (value: string) => void;

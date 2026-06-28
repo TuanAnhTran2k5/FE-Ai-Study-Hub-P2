@@ -177,6 +177,22 @@ function formatFileSize(bytes?: number) {
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 }
 
+function formatFileType(fileType?: string) {
+  if (!fileType) return "FILE";
+
+  const normalizedType = fileType.toLowerCase();
+
+  if (normalizedType.includes("pdf")) return "PDF";
+  if (normalizedType.includes("wordprocessingml") || normalizedType.includes("docx")) {
+    return "DOCX";
+  }
+  if (normalizedType.includes("text/plain") || normalizedType.includes("txt")) {
+    return "TXT";
+  }
+
+  return fileType.split("/").pop()?.toUpperCase() || "FILE";
+}
+
 function DocumentCard({ document, onView }: DocumentCardProps) {
   const rating = Math.min(5, Math.round(document.averageRating ?? 0));
 
@@ -191,8 +207,8 @@ function DocumentCard({ document, onView }: DocumentCardProps) {
           </div>
 
           <div className="absolute right-5 top-5 flex gap-2">
-            <Badge className="rounded-full bg-card px-3 py-1 text-xs font-bold text-primary shadow-sm hover:bg-card">
-              {document.fileType}
+            <Badge className="max-w-[90px] truncate rounded-full bg-card px-3 py-1 text-xs font-bold text-primary shadow-sm hover:bg-card">
+              {formatFileType(document.fileType)}
             </Badge>
 
             <Badge

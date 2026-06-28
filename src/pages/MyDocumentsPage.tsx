@@ -4,9 +4,9 @@ import { Upload } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-import DocumentGrid from "@/components/documents/DocumentGrid";
-import DocumentSearch from "@/components/documents/DocumentSearch";
-import DocumentUploadForm from "@/components/documents/DocumentUploadForm";
+import DocumentGrid from "@/components/document/DocumentGrid";
+import DocumentSearch from "@/components/document/DocumentSearch";
+import DocumentUploadForm from "@/components/document/DocumentUploadForm";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
