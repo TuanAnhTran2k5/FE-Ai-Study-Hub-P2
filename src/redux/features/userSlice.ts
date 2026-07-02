@@ -1,16 +1,35 @@
 import { createSlice } from "@reduxjs/toolkit";
+import type { UserResponse } from "@/types/user.type";
 
-//initialState
-const initialState = null;
-//1 slice, 1feature chứa những reducers của nó
-//tạo ra 1 reducer cụ thể là tạo ra 1 Slice
+// Dữ liệu user ban đầu.
+// Khi chưa đăng nhập => null
+const initialState: UserResponse | null = null;
+
+// User Slice: quản lý thông tin người dùng trong Redux
 export const userSlice = createSlice({
   name: "user",
-  initialState, //initialState: initialState, viết tắt tên
+  initialState,
+
   reducers: {
+    // Lưu toàn bộ thông tin user vào Redux sau khi login
     login: (_, action) => action.payload,
-    logout: () => null, //state = null
+
+    // Cập nhật profile sau khi gọi API thành công
+    // Giữ lại accessToken để không bị mất phiên đăng nhập
+    updateProfile: (state, action) => {
+      if (!state) return action.payload;
+
+      return {
+        ...state,
+        ...action.payload,
+        accessToken: state.accessToken,
+      };
+    },
+
+    // Xóa thông tin user khi logout
+    logout: () => null,
   },
 });
-export const { login, logout } = userSlice.actions;
+
+export const { login, updateProfile, logout } = userSlice.actions;
 export default userSlice.reducer;
