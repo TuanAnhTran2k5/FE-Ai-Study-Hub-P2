@@ -1,228 +1,191 @@
-// import { useMemo, useState } from "react";
-// import { useQuery } from "@tanstack/react-query";
-// import { getDocuments } from "@/services/documentService";
-// import { VisibilityStatus } from "@/models/document.enum";
-// import DocumentGrid from "@/components/documents/DocumentGrid";
-// import {
-//   CommunityFilters,
-//   type FilterState,
-// } from "@/components/community/CommunityFilters";
-// import { TrendingSubjects } from "@/components/community/TrendingSubjects";
-// import { TopContributors } from "@/components/community/TopContributors";
-// import { Input } from "@/components/ui/input";
-// import { Button } from "@/components/ui/button";
-// import { Search, PanelRightClose, PanelRightOpen } from "lucide-react";
-
-// function CommunityPage() {
-//   const [keyword, setKeyword] = useState("");
-//   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-//   const [filters, setFilters] = useState<FilterState>({
-//     subject: "ALL",
-//     semester: "ALL",
-//     documentType: "ALL",
-//     fileType: "ALL",
-//     rating: 0,
-//   });
-
-//   const {
-//     data: documents = [],
-//     isLoading,
-//     isError,
-//   } = useQuery({
-//     queryKey: ["documents"],
-//     queryFn: getDocuments,
-//   });
-
-//   const publicDocuments = useMemo(() => {
-//     return documents.filter(
-//       (document) => document.visibilityStatus === VisibilityStatus.PUBLIC,
-//     );
-//   }, [documents]);
-
-//   const subjects = useMemo(() => {
-//     const subjectMap = new Map<string, string>();
-//     publicDocuments.forEach((document) => {
-//       subjectMap.set(document.subjectCode, document.subjectName);
-//     });
-//     return Array.from(subjectMap.entries()).map(
-//       ([subjectCode, subjectName]) => ({
-//         code: subjectCode,
-//         name: subjectName,
-//       }),
-//     );
-//   }, [publicDocuments]);
-
-//   const semesters = useMemo(() => {
-//     return Array.from(
-//       new Set(publicDocuments.map((document) => document.semesterNo)),
-//     ).sort((a, b) => a - b);
-//   }, [publicDocuments]);
-
-//   const filteredDocuments = useMemo(() => {
-//     const q = keyword.trim().toLowerCase();
-
-//     return publicDocuments.filter((document) => {
-//       const matchesKeyword =
-//         !q ||
-//         document.title.toLowerCase().includes(q) ||
-//         document.description.toLowerCase().includes(q) ||
-//         document.subjectName.toLowerCase().includes(q) ||
-//         document.subjectCode.toLowerCase().includes(q) ||
-//         document.ownerName.toLowerCase().includes(q);
-
-//       const matchesSubject =
-//         filters.subject === "ALL" || document.subjectCode === filters.subject;
-
-//       const matchesSemester =
-//         filters.semester === "ALL" ||
-//         document.semesterNo === Number(filters.semester);
-
-//       const matchesFileType =
-//         filters.fileType === "ALL" || document.fileType === filters.fileType;
-
-//       const rating = Math.min(5, Math.round(document.averageRating || 0));
-//       const matchesRating = filters.rating === 0 || rating >= filters.rating;
-
-//       return (
-//         matchesKeyword &&
-//         matchesSubject &&
-//         matchesSemester &&
-//         matchesFileType &&
-//         matchesRating
-//       );
-//     });
-//   }, [publicDocuments, keyword, filters]);
-
-//   const handleViewDocument = (documentId: string) => {
-//     console.log("View document:", documentId);
-//   };
-
-//   if (isLoading) {
-//     return <div className="p-10 text-muted-foreground">Loading...</div>;
-//   }
-
-//   if (isError) {
-//     return <div className="p-10 text-destructive">Failed to load data</div>;
-//   }
-
-//   return (
-//     <div className="flex w-full flex-col lg:flex-row gap-8 p-5">
-//       {/* MAIN CONTENT AREA */}
-//       <div className="flex-1 min-w-0 transition-all duration-300">
-//         <div className="mb-6 flex items-start justify-between">
-//           <div>
-//             <h1 className="text-3xl font-black text-card-foreground">
-//               Community Documents
-//             </h1>
-//             <p className="mt-2 text-muted-foreground">
-//               Discover and learn from documents shared by the community.
-//             </p>
-//           </div>
-//         </div>
-
-//         {/* Quick Search Bar */}
-//         <div className="relative mb-6 flex gap-3">
-//           <div className="relative flex-1">
-//             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
-//             <Input
-//               type="text"
-//               placeholder="Search documents by title, subject, or owner..."
-//               className="pl-12 h-14 rounded-2xl bg-card border-border shadow-sm text-base"
-//               value={keyword}
-//               onChange={(e) => setKeyword(e.target.value)}
-//             />
-//           </div>
-//           <Button
-//             variant="outline"
-//             className={`cursor-pointer h-14 px-5 rounded-2xl border-border shadow-sm transition-colors ${
-//               !isSidebarOpen ? "bg-primary/10 text-primary border-primary/30" : "bg-card"
-//             }`}
-//             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-//           >
-//             {isSidebarOpen ? (
-//               <PanelRightClose className="h-5 w-5" />
-//             ) : (
-//               <PanelRightOpen className="h-5 w-5" />
-//             )}
-//             <span className="ml-2 hidden sm:inline font-semibold">
-//               {isSidebarOpen ? "Hide Panel" : "Filters & Stats"}
-//             </span>
-//           </Button>
-//         </div>
-
-//         {/* Results Info */}
-//         <div className="mb-6 text-sm text-muted-foreground">
-//           Showing{" "}
-//           <span className="font-bold text-card-foreground">
-//             {filteredDocuments.length}
-//           </span>{" "}
-//           documents
-//         </div>
-
-//         {/* Document Grid */}
-//         <DocumentGrid
-//           documents={filteredDocuments}
-//           onView={(doc) => handleViewDocument(doc.id)}
-//         />
-//       </div>
-
-//       {/* RIGHT SIDEBAR */}
-//       {isSidebarOpen && (
-//         <div className="w-full lg:w-80 shrink-0 space-y-6 animate-in slide-in-from-right-8 duration-300">
-//           <CommunityFilters
-//             filters={filters}
-//             onFilterChange={setFilters}
-//             subjects={subjects}
-//             semesters={semesters}
-//           />
-//           <TrendingSubjects />
-//           <TopContributors />
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-// export default CommunityPage;
-
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Search, PanelRightClose, PanelRightOpen } from "lucide-react";
+import { PanelRightClose, PanelRightOpen, Search } from "lucide-react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
+import {
+  CommunityFilters,
+  type FilterState,
+} from "@/components/community/CommunityFilters";
+import { TopContributors } from "@/components/community/TopContributors";
+import { TrendingSubjects } from "@/components/community/TrendingSubjects";
 import DocumentGrid from "@/components/document/DocumentGrid";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ROUTE } from "@/models/routePath";
+import type { User } from "@/models/user";
+import type { RootState } from "@/redux/store";
+import { getAllAcademicSubjects } from "@/services/academicService";
 import { searchPublicDocuments } from "@/services/documentService";
+import type { SubjectResponse } from "@/types/academic.type";
 
 function CommunityPage() {
+  const navigate = useNavigate();
+
+  // NOTE AUTH: Lay user hien tai de biet document nao la cua minh.
+  // Community van hien tat ca public documents, ke ca cua minh va cua user khac.
+  const currentUser = useSelector(
+    (state: RootState) => state.user as User | null,
+  );
+
+  // NOTE FE: keyword la chu user dang go, searchKeyword la gia tri da submit de call API.
   const [keyword, setKeyword] = useState("");
-  const [searchKeyword, setSearchKeyword] = useState("a");
+  const [searchKeyword, setSearchKeyword] = useState("");
+
+  // NOTE FE: Bat/tat panel filter ben phai.
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  // NOTE FE: Bo loc dang xu ly o frontend vi backend chua co API filter public document day du.
+  const [filters, setFilters] = useState<FilterState>({
+    subject: "ALL",
+    semester: "ALL",
+    documentType: "ALL",
+    fileType: "ALL",
+    rating: 0,
+  });
+
+  const isAuthenticated = !!localStorage.getItem("accessToken");
+  const authUserId = localStorage.getItem("authUserId");
+
+  // NOTE API: Lay public documents tu backend theo keyword.
+  // Endpoint hien tai nam duoi /user nen chi enable khi da co token/user.
   const {
     data: documents = [],
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["publicDocuments", searchKeyword],
+    queryKey: ["publicDocuments", authUserId, searchKeyword],
     queryFn: () => searchPublicDocuments(searchKeyword),
-    enabled: !!searchKeyword.trim(),
+    enabled: isAuthenticated && !!authUserId,
   });
 
+  // NOTE API: Lay subject/semester tu backend de bo sung thong tin cho card va filter.
+  const { data: academicSubjects = [] } = useQuery({
+    queryKey: ["communityAcademicSubjects", authUserId],
+    queryFn: getAllAcademicSubjects,
+    enabled: isAuthenticated && !!authUserId,
+  });
+
+  // NOTE DATA: Map subjectId -> subject de ghep document response voi subject detail.
+  const subjectMap = useMemo(() => {
+    return new Map<number, SubjectResponse>(
+      academicSubjects.map((subject) => [subject.subjectId, subject]),
+    );
+  }, [academicSubjects]);
+
+  // NOTE DATA: Bo sung subjectCode, subjectName, semesterNo, comboName cho document.
+  // Khong filter owner o day vi Community can hien tat ca tai lieu public.
+  const hydratedDocuments = useMemo(() => {
+    return documents.map((document) => {
+      const subject = subjectMap.get(document.subjectId);
+
+      return {
+        ...document,
+        subjectCode: document.subjectCode ?? subject?.subjectCode,
+        subjectName: document.subjectName ?? subject?.subjectName,
+        semesterNo: document.semesterNo ?? subject?.semesterNo ?? null,
+        comboCode: document.comboCode ?? subject?.comboCode ?? null,
+        comboName: document.comboName ?? subject?.comboName ?? null,
+      };
+    });
+  }, [documents, subjectMap]);
+
+  // NOTE DATA: Filter tren frontend theo subject, semester, fileType va rating.
+  const filteredDocuments = useMemo(() => {
+    return hydratedDocuments.filter((document) => {
+      const matchesSubject =
+        filters.subject === "ALL" ||
+        String(document.subjectId) === filters.subject;
+
+      const matchesSemester =
+        filters.semester === "ALL" ||
+        String(document.semesterNo ?? "") === filters.semester;
+
+      const matchesFileType =
+        filters.fileType === "ALL" ||
+        String(document.fileType).toUpperCase() === filters.fileType;
+
+      const rating = Math.round(document.averageRating ?? 0);
+      const matchesRating = filters.rating === 0 || rating >= filters.rating;
+
+      return (
+        matchesSubject && matchesSemester && matchesFileType && matchesRating
+      );
+    });
+  }, [hydratedDocuments, filters]);
+
+  const subjectOptions = useMemo(() => {
+    // NOTE UI DATA: Chuan hoa subject options cho CommunityFilters.
+    return academicSubjects.map((subject) => ({
+      code: String(subject.subjectId),
+      name: `${subject.subjectCode ?? subject.subjectId} - ${
+        subject.subjectName ?? "Subject"
+      }`,
+    }));
+  }, [academicSubjects]);
+
+  const semesterOptions = useMemo(() => {
+    // NOTE UI DATA: Lay danh sach hoc ky duy nhat tu academic subjects de dua vao dropdown.
+    const values = academicSubjects
+      .map((subject) => Number(subject.semesterNo))
+      .filter((semester) => Number.isFinite(semester));
+
+    return Array.from(new Set(values)).sort((a, b) => a - b);
+  }, [academicSubjects]);
+
   const handleSearch = () => {
-    const q = keyword.trim();
-    setSearchKeyword(q || "a");
+    // NOTE ACTION: Chi khi bam Search/Enter moi cap nhat searchKeyword de goi lai API.
+    setSearchKeyword(keyword.trim());
   };
 
   const handleViewDocument = (documentId: number) => {
-    console.log("View document:", documentId);
+    const selectedDocument = hydratedDocuments.find(
+      (document) => document.documentId === documentId,
+    );
+    const isMyDocument =
+      Number(selectedDocument?.ownerId) === Number(currentUser?.userId);
+
+    // NOTE NAVIGATION: Document cua minh -> My Documents detail de co edit/delete.
+    // Document cua nguoi khac -> Community detail de co save/bookmark/rating/report.
+    navigate(
+      `/${ROUTE.APP}/${
+        isMyDocument ? ROUTE.MY_DOCUMENTS : ROUTE.COMMUNITY
+      }/${documentId}`,
+    );
   };
 
+  if (!isAuthenticated) {
+    // NOTE GUARD: Chua dang nhap thi khong goi API Community, chi yeu cau login.
+    return (
+      <div className="p-10">
+        <div className="rounded-3xl border border-border bg-card p-10 text-center shadow-sm">
+          <h1 className="text-3xl font-black text-card-foreground">
+            Community Documents
+          </h1>
+          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
+            Please login to search public documents, bookmark, rate and report
+            community documents.
+          </p>
+          <Button
+            type="button"
+            className="mt-6 rounded-2xl px-8 font-bold"
+            onClick={() => navigate(`/${ROUTE.AUTH}/${ROUTE.LOGIN}`)}
+          >
+            Login to continue
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
+    // NOTE UI STATE: Trang thai cho API public documents.
     return <div className="p-10 text-muted-foreground">Loading...</div>;
   }
 
   if (isError) {
+    // NOTE UI STATE: Loi thuong do token/API backend public document chua chay dung.
     return <div className="p-10 text-destructive">Failed to load data</div>;
   }
 
@@ -286,27 +249,29 @@ function CommunityPage() {
         <div className="mb-6 text-sm text-muted-foreground">
           Showing{" "}
           <span className="font-bold text-card-foreground">
-            {documents.length}
+            {filteredDocuments.length}
           </span>{" "}
           documents
         </div>
 
+        {/* NOTE RENDER: DocumentGrid chi render card. Du lieu da search/filter/hydrate o CommunityPage. */}
         <DocumentGrid
-          documents={documents}
+          documents={filteredDocuments}
           onView={(document) => handleViewDocument(document.documentId)}
         />
       </div>
 
       {isSidebarOpen && (
+        /* NOTE SIDEBAR: Cac component phu tach rieng de de sua UI filter, trending subject, contributor. */
         <div className="w-full shrink-0 space-y-6 lg:w-80">
-          <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-            <h3 className="font-bold text-card-foreground">Filters</h3>
-
-            <p className="mt-2 text-sm text-muted-foreground">
-              Subject, semester and rating filters need more fields from BE
-              response.
-            </p>
-          </div>
+          <CommunityFilters
+            filters={filters}
+            onFilterChange={setFilters}
+            subjects={subjectOptions}
+            semesters={semesterOptions}
+          />
+          <TrendingSubjects />
+          <TopContributors />
         </div>
       )}
     </div>

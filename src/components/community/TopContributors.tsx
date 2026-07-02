@@ -4,12 +4,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getTopContributors } from "@/services/communityService";
 
+// NOTE COMPONENT: Card phụ ở trang Community, hiển thị user đóng góp nhiều nhất.
+// UI này chỉ render dữ liệu, phần gọi API/sắp xếp nằm trong communityService.
 export function TopContributors() {
+  // NOTE API: React Query lấy danh sách contributor và cache theo key "topContributors".
   const { data: contributors, isLoading } = useQuery({
     queryKey: ["topContributors"],
     queryFn: getTopContributors,
   });
 
+  // NOTE UI: Loading dùng skeleton; có data thì render rank, avatar, role và điểm.
   return (
     <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
@@ -23,6 +27,7 @@ export function TopContributors() {
 
       <div className="flex flex-col gap-4">
         {isLoading
+          // NOTE UI: Skeleton mô phỏng từng dòng contributor để layout không bị giật.
           ? Array.from({ length: 3 }).map((_, i) => (
               <div key={i} className="flex items-center gap-3">
                 <Skeleton className="h-6 w-6 rounded-full" />
