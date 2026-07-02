@@ -8,6 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
 
+// NOTE TYPE: State filter duoc CommunityPage giu.
+// Component nay chi render control va bao nguoc thay doi, khong tu loc document.
 export interface FilterState {
   subject: string;
   semester: string;
@@ -16,6 +18,7 @@ export interface FilterState {
   rating: number;
 }
 
+// NOTE PROPS: subjects/semesters da duoc CommunityPage chuan hoa tu API academic subjects.
 interface CommunityFiltersProps {
   filters: FilterState;
   onFilterChange: (filters: FilterState) => void;
@@ -23,12 +26,18 @@ interface CommunityFiltersProps {
   semesters: number[];
 }
 
+const selectContentClassName =
+  "z-[80] max-h-64 w-[var(--radix-select-trigger-width)] overflow-y-auto rounded-xl border border-border bg-popover shadow-xl";
+
+const selectItemClassName = "cursor-pointer truncate py-2";
+
 export function CommunityFilters({
   filters,
   onFilterChange,
   subjects,
   semesters,
 }: CommunityFiltersProps) {
+  // NOTE ACTION: Reset tat ca filter ve trang thai "All".
   const handleReset = () => {
     onFilterChange({
       subject: "ALL",
@@ -39,6 +48,7 @@ export function CommunityFilters({
     });
   };
 
+  // NOTE ACTION: Dung chung cho tat ca select/star de cap nhat dung 1 field filter.
   const updateFilter = (key: keyof FilterState, value: string | number) => {
     onFilterChange({ ...filters, [key]: value });
   };
@@ -48,6 +58,7 @@ export function CommunityFilters({
       <div className="mb-6 flex items-center justify-between">
         <h3 className="font-bold text-card-foreground">Filter</h3>
         <button
+          type="button"
           onClick={handleReset}
           className="cursor-pointer text-xs font-semibold text-primary hover:underline"
         >
@@ -64,13 +75,23 @@ export function CommunityFilters({
             value={filters.subject}
             onValueChange={(val) => updateFilter("subject", val)}
           >
-            <SelectTrigger className="w-full bg-secondary/50 border-border">
+            <SelectTrigger className="h-11 w-full rounded-xl border-border bg-secondary/50 px-3">
               <SelectValue placeholder="All Subjects" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All Subjects</SelectItem>
+            <SelectContent
+              position="popper"
+              align="start"
+              className={selectContentClassName}
+            >
+              <SelectItem className={selectItemClassName} value="ALL">
+                All Subjects
+              </SelectItem>
               {subjects.map((s) => (
-                <SelectItem key={s.code} value={s.code}>
+                <SelectItem
+                  key={s.code}
+                  className={selectItemClassName}
+                  value={s.code}
+                >
                   {s.code} - {s.name}
                 </SelectItem>
               ))}
@@ -86,13 +107,23 @@ export function CommunityFilters({
             value={filters.semester}
             onValueChange={(val) => updateFilter("semester", val)}
           >
-            <SelectTrigger className="w-full bg-secondary/50 border-border">
+            <SelectTrigger className="h-11 w-full rounded-xl border-border bg-secondary/50 px-3">
               <SelectValue placeholder="All Semesters" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All Semesters</SelectItem>
+            <SelectContent
+              position="popper"
+              align="start"
+              className={selectContentClassName}
+            >
+              <SelectItem className={selectItemClassName} value="ALL">
+                All Semesters
+              </SelectItem>
               {semesters.map((sem) => (
-                <SelectItem key={sem} value={sem.toString()}>
+                <SelectItem
+                  key={sem}
+                  className={selectItemClassName}
+                  value={sem.toString()}
+                >
                   Semester {sem}
                 </SelectItem>
               ))}
@@ -108,15 +139,29 @@ export function CommunityFilters({
             value={filters.fileType}
             onValueChange={(val) => updateFilter("fileType", val)}
           >
-            <SelectTrigger className="w-full bg-secondary/50 border-border">
+            <SelectTrigger className="h-11 w-full rounded-xl border-border bg-secondary/50 px-3">
               <SelectValue placeholder="All File Types" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">All File Types</SelectItem>
-              <SelectItem value="PDF">PDF</SelectItem>
-              <SelectItem value="DOCX">DOCX</SelectItem>
-              <SelectItem value="PPTX">PPTX</SelectItem>
-              <SelectItem value="XLSX">XLSX</SelectItem>
+            <SelectContent
+              position="popper"
+              align="start"
+              className={selectContentClassName}
+            >
+              <SelectItem className={selectItemClassName} value="ALL">
+                All File Types
+              </SelectItem>
+              <SelectItem className={selectItemClassName} value="PDF">
+                PDF
+              </SelectItem>
+              <SelectItem className={selectItemClassName} value="DOCX">
+                DOCX
+              </SelectItem>
+              <SelectItem className={selectItemClassName} value="PPTX">
+                PPTX
+              </SelectItem>
+              <SelectItem className={selectItemClassName} value="XLSX">
+                XLSX
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -134,8 +179,9 @@ export function CommunityFilters({
             ].map((r) => (
               <button
                 key={r.value}
+                type="button"
                 onClick={() => updateFilter("rating", r.value)}
-                className={`cursor-pointer flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                className={`flex cursor-pointer items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
                   filters.rating === r.value
                     ? "border-primary bg-primary/10 text-primary"
                     : "border-border bg-card text-muted-foreground hover:bg-secondary"
@@ -149,9 +195,10 @@ export function CommunityFilters({
         </div>
 
         <Button
-          className="cursor-pointer w-full mt-4 font-bold rounded-xl"
+          className="mt-4 w-full cursor-pointer rounded-xl font-bold"
           onClick={() => {}}
         >
+          {/* NOTE UI: Filter ap dung ngay khi doi select/star. Nut nay giu de dung thiet ke. */}
           Apply Filters
         </Button>
       </div>

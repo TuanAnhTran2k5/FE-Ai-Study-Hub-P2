@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import type { UserResponse } from "@/types/user.type";
 import { ROUTE } from "@/models/routePath";
 import { Navigate } from "react-router-dom";
+import FeatureOverviewSection from "@/components/home/FeatureOverviewSection";
 
 function HomePage() {
   const user = useSelector(
@@ -17,6 +18,9 @@ function HomePage() {
     <div className="px-10">
       <HeroSection />
 
+      <FeatureOverviewSection />
+
+      
       <TopSubjectsSection />
     </div>
   );

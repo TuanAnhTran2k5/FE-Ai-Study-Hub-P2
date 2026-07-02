@@ -19,6 +19,7 @@ import {
   getTopWeeklyUsers,
 } from "@/services/leaderboardService";
 import type { RootState } from "@/redux/store";
+import type { User } from "@/models/user";
 import type {
   BadgeResponse,
   RankResponse,
@@ -36,7 +37,9 @@ function formatDate(value?: string) {
 }
 
 function LeaderboardPage() {
-  const currentLoginUser = useSelector((state: RootState) => state.user);
+  const currentLoginUser = useSelector(
+    (state: RootState) => state.user,
+  ) as (User & { id?: number }) | null;
 
   const { data: users = [] } = useQuery({
     queryKey: ["topWeeklyUsers"],

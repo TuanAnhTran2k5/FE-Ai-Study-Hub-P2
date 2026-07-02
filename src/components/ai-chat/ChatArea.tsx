@@ -22,6 +22,7 @@ import type {
 import { useSelector } from "react-redux";
 import type { RootState } from "@/redux/store";
 import AvatarFrame from "../avatarFrame/AvatarFrame";
+import type { User } from "@/models/user";
 
 interface ChatAreaProps {
   activeSessionId: number | null;
@@ -55,7 +56,9 @@ function ChatArea({
   onSessionCreated,
 }: ChatAreaProps) {
   const queryClient = useQueryClient();
-  const currentUser = useSelector((state: RootState) => state.user);
+  const currentUser = useSelector(
+    (state: RootState) => state.user,
+  ) as User | null;
 
   const [question, setQuestion] = useState("");
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
@@ -69,7 +72,6 @@ function ChatArea({
   const {
     data: sessionMessagesPage,
     isLoading: isLoadingMessages,
-    isFetching: isFetchingMessages,
   } = useQuery<RagChatMessagesPageResponse>({
     queryKey: ["ragSessionMessages", activeSessionId],
     queryFn: () => getRagSessionMessages(activeSessionId as number, 0, 50),

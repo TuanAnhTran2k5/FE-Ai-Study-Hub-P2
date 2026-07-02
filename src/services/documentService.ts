@@ -4,18 +4,21 @@ import type {
   BookmarkRequest,
   BookmarkResponse,
   DeleteDocumentResponse,
-  MyDocumentResponse,
   DocumentDownloadResponse,
   DocumentResponse,
   DocumentUpdateRequest,
   DocumentUpdateResponse,
   DocumentUploadRequest,
   DocumentUploadResponse,
+  MyDocumentResponse,
   RatingRequest,
   RatingResponse,
+  ReportRequest,
+  ReportResponse,
 } from "@/types/document.type";
 
 export const getMyDocuments = async (): Promise<MyDocumentResponse[]> => {
+  // NOTE API: Lấy tài liệu của user đang đăng nhập. MyDocumentsPage dùng API này.
   const response = await api.get<APIResponse<MyDocumentResponse[]>>(
     "/user/document/my-documents",
   );
@@ -26,6 +29,7 @@ export const getMyDocuments = async (): Promise<MyDocumentResponse[]> => {
 export const getDocumentById = async (
   documentId: number,
 ): Promise<MyDocumentResponse> => {
+  // NOTE API: Lấy chi tiết 1 document theo id. DocumentDetailPage dùng để render header/sidebar.
   const response = await api.get<APIResponse<MyDocumentResponse>>(
     `/user/document/${documentId}`,
   );
@@ -37,7 +41,7 @@ export const uploadDocument = async (
   data: DocumentUploadRequest,
   onUploadProgress?: (progress: number) => void,
 ): Promise<DocumentUploadResponse> => {
-  // Backend upload nhận multipart/form-data nên phải tự tạo FormData ở đây.
+  // NOTE API: Backend upload nhận multipart/form-data nên FE phải tự tạo FormData ở đây.
   const formData = new FormData();
 
   formData.append("file", data.file);
@@ -52,7 +56,7 @@ export const uploadDocument = async (
     "/user/document/upload",
     formData,
     {
-      // Axios trả tiến độ upload theo byte; đổi sang phần trăm để UI hiển thị progress bar.
+      // NOTE UX: Axios trả tiến độ upload theo byte; đổi sang phần trăm để UI hiện progress bar.
       onUploadProgress: (progressEvent) => {
         if (!progressEvent.total) {
           return;
@@ -74,6 +78,8 @@ export const uploadDocument = async (
 export const searchPublicDocuments = async (
   keyword: string,
 ): Promise<DocumentResponse[]> => {
+  // NOTE API COMMUNITY: Lấy tài liệu public theo keyword.
+  // CommunityPage dùng hàm này để search tài liệu của cộng đồng.
   const response = await api.get<APIResponse<DocumentResponse[]>>(
     "/user/document/search",
     {
@@ -90,8 +96,8 @@ export const updateDocument = async (
   documentId: number,
   data: DocumentUpdateRequest,
 ): Promise<DocumentUpdateResponse> => {
-  // API update đang tạm chưa gọi từ UI vì backend chưa lưu ổn định.
-  // Giữ service lại để nối lại nhanh khi backend sửa xong.
+  // NOTE API: Cập nhật metadata document như title, subject, visibility.
+  // UI edit document có thể gọi lại hàm này khi backend đã ổn định đầy đủ.
   const response = await api.patch<APIResponse<DocumentUpdateResponse>>(
     `/user/document/${documentId}`,
     data,
@@ -103,6 +109,7 @@ export const updateDocument = async (
 export const deleteDocument = async (
   documentId: number,
 ): Promise<DeleteDocumentResponse> => {
+  // NOTE API: Xóa document của chính user. Không dùng để xóa document người khác trong Community.
   const response = await api.delete<APIResponse<DeleteDocumentResponse>>(
     `/user/document/${documentId}`,
   );
@@ -113,6 +120,8 @@ export const deleteDocument = async (
 export const downloadPublicDocument = async (
   documentId: number,
 ): Promise<DocumentDownloadResponse> => {
+  // NOTE API COMMUNITY: Save to Storage / ghi nhận download public.
+  // Backend xử lý quyền, tăng download count và trả metadata download.
   const response = await api.post<APIResponse<DocumentDownloadResponse>>(
     `/user/document/${documentId}/download/public`,
   );
@@ -123,7 +132,7 @@ export const downloadPublicDocument = async (
 export const cloudDownloadDocument = async (
   documentId: number,
 ): Promise<Blob> => {
-  // Endpoint này dùng cho nút Download, trả file dạng Blob để trình duyệt tải xuống.
+  // NOTE API: Dùng cho nút Download, trả file dạng Blob để trình duyệt tải xuống.
   const response = await api.get(`/user/document/${documentId}/cloud-download`, {
     responseType: "blob",
   });
@@ -134,7 +143,7 @@ export const cloudDownloadDocument = async (
 export const viewDocumentContent = async (
   documentId: number,
 ): Promise<Blob> => {
-  // Endpoint này dùng để preview file ngay trong web, không tải xuống trực tiếp.
+  // NOTE API: Dùng để preview file ngay trong web, không tải xuống trực tiếp.
   const response = await api.get(`/user/document/${documentId}/view-content`, {
     responseType: "blob",
   });
@@ -146,6 +155,8 @@ export const ratingDocument = async (
   documentId: number,
   data: RatingRequest,
 ): Promise<RatingResponse> => {
+  // NOTE API COMMUNITY: User đánh giá document public.
+  // Sau khi thành công, DocumentDetailPage cập nhật cache để card/detail hiện sao mới.
   const response = await api.post<APIResponse<RatingResponse>>(
     `/user/document/${documentId}/rating`,
     data,
@@ -154,8 +165,9 @@ export const ratingDocument = async (
   return response.data.result;
 };
 
-
 export const getBookmarks = async (): Promise<BookmarkResponse[]> => {
+  // NOTE API COMMUNITY: Lấy danh sách bookmark của current user.
+  // FE dùng để biết document nào đã được bookmark khi quay lại trang.
   const response = await api.get<APIResponse<BookmarkResponse[]>>(
     "/user/bookmarks",
   );
@@ -166,6 +178,7 @@ export const getBookmarks = async (): Promise<BookmarkResponse[]> => {
 export const addBookmark = async (
   data: BookmarkRequest,
 ): Promise<BookmarkResponse> => {
+  // NOTE API COMMUNITY: Thêm bookmark cho document public.
   const response = await api.post<APIResponse<BookmarkResponse>>(
     "/user/bookmarks",
     data,
@@ -177,8 +190,22 @@ export const addBookmark = async (
 export const removeBookmark = async (
   documentId: number,
 ): Promise<DeleteDocumentResponse> => {
+  // NOTE API COMMUNITY: Bỏ bookmark theo documentId.
   const response = await api.delete<APIResponse<DeleteDocumentResponse>>(
     `/user/bookmarks/${documentId}`,
+  );
+
+  return response.data.result;
+};
+
+export const reportDocument = async (
+  data: ReportRequest,
+): Promise<ReportResponse> => {
+  // NOTE API COMMUNITY: Gửi report document cho moderation.
+  // reasonId hiện phụ thuộc bảng report reason bên backend/database.
+  const response = await api.post<APIResponse<ReportResponse>>(
+    "/user/reports",
+    data,
   );
 
   return response.data.result;
