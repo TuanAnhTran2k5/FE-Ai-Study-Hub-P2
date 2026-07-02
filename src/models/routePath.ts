@@ -13,6 +13,7 @@ export const ROUTE = {
   MY_DOCUMENTS: "mydocuments",
   DOCUMENT_DETAIL: "mydocuments/:id",
   COMMUNITY: "community",
+  COMMUNITY_DETAIL: "community/:id",
   AI_CHAT: "aichat",
   BOOKMARKS: "bookmarks",
   NOTIFICATIONS: "notifications",

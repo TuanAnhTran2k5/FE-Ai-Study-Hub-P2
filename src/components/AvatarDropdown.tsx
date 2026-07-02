@@ -14,7 +14,7 @@ import type { User } from "@/models/user";
 import { logout } from "@/redux/features/userSlice";
 import { authLogout } from "@/services/authService";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
@@ -25,9 +25,12 @@ type AvatarDropdownProps = {
 export function AvatarDropdown({ user }: AvatarDropdownProps) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const clearAuthAndRedirect = () => {
     localStorage.removeItem("accessToken");
+    localStorage.removeItem("authUserId");
+    queryClient.clear();
     dispatch(logout());
     navigate(ROUTE.HOME);
   };

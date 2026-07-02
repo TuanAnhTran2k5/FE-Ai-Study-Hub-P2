@@ -98,6 +98,10 @@ export const router = createBrowserRouter([
         element: <CommunityPage />,
       },
       {
+        path: ROUTE.COMMUNITY_DETAIL,
+        element: <DocumentDetailPage />,
+      },
+      {
         path: ROUTE.AI_CHAT,
         element: <AIChatPage />,
       },

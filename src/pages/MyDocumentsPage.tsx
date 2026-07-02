@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Upload } from "lucide-react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -16,6 +17,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { VisibilityStatus } from "@/models/document.enum";
+import type { User } from "@/models/user";
+import type { RootState } from "@/redux/store";
 import { getAllAcademicSubjects, getSemesters } from "@/services/academicService";
 import { getMyDocuments, uploadDocument } from "@/services/documentService";
 import type {
@@ -87,6 +90,13 @@ function MyDocumentsPage() {
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const currentUser = useSelector((state: RootState) => state.user as User | null);
+  const authUserId =
+    currentUser?.userId != null
+      ? String(currentUser.userId)
+      : localStorage.getItem("authUserId");
+  const isAuthenticated =
+    !!localStorage.getItem("accessToken") || !!currentUser?.userId;
 
   const {
     data: documents = [],
@@ -95,8 +105,9 @@ function MyDocumentsPage() {
     error: documentsError,
     refetch: refetchDocuments,
   } = useQuery<DocumentResponse[], Error>({
-    queryKey: ["myDocuments"],
+    queryKey: ["myDocuments", authUserId ?? "current-user"],
     queryFn: getMyDocuments,
+    enabled: isAuthenticated,
     retry: 1,
   });
 
