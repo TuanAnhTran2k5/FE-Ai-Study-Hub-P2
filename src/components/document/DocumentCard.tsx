@@ -193,24 +193,8 @@ function formatFileType(fileType?: string) {
   return fileType.split("/").pop()?.toUpperCase() || "FILE";
 }
 
-function formatDisplayFileName(fileName?: string | null) {
-  if (!fileName) return "";
-
-  // NOTE UI: Backend/storage co the them UUID_ vao truoc ten file de tranh trung ten.
-  // FE chi an prefix nay khi hien thi, khong xoa hay sua du lieu goc trong database.
-  return fileName
-    .replace(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_/i, "")
-    .replaceAll("_", " ");
-}
-
 function DocumentCard({ document, onView }: DocumentCardProps) {
-  // Nếu BE chưa recompute averageRating nhưng đã trả myRating,
-  // card vẫn dùng myRating để hiện số sao user vừa đánh giá.
-  const displayRating =
-    (document.averageRating ?? 0) > 0
-      ? (document.averageRating ?? 0)
-      : (document.myRating ?? 0);
-  const rating = Math.min(5, Math.round(displayRating));
+  const rating = Math.min(5, Math.round(document.averageRating ?? 0));
 
   return (
     <Card className="group flex h-full overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
@@ -271,7 +255,7 @@ function DocumentCard({ document, onView }: DocumentCardProps) {
           </h3>
 
           <p className="mt-3 line-clamp-2 min-h-[52px] text-base leading-7 text-muted-foreground">
-            {document.description || formatDisplayFileName(document.fileName)}
+            {document.description || document.fileName}
           </p>
 
           <div className="mt-5 border-t border-border pt-4">

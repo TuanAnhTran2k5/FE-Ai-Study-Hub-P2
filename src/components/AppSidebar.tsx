@@ -10,10 +10,6 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { ROUTE } from "@/models/routePath";
-import type { User as AuthUser } from "@/models/user";
-import type { RootState } from "@/redux/store";
-import { getUnreadNotificationCount } from "@/services/notificationService";
-import { useQuery } from "@tanstack/react-query";
 
 import {
   LayoutDashboard,
@@ -23,10 +19,9 @@ import {
   Bookmark,
   Bell,
   Trophy,
-  User as UserIcon,
+  User,
   Settings,
 } from "lucide-react";
-import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 
 const menuItems = [
@@ -54,6 +49,7 @@ const menuItems = [
     title: "Notifications",
     url: ROUTE.NOTIFICATIONS,
     icon: Bell,
+    badge: 3,
   },
   {
     title: "Leaderboard",
@@ -63,7 +59,7 @@ const menuItems = [
   {
     title: "Profile",
     url: ROUTE.PROFILE,
-    icon: UserIcon,
+    icon: User,
   },
   {
     title: "Dashboard",
@@ -79,18 +75,6 @@ const menuItems = [
 
 function AppSidebar() {
   const location = useLocation();
-  const currentUser = useSelector(
-    (state: RootState) => state.user as AuthUser | null,
-  );
-  const currentUserId = currentUser?.userId;
-
-  // NOTE API: Badge Notifications lay so unread that tu backend.
-  // Khong hard-code so 3 nua, va query key co userId de tranh hien cache cua account cu.
-  const { data: unreadNotificationCount = 0 } = useQuery({
-    queryKey: ["notifications", currentUserId, "unread-count"],
-    queryFn: getUnreadNotificationCount,
-    enabled: !!currentUserId,
-  });
 
   return (
     <Sidebar
@@ -107,13 +91,7 @@ function AppSidebar() {
             <SidebarMenu className="flex flex-col items-stretch gap-1 group-data-[collapsible=icon]:items-center">
               {menuItems.map((item) => {
                 const Icon = item.icon;
-                const isActive = location.pathname.startsWith(
-                  `/app/${item.url}`,
-                );
-                const badge =
-                  item.url === ROUTE.NOTIFICATIONS
-                    ? unreadNotificationCount
-                    : 0;
+                const isActive = location.pathname === `/app/${item.url}`;
 
                 return (
                   <SidebarMenuItem
@@ -135,9 +113,9 @@ function AppSidebar() {
                           {item.title}
                         </span>
 
-                        {badge > 0 && (
+                        {item.badge && (
                           <span className="ml-auto flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:right-1 group-data-[collapsible=icon]:top-1 group-data-[collapsible=icon]:size-3.5 group-data-[collapsible=icon]:text-[8px]">
-                            {badge > 99 ? "99+" : badge}
+                            {item.badge}
                           </span>
                         )}
                       </Link>

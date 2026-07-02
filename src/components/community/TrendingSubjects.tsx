@@ -4,16 +4,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { BookOpen } from "lucide-react";
 import { getTrendingSubjects } from "@/services/communityService";
 
-// NOTE COMPONENT: Card phụ ở trang Community, hiển thị các môn học đang có nhiều tài liệu.
-// Dữ liệu đi qua communityService để sau này đổi endpoint/backend không phải sửa UI.
 export function TrendingSubjects() {
-  // NOTE API: React Query gọi service và cache theo key "trendingSubjects".
   const { data: subjects, isLoading } = useQuery({
     queryKey: ["trendingSubjects"],
     queryFn: getTrendingSubjects,
   });
 
-  // NOTE UI: Khi đang load thì hiện skeleton, khi có data thì render danh sách subject.
   return (
     <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
       <div className="mb-4 flex items-center justify-between">
@@ -25,7 +21,6 @@ export function TrendingSubjects() {
 
       <div className="flex flex-col gap-4">
         {isLoading
-          // NOTE UI: Skeleton giữ bố cục ổn định trong lúc chờ API.
           ? Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="flex items-center gap-3">
                 <Skeleton className="h-8 w-8 rounded-lg" />

@@ -14,7 +14,6 @@ type DocumentDetailHeaderProps = {
   semesterNo?: number | string | null;
   comboName?: string | null;
   fileSizeLabel: string;
-  isOwner: boolean;
   isDeleting: boolean;
   onUpdate: () => void;
   onDelete: () => void;
@@ -29,7 +28,6 @@ function DocumentDetailHeader({
   semesterNo,
   comboName,
   fileSizeLabel,
-  isOwner,
   isDeleting,
   onUpdate,
   onDelete,
@@ -37,30 +35,28 @@ function DocumentDetailHeader({
   return (
     <Card className="mb-6 rounded-3xl border border-border bg-card shadow-sm">
       <CardContent className="relative p-6 pr-6 md:pr-52">
-        {isOwner && (
-          <div className="mb-5 flex gap-2 md:absolute md:right-6 md:top-6 md:mb-0">
-            <Button
-              type="button"
-              variant="outline"
-              className="h-10 rounded-xl border-primary/30 text-primary"
-              onClick={onUpdate}
-            >
-              <Pencil className="mr-2 h-4 w-4" />
-              Update Document
-            </Button>
+        <div className="mb-5 flex gap-2 md:absolute md:right-6 md:top-6 md:mb-0">
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 rounded-xl border-primary/30 text-primary"
+            onClick={onUpdate}
+          >
+            <Pencil className="mr-2 h-4 w-4" />
+            Update Document
+          </Button>
 
-            <Button
-              type="button"
-              variant="outline"
-              className="h-10 rounded-xl border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-              onClick={onDelete}
-              disabled={isDeleting}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </Button>
-          </div>
-        )}
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10 rounded-xl border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+            onClick={onDelete}
+            disabled={isDeleting}
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete
+          </Button>
+        </div>
 
         <div className="flex flex-col gap-5 md:flex-row md:items-start">
           <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-secondary text-primary">
