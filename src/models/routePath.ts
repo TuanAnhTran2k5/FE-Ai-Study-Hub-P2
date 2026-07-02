@@ -17,6 +17,7 @@ export const ROUTE = {
   AI_CHAT: "aichat",
   BOOKMARKS: "bookmarks",
   NOTIFICATIONS: "notifications",
+  NOTIFICATION_DETAIL: "notifications/:id",
   LEADERBOARD: "leaderboard",
   PROFILE: "profile",
   SETTINGS: "settings",

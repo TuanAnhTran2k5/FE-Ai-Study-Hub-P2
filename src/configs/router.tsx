@@ -13,6 +13,8 @@ import BookmarksPage from "@/pages/BookmarksPage";
 import LeaderboardPage from "@/pages/LeaderboardPage";
 import ProfilePage from "@/pages/ProfilePage";
 import DocumentDetailPage from "@/pages/DocumentDetailPage";
+import NotificationPage from "@/pages/NotificationPage";
+import NotificationDetailPage from "@/pages/NotificationDetailPage";
 import VerifyOtpForm from "@/components/auth/VerifyOtpForm";
 import RegisterForm from "@/components/auth/RegisterForm";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
@@ -111,7 +113,11 @@ export const router = createBrowserRouter([
       },
       {
         path: ROUTE.NOTIFICATIONS,
-        element: <div> </div>,
+        element: <NotificationPage />,
+      },
+      {
+        path: ROUTE.NOTIFICATION_DETAIL,
+        element: <NotificationDetailPage />,
       },
       {
         path: ROUTE.LEADERBOARD,

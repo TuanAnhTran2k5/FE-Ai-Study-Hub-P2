@@ -10,7 +10,11 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { ROUTE } from "@/models/routePath";
+import type { User as AuthUser } from "@/models/user";
+import type { RootState } from "@/redux/store";
+import { getUnreadNotificationCount } from "@/services/notificationService";
 
+import { useQuery } from "@tanstack/react-query";
 import {
   LayoutDashboard,
   FileText,
@@ -22,6 +26,7 @@ import {
   User,
   Settings,
 } from "lucide-react";
+import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 
 const menuItems = [
@@ -49,7 +54,6 @@ const menuItems = [
     title: "Notifications",
     url: ROUTE.NOTIFICATIONS,
     icon: Bell,
-    badge: 3,
   },
   {
     title: "Leaderboard",
@@ -75,6 +79,18 @@ const menuItems = [
 
 function AppSidebar() {
   const location = useLocation();
+  const currentUser = useSelector(
+    (state: RootState) => state.user as AuthUser | null,
+  );
+  const currentUserId = currentUser?.userId;
+
+  // NOTE API: Badge notification tren sidebar lay so unread that tu backend.
+  // Query key co userId de khi doi account khong bi hien so notification cua user cu.
+  const { data: unreadNotificationCount = 0 } = useQuery({
+    queryKey: ["notifications", currentUserId, "sidebar-unread-count"],
+    queryFn: getUnreadNotificationCount,
+    enabled: !!currentUserId,
+  });
 
   return (
     <Sidebar
@@ -92,6 +108,8 @@ function AppSidebar() {
               {menuItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === `/app/${item.url}`;
+                const badge =
+                  item.title === "Notifications" ? unreadNotificationCount : 0;
 
                 return (
                   <SidebarMenuItem
@@ -113,9 +131,9 @@ function AppSidebar() {
                           {item.title}
                         </span>
 
-                        {item.badge && (
+                        {badge > 0 && (
                           <span className="ml-auto flex size-5 shrink-0 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-white group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:right-1 group-data-[collapsible=icon]:top-1 group-data-[collapsible=icon]:size-3.5 group-data-[collapsible=icon]:text-[8px]">
-                            {item.badge}
+                            {badge > 99 ? "99+" : badge}
                           </span>
                         )}
                       </Link>
