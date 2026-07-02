@@ -24,7 +24,6 @@ function CommunityPage() {
   const navigate = useNavigate();
 
   // NOTE AUTH: Lay user hien tai de biet document nao la cua minh.
-  // Community van hien tat ca public documents, ke ca cua minh va cua user khac.
   const currentUser = useSelector(
     (state: RootState) => state.user as User | null,
   );
