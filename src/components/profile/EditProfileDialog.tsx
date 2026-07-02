@@ -1,0 +1,172 @@
+import { useEffect, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { Edit, Loader2, Save, X } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { toast } from "react-toastify";
+
+import { ERROR_CODE } from "@/constants/errorCode";
+import { SUCCESS_MESSAGE } from "@/constants/successMessage";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { updateProfile } from "@/redux/features/userSlice";
+import { updateUserProfile } from "@/services/userService";
+import type { UserRequest, UserResponse } from "@/types/user.type";
+
+interface EditProfileDialogProps {
+  user: UserResponse;
+}
+
+function EditProfileDialog({ user }: EditProfileDialogProps) {
+  const dispatch = useDispatch();
+  const [open, setOpen] = useState(false);
+
+  const [formValues, setFormValues] = useState<UserRequest>({
+    fullName: user.fullName || "",
+    avatarUrl: user.avatarUrl || "",
+  });
+
+  useEffect(() => {
+    setFormValues({
+      fullName: user.fullName || "",
+      avatarUrl: user.avatarUrl || "",
+    });
+  }, [user.fullName, user.avatarUrl]);
+
+  const updateMutation = useMutation({
+    mutationFn: updateUserProfile,
+
+    onSuccess: (data) => {
+      dispatch(updateProfile(data));
+      toast.success(SUCCESS_MESSAGE.PROFILE_UPDATED);
+      setOpen(false);
+    },
+
+    onError: () => {
+      toast.error(ERROR_CODE.PROFILE_UPDATE_FAILED);
+    },
+  });
+
+  const handleChange = (field: keyof UserRequest, value: string) => {
+    setFormValues((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleSubmit = () => {
+    if (!formValues.fullName.trim()) {
+      toast.error(ERROR_CODE.FIELD_REQUIRED);
+      return;
+    }
+
+    updateMutation.mutate({
+      fullName: formValues.fullName.trim(),
+      avatarUrl: formValues.avatarUrl.trim(),
+    });
+  };
+
+  const handleCancel = () => {
+    setFormValues({
+      fullName: user.fullName || "",
+      avatarUrl: user.avatarUrl || "",
+    });
+    setOpen(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" className="h-11 rounded-xl font-bold">
+          <Edit className="mr-2 h-4 w-4" />
+          Edit Profile
+        </Button>
+      </DialogTrigger>
+
+      <DialogContent className="rounded-3xl border-border bg-card sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-black text-card-foreground">
+            Edit Profile
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-5">
+          <div className="flex justify-center">
+            <div className="h-28 w-28 overflow-hidden rounded-full border-4 border-primary/30 bg-secondary">
+              {formValues.avatarUrl ? (
+                <img
+                  src={formValues.avatarUrl}
+                  alt={formValues.fullName}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-3xl font-black text-primary">
+                  {formValues.fullName.charAt(0).toUpperCase() || "U"}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-bold text-card-foreground">
+              Full name
+            </label>
+            <Input
+              value={formValues.fullName}
+              onChange={(event) => handleChange("fullName", event.target.value)}
+              placeholder="Enter your full name"
+              className="h-11 rounded-xl"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-bold text-card-foreground">
+              Avatar URL
+            </label>
+            <Input
+              value={formValues.avatarUrl}
+              onChange={(event) => handleChange("avatarUrl", event.target.value)}
+              placeholder="Enter avatar image URL"
+              className="h-11 rounded-xl"
+            />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCancel}
+              className="rounded-xl font-bold"
+              disabled={updateMutation.isPending}
+            >
+              <X className="mr-2 h-4 w-4" />
+              Cancel
+            </Button>
+
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              className="rounded-xl font-bold"
+              disabled={updateMutation.isPending}
+            >
+              {updateMutation.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="mr-2 h-4 w-4" />
+              )}
+              Save
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export default EditProfileDialog;
