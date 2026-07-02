@@ -45,6 +45,7 @@ import {
   downloadPublicDocument,
   getDocumentById,
   ratingDocument,
+  removeBookmark,
   reportDocument,
   updateDocument,
   viewDocumentContent,
@@ -454,9 +455,20 @@ function DocumentDetailPage() {
             ? {
                 ...currentDocument,
                 isBookmarked: true,
-                bookmarkCount: (currentDocument.bookmarkCount ?? 0) + 1,
               }
             : currentDocument,
+      );
+      queryClient.setQueriesData<DocumentResponse[]>(
+        { queryKey: ["publicDocuments"] },
+        (currentDocuments) =>
+          currentDocuments?.map((currentDocument) =>
+            currentDocument.documentId === documentId
+              ? {
+                  ...currentDocument,
+                  isBookmarked: true,
+                }
+              : currentDocument,
+          ),
       );
       queryClient.invalidateQueries({ queryKey: ["document", documentId] });
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
@@ -473,6 +485,43 @@ function DocumentDetailPage() {
       }
 
       toast.error(message || "Bookmark failed");
+    },
+  });
+
+  const removeBookmarkMutation = useMutation({
+    mutationFn: () => removeBookmark(documentId as number),
+    onSuccess: () => {
+      setIsBookmarked(false);
+      queryClient.setQueryData<DocumentResponse>(
+        ["document", documentId],
+        (currentDocument) =>
+          currentDocument
+            ? {
+                ...currentDocument,
+                isBookmarked: false,
+              }
+            : currentDocument,
+      );
+      queryClient.setQueriesData<DocumentResponse[]>(
+        { queryKey: ["publicDocuments"] },
+        (currentDocuments) =>
+          currentDocuments?.map((currentDocument) =>
+            currentDocument.documentId === documentId
+              ? {
+                  ...currentDocument,
+                  isBookmarked: false,
+                }
+              : currentDocument,
+          ),
+      );
+      queryClient.invalidateQueries({ queryKey: ["document", documentId] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+      queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
+      toast.success("Bookmark removed successfully");
+    },
+    onError: (error) => {
+      const message = getBackendErrorMessage(error);
+      toast.error(message || "Remove bookmark failed");
     },
   });
 
@@ -581,6 +630,19 @@ function DocumentDetailPage() {
     link.click();
 
     URL.revokeObjectURL(downloadUrl);
+  };
+
+  const handleToggleBookmark = () => {
+    if (!documentId || bookmarkMutation.isPending || removeBookmarkMutation.isPending) {
+      return;
+    }
+
+    if (isBookmarked) {
+      removeBookmarkMutation.mutate();
+      return;
+    }
+
+    bookmarkMutation.mutate();
   };
 
   // Mở dialog xác nhận xóa, chưa gọi API ở bước này.
@@ -798,10 +860,12 @@ function DocumentDetailPage() {
           isBookmarked={isBookmarked}
           selectedRating={selectedRating}
           isSavingToStorage={saveToStorageMutation.isPending}
-          isBookmarking={bookmarkMutation.isPending}
+          isBookmarking={
+            bookmarkMutation.isPending || removeBookmarkMutation.isPending
+          }
           isRating={ratingMutation.isPending}
           onSaveToStorage={() => saveToStorageMutation.mutate()}
-          onBookmark={() => bookmarkMutation.mutate()}
+          onBookmark={handleToggleBookmark}
           onRate={(ratingValue: number) => ratingMutation.mutate(ratingValue)}
           onReport={() => setIsReportOpen(true)}
         />
