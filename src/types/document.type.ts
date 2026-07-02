@@ -133,8 +133,7 @@ export interface RatingResponse {
 export interface BookmarkResponse {
   bookmarkId: number;
   userId: number;
-  documentId: number;
-  documentTitle: string;
+  document: DocumentResponse;
   bookmarkedAt: string;
 }
 

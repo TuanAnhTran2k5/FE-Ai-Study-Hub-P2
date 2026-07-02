@@ -89,12 +89,18 @@ function DocumentDetailSidebar({
                 type="button"
                 variant="outline"
                 className="w-full rounded-xl"
-                disabled={isBookmarking || isBookmarked}
+                disabled={isBookmarking}
                 onClick={onBookmark}
               >
-                <Bookmark className="mr-2 h-4 w-4" />
+                <Bookmark
+                  className={`mr-2 h-4 w-4 ${
+                    isBookmarked ? "fill-yellow-400 text-yellow-400" : ""
+                  }`}
+                />
                 {isBookmarking
-                  ? "Saving..."
+                  ? isBookmarked
+                    ? "Removing..."
+                    : "Saving..."
                   : isBookmarked
                     ? "Bookmarked"
                     : "Bookmark"}
@@ -159,7 +165,7 @@ function DocumentDetailSidebar({
               icon={
                 <Bookmark
                   className={`h-4 w-4 ${
-                    document.isBookmarked ? "fill-yellow-400 text-yellow-400" : ""
+                    isBookmarked ? "fill-yellow-400 text-yellow-400" : ""
                   }`}
                 />
               }
