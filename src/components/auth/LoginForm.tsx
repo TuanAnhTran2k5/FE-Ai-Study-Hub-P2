@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { FcGoogle } from "react-icons/fc";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { GoogleLoginRequest, LoginRequest } from "@/types/auth";
 import { authLogin, googleLogin } from "@/services/authService";
 import { login } from "@/redux/features/userSlice";
@@ -22,6 +22,12 @@ import { ERROR_CODE } from "@/constants/errorCode";
 import { useGoogleLogin } from "@react-oauth/google";
 
 type LoginErrors = Partial<Record<keyof LoginFormValues, string>>;
+
+function saveAuthSession(user: User) {
+  localStorage.setItem("accessToken", user.accessToken);
+  localStorage.setItem("authUserId", String(user.userId));
+}
+
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -36,12 +42,14 @@ function LoginForm() {
   const dispatch = useDispatch();
   //useNavigate để điều hướng
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const loginMutation = useMutation<User, Error, LoginRequest>({
     mutationFn: authLogin,
     //khi mà call API thành công, trả cho data
     onSuccess: (data) => {
-      localStorage.setItem("accessToken", data.accessToken);
+      queryClient.clear();
+      saveAuthSession(data);
 
       if (rememberMe) {
         localStorage.setItem("rememberEmail", data.email);
@@ -82,7 +90,8 @@ function LoginForm() {
     mutationFn: googleLogin,
 
     onSuccess: (data) => {
-      localStorage.setItem("accessToken", data.accessToken);
+      queryClient.clear();
+      saveAuthSession(data);
 
       dispatch(login(data));
 

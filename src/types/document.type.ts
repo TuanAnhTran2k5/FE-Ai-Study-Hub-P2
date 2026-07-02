@@ -42,6 +42,7 @@ export interface DocumentResponse {
   comboName?: string | null;
 
   isBookmarked?: boolean;
+  myRating?: number | null;
 }
 
 export type MyDocumentResponse = DocumentResponse & {
@@ -139,5 +140,22 @@ export interface BookmarkResponse {
 
 export interface BookmarkRequest {
   documentId: number;
+}
+
+export interface ReportRequest {
+  documentId: number;
+  reasonId: number;
+  description?: string;
+  evidenceUrl?: string;
+}
+
+export interface ReportResponse {
+  reportId: number;
+  documentId: number;
+  reasonId: number;
+  description?: string | null;
+  evidenceUrl?: string | null;
+  status?: string;
+  createdAt?: string;
 }
 
