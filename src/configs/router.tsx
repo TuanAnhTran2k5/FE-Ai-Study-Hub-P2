@@ -21,6 +21,7 @@ import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
 import ForgotPasswordVerifyOtpForm from "@/components/auth/ForgotPasswordVerifyOtpForm";
 import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
+import SettingsPage from "@/pages/SettingsPage";
 
 export const router = createBrowserRouter([
   {
@@ -129,7 +130,7 @@ export const router = createBrowserRouter([
       },
       {
         path: ROUTE.SETTINGS,
-        element: <div> </div>,
+        element: <SettingsPage />,
       },
     ],
   },
@@ -137,11 +138,11 @@ export const router = createBrowserRouter([
 
 export const NAVIGATE_KEY = [
   {
-    name: "Home",
+    nameKey: "nav.home",
     path: ROUTE.HOME,
   },
   {
-    name: "Community",
+    nameKey: "nav.community",
     path: ROUTE.COMMUNITY,
   },
 ];

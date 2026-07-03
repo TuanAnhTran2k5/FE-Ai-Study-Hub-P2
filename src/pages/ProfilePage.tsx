@@ -62,9 +62,7 @@ function getStorageLimit(user: UserResponse) {
   const score = user.totalScore ?? 0;
 
   const isGoldOrHigher =
-    rankName.includes("gold") ||
-    rankName.includes("elite") ||
-    score >= 301;
+    rankName.includes("gold") || rankName.includes("elite") || score >= 301;
 
   const fallbackLimit = isGoldOrHigher
     ? GOLD_STORAGE_LIMIT_BYTES
@@ -154,7 +152,14 @@ function ProfilePage() {
 
   const totalBookmarks = bookmarks.length;
 
-  const storageUsed = user.storageUsed ?? 0;
+  const calculatedStorageUsed = myDocuments.reduce(
+    (total, document) => total + (document.fileSize ?? 0),
+    0,
+  );
+
+  const storageUsed =
+    calculatedStorageUsed > 0 ? calculatedStorageUsed : (user.storageUsed ?? 0);
+    
   const storageLimit = getStorageLimit(user);
   const storageRemaining = Math.max(storageLimit - storageUsed, 0);
 

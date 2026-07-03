@@ -1,5 +1,4 @@
 import { ERROR_CODE } from "@/constants/errorCode";
-import { SUCCESS_MESSAGE } from "@/constants/successMessage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ROUTE } from "@/models/routePath";
@@ -13,6 +12,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { ArrowLeft, CheckCircle2, Eye, EyeOff, Lock } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -21,6 +21,7 @@ type ResetPasswordErrors = Partial<
 >;
 
 function ResetPasswordForm() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -45,7 +46,7 @@ function ResetPasswordForm() {
     mutationFn: resetPassword,
 
     onSuccess: () => {
-      toast.success(SUCCESS_MESSAGE.RESET_PASSWORD_SUCCESS);
+      toast.success(t("success.resetPassword"));
       navigate(`/${ROUTE.AUTH}/${ROUTE.LOGIN}`);
     },
 
@@ -125,19 +126,19 @@ function ResetPasswordForm() {
         className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-link hover:text-link-hover"
       >
         <ArrowLeft className="h-4 w-4" />
-        Back to OTP
+        {t("auth.backToOtp")}
       </Link>
 
       <div className="mb-8 text-center">
         <h2 className="text-3xl font-extrabold text-card-foreground">
-          Reset{" "}
+          {t("auth.resetPassword.titleStart")}{" "}
           <span className="bg-gradient-to-r from-primary-start to-primary-end bg-clip-text text-transparent">
-            Password
+            {t("auth.resetPassword.titleHighlight")}
           </span>
         </h2>
 
         <p className="mt-3 text-sm text-muted-foreground">
-          Create a new secure password for your account.
+          {t("auth.resetPassword.description")}
         </p>
       </div>
 
@@ -147,7 +148,7 @@ function ResetPasswordForm() {
             htmlFor="password"
             className="mb-2 block text-sm font-bold text-card-foreground"
           >
-            New Password
+            {t("auth.newPassword")}
           </label>
 
           <div className="relative">
@@ -156,7 +157,7 @@ function ResetPasswordForm() {
             <Input
               id="password"
               type={showPassword ? "text" : "password"}
-              placeholder="Enter new password"
+              placeholder={t("auth.enterNewPassword")}
               value={formValues.password}
               onChange={handleChange("password")}
               className={`h-14 rounded-xl bg-secondary px-12 text-card-foreground placeholder:text-muted-foreground ${
@@ -191,7 +192,7 @@ function ResetPasswordForm() {
             htmlFor="confirmPassword"
             className="mb-2 block text-sm font-bold text-card-foreground"
           >
-            Confirm Password
+            {t("auth.confirmPassword")}
           </label>
 
           <div className="relative">
@@ -200,7 +201,7 @@ function ResetPasswordForm() {
             <Input
               id="confirmPassword"
               type={showConfirmPassword ? "text" : "password"}
-              placeholder="Confirm new password"
+              placeholder={t("auth.confirmNewPassword")}
               value={formValues.confirmPassword}
               onChange={handleChange("confirmPassword")}
               className={`h-14 rounded-xl bg-secondary px-12 text-card-foreground placeholder:text-muted-foreground ${
@@ -232,14 +233,14 @@ function ResetPasswordForm() {
 
         <div className="rounded-2xl border border-border bg-secondary p-4 text-sm text-muted-foreground">
           <p className="mb-2 font-bold text-card-foreground">
-            Password must include:
+            {t("auth.passwordRules.title")}
           </p>
 
           <ul className="space-y-1">
-            <li>• At least 8 characters</li>
-            <li>• Uppercase and lowercase letters</li>
-            <li>• At least 1 number</li>
-            <li>• At least 1 special character</li>
+            <li>• {t("auth.passwordRules.minLength")}</li>
+            <li>• {t("auth.passwordRules.upperLower")}</li>
+            <li>• {t("auth.passwordRules.number")}</li>
+            <li>• {t("auth.passwordRules.special")}</li>
           </ul>
         </div>
 
@@ -248,7 +249,9 @@ function ResetPasswordForm() {
           disabled={resetPasswordMutation.isPending}
           className="h-14 w-full rounded-xl bg-gradient-to-r from-primary-start to-primary-end font-bold text-primary-foreground transition hover:from-primary-start-hover hover:to-primary-end-hover"
         >
-          {resetPasswordMutation.isPending ? "Resetting..." : "Reset Password"}
+          {resetPasswordMutation.isPending
+            ? t("auth.resetting")
+            : t("auth.resetPasswordButton")}
 
           <CheckCircle2 className="ml-2 h-5 w-5" />
         </Button>

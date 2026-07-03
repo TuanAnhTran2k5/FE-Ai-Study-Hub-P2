@@ -3,24 +3,22 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, RotateCcw, ShieldCheck } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
 import { ROUTE } from "@/models/routePath";
 import { resendOtp, verifyOtp } from "@/services/authService";
-
 import type { User } from "@/models/user";
 import type {
   ResendOtpRequest,
   ResendOtpResponse,
   VerifyOtpRequest,
 } from "@/types/auth";
-
-import { SUCCESS_MESSAGE } from "@/constants/successMessage";
 import { ERROR_CODE } from "@/constants/errorCode";
 
 function VerifyOtpForm() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -33,14 +31,12 @@ function VerifyOtpForm() {
     mutationFn: verifyOtp,
 
     onSuccess: () => {
-      toast.success(SUCCESS_MESSAGE.VERIFY_OTP_SUCCESS);
-
+      toast.success(t("success.verifyOtp"));
       navigate(`/${ROUTE.AUTH}/${ROUTE.LOGIN}`);
     },
 
     onError: (error: any) => {
       const message = error.response?.data?.message || ERROR_CODE.SERVER_ERROR;
-
       toast.error(message);
     },
   });
@@ -53,22 +49,20 @@ function VerifyOtpForm() {
     mutationFn: resendOtp,
 
     onSuccess: () => {
-      toast.success(SUCCESS_MESSAGE.RESEND_OTP_SUCCESS);
+      toast.success(t("success.resendOtp"));
     },
 
     onError: (error: any) => {
       const message = error.response?.data?.message || ERROR_CODE.SERVER_ERROR;
-
       toast.error(message);
     },
   });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
 
     if (!email) {
       toast.error(ERROR_CODE.FIELD_REQUIRED);
-
       navigate(`/${ROUTE.AUTH}/${ROUTE.REGISTER}`);
       return;
     }
@@ -92,7 +86,6 @@ function VerifyOtpForm() {
   const handleResendOtp = () => {
     if (!email) {
       toast.error(ERROR_CODE.FIELD_REQUIRED);
-
       navigate(`/${ROUTE.AUTH}/${ROUTE.REGISTER}`);
       return;
     }
@@ -111,11 +104,11 @@ function VerifyOtpForm() {
         </div>
 
         <h1 className="text-3xl font-bold text-card-foreground">
-          Verify your email
+          {t("auth.verifyEmail.title")}
         </h1>
 
         <p className="mt-3 text-sm text-muted-foreground">
-          Enter the OTP code sent to your email.
+          {t("auth.verifyEmail.description")}
         </p>
 
         {email && (
@@ -126,17 +119,17 @@ function VerifyOtpForm() {
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="mb-2 block text-sm font-medium text-card-foreground">
-            OTP Code
+            {t("auth.otpCode")}
           </label>
 
           <Input
             value={otpCode}
-            onChange={(e) => {
-              const value = e.target.value.replace(/\D/g, "");
+            onChange={(event) => {
+              const value = event.target.value.replace(/\D/g, "");
               setOtpCode(value);
             }}
             maxLength={6}
-            placeholder="Enter 6-digit OTP"
+            placeholder={t("auth.enterOtp")}
             className="h-12 rounded-lg border-border text-center text-lg font-semibold tracking-[0.4em]"
           />
         </div>
@@ -146,7 +139,9 @@ function VerifyOtpForm() {
           disabled={verifyMutation.isPending || otpCode.length !== 6}
           className="h-12 w-full cursor-pointer rounded-lg bg-gradient-to-r from-primary-start to-primary-end text-sm font-semibold text-primary-foreground"
         >
-          {verifyMutation.isPending ? "Verifying..." : "Verify Email"}
+          {verifyMutation.isPending
+            ? t("auth.verifying")
+            : t("auth.verifyEmail.button")}
 
           <ArrowRight className="ml-2 size-4" />
         </Button>
@@ -160,7 +155,9 @@ function VerifyOtpForm() {
         >
           <RotateCcw className="mr-2 size-4" />
 
-          {resendOtpMutation.isPending ? "Sending..." : "Resend OTP"}
+          {resendOtpMutation.isPending
+            ? t("auth.sending")
+            : t("auth.resendOtp")}
         </Button>
       </form>
     </div>

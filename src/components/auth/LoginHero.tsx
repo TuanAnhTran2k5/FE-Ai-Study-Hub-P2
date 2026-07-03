@@ -6,86 +6,83 @@ import {
   Trophy,
   Users,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 function LoginHero() {
+  const { t } = useTranslation();
+
   return (
     <div className="relative flex h-full min-h-[650px] flex-col overflow-hidden rounded-3xl p-2">
-      {/* Background glow */}
       <div className="absolute bottom-10 left-10 h-56 w-56 rounded-full bg-link-hover/20 blur-3xl" />
 
-      {/* Header Text */}
       <div className="relative z-10">
         <h1 className="text-[34px] font-black leading-tight tracking-tight text-card-foreground">
-          Welcome Back! <span>👋</span>
+          {t("auth.loginHero.welcome")} <span>👋</span>
           <br />
-          Login to <span className="text-link">Your Account</span>
+          {t("auth.loginHero.loginTo")}{" "}
+          <span className="text-link">{t("auth.loginHero.yourAccount")}</span>
         </h1>
 
         <p className="mt-4 max-w-md text-sm leading-6 text-foreground">
-          Login to continue discovering, sharing and learning with AI Study Hub
-          community.
+          {t("auth.loginHero.description")}
         </p>
       </div>
 
-      {/* Logo image */}
       <div className="relative z-10 mt-8 flex justify-center">
         <div className="relative">
           <img
             src="/img/LoginHero_BG.png"
             alt="AI Study Hub"
-            className="h-full  w-full object-contain drop-shadow-xl"
+            className="h-full w-full object-contain drop-shadow-xl"
           />
 
-          {/* Floating stats */}
           <div className="absolute -left-0 top-8 space-y-3">
             <StatCard
               icon={<FileText size={16} />}
               value="12K+"
-              label="Documents"
+              label={t("auth.loginHero.stats.documents")}
             />
             <StatCard
               icon={<MessageCircle size={16} />}
               value="25K+"
-              label="AI Chats"
+              label={t("auth.loginHero.stats.aiChats")}
             />
             <StatCard
               icon={<Users size={16} />}
               value="5K+"
-              label="Active Users"
+              label={t("auth.loginHero.stats.activeUsers")}
             />
           </div>
 
-          {/* Cloud */}
           <div className="absolute -right-1 top-12 flex size-16 items-center justify-center rounded-2xl bg-link text-primary-foreground shadow-lg">
             <CloudUpload size={30} />
           </div>
         </div>
       </div>
 
-      {/* Feature Card */}
       <div className="relative z-10 mt-auto rounded-3xl border border-border bg-accent/50 p-5 shadow-sm backdrop-blur">
         <FeatureItem
           icon={<ShieldCheck size={20} />}
-          title="Secure & Private"
-          desc="Your data is encrypted and always protected."
+          title={t("auth.loginHero.features.secure.title")}
+          desc={t("auth.loginHero.features.secure.description")}
           color="bg-primary-bg-hover text-link"
         />
         <FeatureItem
           icon={<CloudUpload size={20} />}
-          title="Access Anywhere"
-          desc="Access your documents and AI assistant anytime, anywhere."
+          title={t("auth.loginHero.features.access.title")}
+          desc={t("auth.loginHero.features.access.description")}
           color="bg-success/15 text-success"
         />
         <FeatureItem
           icon={<Users size={20} />}
-          title="Join Community"
-          desc="Connect with thousands of students and share knowledge."
+          title={t("auth.loginHero.features.community.title")}
+          desc={t("auth.loginHero.features.community.description")}
           color="bg-chart-4/15 text-chart-4"
         />
         <FeatureItem
           icon={<Trophy size={20} />}
-          title="Earn & Grow"
-          desc="Earn reputation, badges and climb the leaderboard."
+          title={t("auth.loginHero.features.grow.title")}
+          desc={t("auth.loginHero.features.grow.description")}
           color="bg-link-hover/15 text-link-hover"
         />
       </div>

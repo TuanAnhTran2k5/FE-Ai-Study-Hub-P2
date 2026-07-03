@@ -1,0 +1,190 @@
+{
+  "common": {
+    "backToHome": "Back to Home"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "emailAddress": "Email Address",
+    "enterEmail": "Enter your email",
+    "password": "Password",
+    "enterPassword": "Enter your password",
+    "fullName": "Full Name",
+    "enterFullName": "Enter your full name",
+    "createPassword": "Create a password",
+    "confirmPassword": "Confirm Password",
+    "confirmYourPassword": "Confirm your password",
+    "rememberMe": "Remember me",
+    "forgotPasswordLink": "Forgot password?",
+    "rememberPassword": "Remember your password?",
+    "loginNow": "Login now",
+    "registerNow": "Register now",
+    "noAccount": "Don't have an account?",
+    "backToLogin": "Back to login",
+    "changeEmail": "Change email",
+    "verify": "Verify",
+    "otpSentTo": "Enter the OTP code sent to",
+    "otpCode": "OTP Code",
+    "enterOtp": "Enter 6-digit OTP",
+    "verifyOtp": "Verify OTP",
+    "sendOtp": "Send OTP",
+    "resendOtp": "Resend OTP",
+    "sending": "Sending...",
+    "resending": "Resending...",
+    "signingIn": "Signing in...",
+    "orContinueWith": "or continue with",
+    "continueWithGoogle": "Continue with Google",
+    "createAccount": "Create Account",
+    "creatingAccount": "Creating account...",
+    "loginForm": {
+      "title": "Login to",
+      "description": "Welcome back! Please enter your details."
+    },
+    "loginHero": {
+      "welcome": "Welcome Back!",
+      "loginTo": "Login to",
+      "yourAccount": "Your Account",
+      "description": "Login to continue discovering, sharing and learning with AI Study Hub community.",
+      "stats": {
+        "documents": "Documents",
+        "aiChats": "AI Chats",
+        "activeUsers": "Active Users"
+      },
+      "features": {
+        "secure": {
+          "title": "Secure & Private",
+          "description": "Your data is encrypted and always protected."
+        },
+        "access": {
+          "title": "Access Anywhere",
+          "description": "Access your documents and AI assistant anytime, anywhere."
+        },
+        "community": {
+          "title": "Join Community",
+          "description": "Connect with thousands of students and share knowledge."
+        },
+        "grow": {
+          "title": "Earn & Grow",
+          "description": "Earn reputation, badges and climb the leaderboard."
+        }
+      }
+    },
+    "registerForm": {
+      "title": "Create Your Account",
+      "description": "Fill in the details below to get started."
+    },
+    "registerHero": {
+      "title": "Join AI Study Hub",
+      "subtitle": "Create",
+      "highlight": "Your Account",
+      "description": "Create your account and start discovering, sharing and learning with AI Study Hub community.",
+      "features": {
+        "upload": {
+          "title": "Upload & Share",
+          "description": "Upload your study materials and share knowledge with others."
+        },
+        "ai": {
+          "title": "AI-Powered Learning",
+          "description": "Chat with AI, get summaries and generate quizzes from documents."
+        },
+        "reward": {
+          "title": "Earn & Grow",
+          "description": "Earn reputation, badges and climb the leaderboard."
+        },
+        "security": {
+          "title": "Secure & Private",
+          "description": "Your data is safe with us. We value your privacy and security."
+        }
+      }
+    },
+    "forgotPassword": {
+      "titleStart": "Forgot",
+      "titleHighlight": "Password",
+      "description": "Enter your email address to receive an OTP code.",
+      "heroTitleStart": "Forgot your",
+      "heroTitleHighlight": "password?",
+      "heroDescription": "No worries. Enter your email address and we will send you an OTP code to verify your account before creating a new password.",
+      "checkEmailTitle": "Check your email",
+      "checkEmailDescription": "We will send a secure OTP code to your registered email.",
+      "verifyIdentityTitle": "Verify identity",
+      "verifyIdentityDescription": "OTP verification helps protect your AI Study Hub account.",
+      "createPasswordTitle": "Create new password",
+      "createPasswordDescription": "After verification, you can safely reset your password."
+    },
+    "backToOtp": "Back to OTP",
+    "newPassword": "New Password",
+    "enterNewPassword": "Enter new password",
+    "confirmNewPassword": "Confirm new password",
+    "resetting": "Resetting...",
+    "resetPasswordButton": "Reset Password",
+    "resetPassword": {
+      "titleStart": "Reset",
+      "titleHighlight": "Password",
+      "description": "Create a new secure password for your account."
+    },
+    "passwordRules": {
+      "title": "Password must include:",
+      "minLength": "At least 8 characters",
+      "upperLower": "Uppercase and lowercase letters",
+      "number": "At least 1 number",
+      "special": "At least 1 special character"
+    },
+    "verifying": "Verifying...",
+    "verifyEmail": {
+      "title": "Verify your email",
+      "description": "Enter the OTP code sent to your email.",
+      "button": "Verify Email"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Learn Smarter with",
+      "description": "Upload, discover and learn from thousands of study materials. Get AI-powered help anytime, anywhere.",
+      "startLearning": "Start Learning",
+      "exploreDocuments": "Explore Documents",
+      "stats": {
+        "documents": "Documents",
+        "users": "Users",
+        "aiChats": "AI Chats"
+      }
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "community": "Community"
+  },
+  "sidebar": {
+    "myDocuments": "My Documents",
+    "community": "Community",
+    "aiChat": "AI Chat",
+    "bookmarks": "Bookmarks",
+    "notifications": "Notifications",
+    "leaderboard": "Leaderboard",
+    "profile": "Profile",
+    "dashboard": "Dashboard",
+    "settings": "Settings"
+  },
+  "settings": {
+    "label": "Settings",
+    "title": "Application Settings",
+    "description": "Manage your language, appearance, account preferences, and app experience.",
+    "language": {
+      "title": "Language",
+      "description": "Choose the display language for AI Study Hub."
+    }
+  },
+  "success": {
+    "login": "Login successful!",
+    "otpSent": "OTP has been sent to your email!",
+    "forgotPasswordOtpSent": "OTP has been sent to your email!",
+    "resendOtp": "OTP has been resent successfully!",
+    "resetPassword": "Password reset successfully!",
+    "verifyOtp": "Email verified successfully!"
+  },
+  "error": {
+    "accountBanned": "Your account has been banned",
+    "emailNotVerified": "Please verify your email",
+    "invalidCredentials": "Invalid email or password",
+    "googleLoginFailed": "Google login failed"
+  }
+}

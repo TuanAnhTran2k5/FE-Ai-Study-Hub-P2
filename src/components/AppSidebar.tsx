@@ -28,64 +28,66 @@ import {
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const menuItems = [
   {
-    title: "My Documents",
+    titleKey: "sidebar.myDocuments",
     url: ROUTE.MY_DOCUMENTS,
     icon: FileText,
   },
   {
-    title: "Community",
+    titleKey: "sidebar.community",
     url: ROUTE.COMMUNITY,
     icon: Users,
   },
   {
-    title: "AI Chat",
+    titleKey: "sidebar.aiChat",
     url: ROUTE.AI_CHAT,
     icon: Bot,
   },
   {
-    title: "Bookmarks",
+    titleKey: "sidebar.bookmarks",
     url: ROUTE.BOOKMARKS,
     icon: Bookmark,
   },
   {
-    title: "Notifications",
+    titleKey: "sidebar.notifications",
     url: ROUTE.NOTIFICATIONS,
     icon: Bell,
   },
   {
-    title: "Leaderboard",
+    titleKey: "sidebar.leaderboard",
     url: ROUTE.LEADERBOARD,
     icon: Trophy,
   },
   {
-    title: "Profile",
+    titleKey: "sidebar.profile",
     url: ROUTE.PROFILE,
     icon: User,
   },
   {
-    title: "Dashboard",
+    titleKey: "sidebar.dashboard",
     url: ROUTE.DASHBOARD,
     icon: LayoutDashboard,
   },
   {
-    title: "Settings",
+    titleKey: "sidebar.settings",
     url: ROUTE.SETTINGS,
     icon: Settings,
   },
 ];
 
 function AppSidebar() {
+  const { t } = useTranslation();
   const location = useLocation();
+
   const currentUser = useSelector(
     (state: RootState) => state.user as AuthUser | null,
   );
+
   const currentUserId = currentUser?.userId;
 
-  // NOTE API: Badge notification tren sidebar lay so unread that tu backend.
-  // Query key co userId de khi doi account khong bi hien so notification cua user cu.
   const { data: unreadNotificationCount = 0 } = useQuery({
     queryKey: ["notifications", currentUserId, "sidebar-unread-count"],
     queryFn: getUnreadNotificationCount,
@@ -109,11 +111,13 @@ function AppSidebar() {
                 const Icon = item.icon;
                 const isActive = location.pathname === `/app/${item.url}`;
                 const badge =
-                  item.title === "Notifications" ? unreadNotificationCount : 0;
+                  item.titleKey === "sidebar.notifications"
+                    ? unreadNotificationCount
+                    : 0;
 
                 return (
                   <SidebarMenuItem
-                    key={item.title}
+                    key={item.titleKey}
                     className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center"
                   >
                     <SidebarMenuButton asChild>
@@ -128,7 +132,7 @@ function AppSidebar() {
                         <Icon className="size-6 shrink-0" />
 
                         <span className="truncate group-data-[collapsible=icon]:hidden">
-                          {item.title}
+                          {t(item.titleKey)}
                         </span>
 
                         {badge > 0 && (

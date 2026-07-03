@@ -1,5 +1,5 @@
 import { ERROR_CODE } from "@/constants/errorCode";
-import { SUCCESS_MESSAGE } from "@/constants/successMessage";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ROUTE } from "@/models/routePath";
@@ -16,6 +16,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { ArrowRight, Mail } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -24,6 +25,7 @@ type ForgotPasswordErrors = Partial<
 >;
 
 function ForgotPasswordForm() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [formValues, setFormValues] = useState<ForgotPasswordFormValues>({
@@ -40,7 +42,7 @@ function ForgotPasswordForm() {
     mutationFn: forgotPassword,
 
     onSuccess: (_, variables) => {
-      toast.success(SUCCESS_MESSAGE.FORGOT_PASSWORD_OTP_SENT);
+      toast.success(t("success.forgotPasswordOtpSent"));
 
       navigate(
         `/${ROUTE.AUTH}/${ROUTE.FORGOT_PASSWORD}/${ROUTE.FORGOT_PASSWORD_VERIFY_OTP}`,
@@ -102,14 +104,14 @@ function ForgotPasswordForm() {
     <div className="mx-auto w-full max-w-xl rounded-4xl bg-card p-8 shadow-sm lg:p-10">
       <div className="mb-8 text-center">
         <h2 className="text-3xl font-extrabold text-card-foreground">
-          Forgot{" "}
+          {t("auth.forgotPassword.titleStart")}{" "}
           <span className="bg-gradient-to-r from-primary-start to-primary-end bg-clip-text text-transparent">
-            Password
+            {t("auth.forgotPassword.titleHighlight")}
           </span>
         </h2>
 
         <p className="mt-3 text-sm text-muted-foreground">
-          Enter your email address to receive an OTP code.
+          {t("auth.forgotPassword.description")}
         </p>
       </div>
 
@@ -119,7 +121,7 @@ function ForgotPasswordForm() {
             htmlFor="email"
             className="mb-2 block text-sm font-bold text-card-foreground"
           >
-            Email Address
+            {t("auth.emailAddress")}
           </label>
 
           <div className="relative">
@@ -128,7 +130,7 @@ function ForgotPasswordForm() {
             <Input
               id="email"
               type="email"
-              placeholder="Enter your email"
+              placeholder={t("auth.enterEmail")}
               value={formValues.email}
               onChange={handleChangeEmail}
               className={`h-14 rounded-xl bg-secondary pl-12 text-card-foreground placeholder:text-muted-foreground ${
@@ -151,18 +153,20 @@ function ForgotPasswordForm() {
           disabled={forgotPasswordMutation.isPending}
           className="h-14 w-full cursor-pointer rounded-xl bg-gradient-to-r from-primary-start to-primary-end font-bold text-primary-foreground transition hover:from-primary-start-hover hover:to-primary-end-hover"
         >
-          {forgotPasswordMutation.isPending ? "Sending..." : "Send OTP"}
+          {forgotPasswordMutation.isPending
+            ? t("auth.sending")
+            : t("auth.sendOtp")}
           <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
       </form>
 
       <p className="mt-8 text-center text-sm text-muted-foreground">
-        Remember your password?{" "}
+        {t("auth.rememberPassword")}{" "}
         <Link
           to={`/${ROUTE.AUTH}/${ROUTE.LOGIN}`}
           className="font-bold text-link hover:text-link-hover"
         >
-          Login now
+          {t("auth.loginNow")}
         </Link>
       </p>
     </div>

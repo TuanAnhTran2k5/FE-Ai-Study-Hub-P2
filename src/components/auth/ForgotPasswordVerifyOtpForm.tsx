@@ -1,5 +1,4 @@
 import { ERROR_CODE } from "@/constants/errorCode";
-import { SUCCESS_MESSAGE } from "@/constants/successMessage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ROUTE } from "@/models/routePath";
@@ -16,6 +15,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, KeyRound, RotateCcw } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -24,6 +24,7 @@ type ForgotPasswordOtpErrors = Partial<
 >;
 
 function ForgotPasswordVerifyOtpForm() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -43,7 +44,7 @@ function ForgotPasswordVerifyOtpForm() {
     mutationFn: forgotPassword,
 
     onSuccess: () => {
-      toast.success(SUCCESS_MESSAGE.RESEND_OTP_SUCCESS);
+      toast.success(t("success.resendOtp"));
     },
 
     onError: (error) => {
@@ -123,19 +124,19 @@ function ForgotPasswordVerifyOtpForm() {
         className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-link hover:text-link-hover"
       >
         <ArrowLeft className="h-4 w-4" />
-        Change email
+        {t("auth.changeEmail")}
       </Link>
 
       <div className="mb-8 text-center">
         <h2 className="text-3xl font-extrabold text-card-foreground">
-          Verify{" "}
+          {t("auth.verify")}{" "}
           <span className="bg-gradient-to-r from-primary-start to-primary-end bg-clip-text text-transparent">
             OTP
           </span>
         </h2>
 
         <p className="mt-3 text-sm text-muted-foreground">
-          Enter the OTP code sent to
+          {t("auth.otpSentTo")}
         </p>
 
         <p className="mt-1 font-bold text-card-foreground">{email}</p>
@@ -147,7 +148,7 @@ function ForgotPasswordVerifyOtpForm() {
             htmlFor="otpCode"
             className="mb-2 block text-sm font-bold text-card-foreground"
           >
-            OTP Code
+            {t("auth.otpCode")}
           </label>
 
           <div className="relative">
@@ -158,7 +159,7 @@ function ForgotPasswordVerifyOtpForm() {
               type="text"
               inputMode="numeric"
               maxLength={6}
-              placeholder="Enter 6-digit OTP"
+              placeholder={t("auth.enterOtp")}
               value={formValues.otpCode}
               onChange={handleOtpChange}
               className={`h-14 rounded-xl bg-secondary pl-12 text-center text-lg font-bold tracking-[0.4em] text-card-foreground placeholder:text-sm placeholder:font-normal placeholder:tracking-normal placeholder:text-muted-foreground ${
@@ -180,7 +181,7 @@ function ForgotPasswordVerifyOtpForm() {
           type="submit"
           className="h-14 w-full rounded-xl bg-gradient-to-r from-primary-start to-primary-end font-bold text-primary-foreground transition hover:from-primary-start-hover hover:to-primary-end-hover"
         >
-          Verify OTP
+          {t("auth.verifyOtp")}
           <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
       </form>
@@ -194,7 +195,9 @@ function ForgotPasswordVerifyOtpForm() {
           className="font-bold text-link hover:text-link-hover"
         >
           <RotateCcw className="mr-2 h-4 w-4" />
-          {resendOtpMutation.isPending ? "Resending..." : "Resend OTP"}
+          {resendOtpMutation.isPending
+            ? t("auth.resending")
+            : t("auth.resendOtp")}
         </Button>
       </div>
     </div>
