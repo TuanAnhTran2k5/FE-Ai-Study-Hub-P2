@@ -21,7 +21,7 @@ function DocumentGrid({ documents, onView }: DocumentGridProps) {
   }
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid justify-start gap-6 [grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),360px))]">
       {documents.map((document) => (
         <DocumentCard
           key={document.documentId}
