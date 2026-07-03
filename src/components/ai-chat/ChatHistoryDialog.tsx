@@ -14,7 +14,7 @@ interface ChatHistoryDialogProps {
   sessions: RagChatSessionResponse[];
   activeSessionId: number | null;
   onOpenChange: (open: boolean) => void;
-  onSelectSession: (sessionId: number) => void;
+  onSelectSession: (sessionId: number, documentIds: number[]) => void;
   onDeleteSession: (sessionId: number) => void;
 }
 
@@ -51,7 +51,7 @@ function ChatHistoryDialog({
                 <button
                   type="button"
                   onClick={() => {
-                    onSelectSession(session.sessionId);
+                    onSelectSession(session.sessionId, session.documentIds ?? []);
                     onOpenChange(false);
                   }}
                   className="flex min-w-0 flex-1 items-center gap-3 text-left"

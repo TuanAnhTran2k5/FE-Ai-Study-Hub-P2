@@ -10,6 +10,7 @@ import type {
   RagDocumentResponse,
   RagSessionAskRequest,
   RagSessionAskResponse,
+  RagUpdateSessionDocumentsRequest,
 } from "@/types/rag.type";
 
 export const askRagQuestion = async (
@@ -44,13 +45,28 @@ export const createRagChatSession = async (
   return response.data.result;
 };
 
+export const updateRagSessionDocuments = async (
+  sessionId: number,
+  data: RagUpdateSessionDocumentsRequest,
+): Promise<RagChatSessionResponse> => {
+  const response = await api.put<APIResponse<RagChatSessionResponse>>(
+    `/user/rag/chat/sessions/${sessionId}/documents`,
+    data,
+  );
+
+  return response.data.result;
+};
+
 export const askRagSessionQuestion = async (
   sessionId: number,
   data: RagSessionAskRequest,
 ): Promise<RagSessionAskResponse> => {
   const response = await api.post<APIResponse<RagSessionAskResponse>>(
     `/user/rag/chat/sessions/${sessionId}/ask`,
-    data,
+    {
+      ...data,
+      sessionId,
+    },
   );
 
   return response.data.result;
@@ -76,8 +92,12 @@ export const getRagSessionMessages = async (
 
 export const deleteRagChatSession = async (
   sessionId: number,
-): Promise<void> => {
-  await api.delete<APIResponse<void>>(`/user/rag/chat/sessions/${sessionId}`);
+): Promise<RagChatResponse> => {
+  const response = await api.delete<APIResponse<RagChatResponse>>(
+    `/user/rag/chat/sessions/${sessionId}`,
+  );
+
+  return response.data.result;
 };
 
 export const indexRagDocument = async (

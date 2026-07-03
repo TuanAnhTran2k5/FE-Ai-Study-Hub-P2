@@ -9,20 +9,24 @@ function AIChatPage() {
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<number[]>([]);
   const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false);
   const [pendingPrompt, setPendingPrompt] = useState("");
-  const [chatResetKey, setChatResetKey] = useState(0);
+  const [clearSignal, setClearSignal] = useState(0);
 
   const handleNewChat = () => {
     setActiveSessionId(null);
     setSelectedDocumentIds([]);
     setPendingPrompt("");
-    setChatResetKey((prev) => prev + 1);
+    setClearSignal((prev) => prev + 1);
   };
 
   const handleClearChat = () => {
-    setActiveSessionId(null);
-    setSelectedDocumentIds([]);
     setPendingPrompt("");
-    setChatResetKey((prev) => prev + 1);
+    setClearSignal((prev) => prev + 1);
+  };
+
+  const handleSelectSession = (sessionId: number, documentIds: number[]) => {
+    setActiveSessionId(sessionId);
+    setSelectedDocumentIds(documentIds);
+    setPendingPrompt("");
   };
 
   return (
@@ -36,7 +40,7 @@ function AIChatPage() {
           activeSessionId={activeSessionId}
           isCollapsed={isHistoryCollapsed}
           onToggleCollapse={() => setIsHistoryCollapsed((prev) => !prev)}
-          onSelectSession={setActiveSessionId}
+          onSelectSession={handleSelectSession}
           onDeletedActiveSession={handleNewChat}
           onNewChat={handleNewChat}
           onClearChat={handleClearChat}
@@ -45,10 +49,10 @@ function AIChatPage() {
 
       <div className="flex h-full min-w-0 flex-1 flex-col">
         <ChatArea
-          key={chatResetKey}
           activeSessionId={activeSessionId}
           selectedDocumentIds={selectedDocumentIds}
           pendingPrompt={pendingPrompt}
+          clearSignal={clearSignal}
           onPendingPromptConsumed={() => setPendingPrompt("")}
           onSessionCreated={setActiveSessionId}
         />
@@ -56,6 +60,7 @@ function AIChatPage() {
 
       <div className="hidden h-full w-80 shrink-0 flex-col xl:flex">
         <ContextSidebar
+          activeSessionId={activeSessionId}
           selectedDocumentIds={selectedDocumentIds}
           onSelectedDocumentIdsChange={setSelectedDocumentIds}
           onPromptClick={setPendingPrompt}
