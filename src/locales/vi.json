@@ -1,0 +1,190 @@
+{
+  "common": {
+    "backToHome": "Quay lại trang chủ"
+  },
+  "auth": {
+    "login": "Đăng nhập",
+    "register": "Đăng ký",
+    "emailAddress": "Địa chỉ email",
+    "enterEmail": "Nhập email của bạn",
+    "password": "Mật khẩu",
+    "enterPassword": "Nhập mật khẩu của bạn",
+    "fullName": "Họ và tên",
+    "enterFullName": "Nhập họ và tên của bạn",
+    "createPassword": "Tạo mật khẩu",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "confirmYourPassword": "Nhập lại mật khẩu",
+    "rememberMe": "Ghi nhớ tôi",
+    "forgotPasswordLink": "Quên mật khẩu?",
+    "rememberPassword": "Bạn nhớ mật khẩu rồi?",
+    "loginNow": "Đăng nhập ngay",
+    "registerNow": "Đăng ký ngay",
+    "noAccount": "Bạn chưa có tài khoản?",
+    "backToLogin": "Quay lại đăng nhập",
+    "changeEmail": "Đổi email",
+    "verify": "Xác thực",
+    "otpSentTo": "Nhập mã OTP đã gửi đến",
+    "otpCode": "Mã OTP",
+    "enterOtp": "Nhập OTP gồm 6 chữ số",
+    "verifyOtp": "Xác thực OTP",
+    "sendOtp": "Gửi OTP",
+    "resendOtp": "Gửi lại OTP",
+    "sending": "Đang gửi...",
+    "resending": "Đang gửi lại...",
+    "signingIn": "Đang đăng nhập...",
+    "orContinueWith": "hoặc tiếp tục với",
+    "continueWithGoogle": "Tiếp tục với Google",
+    "createAccount": "Tạo tài khoản",
+    "creatingAccount": "Đang tạo tài khoản...",
+    "loginForm": {
+      "title": "Đăng nhập vào",
+      "description": "Chào mừng bạn trở lại! Vui lòng nhập thông tin đăng nhập."
+    },
+    "loginHero": {
+      "welcome": "Chào mừng trở lại!",
+      "loginTo": "Đăng nhập vào",
+      "yourAccount": "tài khoản của bạn",
+      "description": "Đăng nhập để tiếp tục khám phá, chia sẻ và học tập cùng cộng đồng AI Study Hub.",
+      "stats": {
+        "documents": "Tài liệu",
+        "aiChats": "AI Chat",
+        "activeUsers": "Người dùng"
+      },
+      "features": {
+        "secure": {
+          "title": "Bảo mật & riêng tư",
+          "description": "Dữ liệu của bạn luôn được mã hóa và bảo vệ."
+        },
+        "access": {
+          "title": "Truy cập mọi nơi",
+          "description": "Truy cập tài liệu và trợ lý AI mọi lúc, mọi nơi."
+        },
+        "community": {
+          "title": "Tham gia cộng đồng",
+          "description": "Kết nối với sinh viên khác và chia sẻ kiến thức."
+        },
+        "grow": {
+          "title": "Tích điểm & phát triển",
+          "description": "Nhận điểm uy tín, huy hiệu và leo bảng xếp hạng."
+        }
+      }
+    },
+    "registerForm": {
+      "title": "Tạo tài khoản",
+      "description": "Điền thông tin bên dưới để bắt đầu."
+    },
+    "registerHero": {
+      "title": "Tham gia AI Study Hub",
+      "subtitle": "Tạo",
+      "highlight": "tài khoản của bạn",
+      "description": "Tạo tài khoản để bắt đầu khám phá, chia sẻ và học tập cùng cộng đồng AI Study Hub.",
+      "features": {
+        "upload": {
+          "title": "Tải lên & Chia sẻ",
+          "description": "Tải lên tài liệu học tập và chia sẻ kiến thức với mọi người."
+        },
+        "ai": {
+          "title": "Học tập cùng AI",
+          "description": "Trò chuyện với AI, tóm tắt tài liệu và tạo câu hỏi từ tài liệu."
+        },
+        "reward": {
+          "title": "Tích điểm & Phát triển",
+          "description": "Nhận điểm uy tín, huy hiệu và leo bảng xếp hạng."
+        },
+        "security": {
+          "title": "An toàn & Riêng tư",
+          "description": "Dữ liệu của bạn luôn được bảo vệ và bảo mật tuyệt đối."
+        }
+      }
+    },
+    "forgotPassword": {
+      "titleStart": "Quên",
+      "titleHighlight": "Mật khẩu",
+      "description": "Nhập địa chỉ email để nhận mã OTP.",
+      "heroTitleStart": "Bạn quên",
+      "heroTitleHighlight": "mật khẩu?",
+      "heroDescription": "Đừng lo. Hãy nhập email của bạn, hệ thống sẽ gửi mã OTP để xác thực tài khoản trước khi tạo mật khẩu mới.",
+      "checkEmailTitle": "Kiểm tra email",
+      "checkEmailDescription": "Hệ thống sẽ gửi mã OTP bảo mật đến email đã đăng ký của bạn.",
+      "verifyIdentityTitle": "Xác thực danh tính",
+      "verifyIdentityDescription": "Xác thực OTP giúp bảo vệ tài khoản AI Study Hub của bạn.",
+      "createPasswordTitle": "Tạo mật khẩu mới",
+      "createPasswordDescription": "Sau khi xác thực, bạn có thể đặt lại mật khẩu một cách an toàn."
+    },
+    "backToOtp": "Quay lại OTP",
+    "newPassword": "Mật khẩu mới",
+    "enterNewPassword": "Nhập mật khẩu mới",
+    "confirmNewPassword": "Nhập lại mật khẩu mới",
+    "resetting": "Đang đặt lại...",
+    "resetPasswordButton": "Đặt lại mật khẩu",
+    "resetPassword": {
+      "titleStart": "Đặt lại",
+      "titleHighlight": "Mật khẩu",
+      "description": "Tạo mật khẩu mới an toàn cho tài khoản của bạn."
+    },
+    "passwordRules": {
+      "title": "Mật khẩu phải bao gồm:",
+      "minLength": "Ít nhất 8 ký tự",
+      "upperLower": "Chữ hoa và chữ thường",
+      "number": "Ít nhất 1 chữ số",
+      "special": "Ít nhất 1 ký tự đặc biệt"
+    },
+    "verifying": "Đang xác thực...",
+    "verifyEmail": {
+      "title": "Xác thực email",
+      "description": "Nhập mã OTP đã được gửi đến email của bạn.",
+      "button": "Xác thực email"
+    }
+  },
+  "home": {
+    "hero": {
+      "title": "Học thông minh hơn cùng",
+      "description": "Tải lên, khám phá và học từ hàng nghìn tài liệu học tập. Nhận sự hỗ trợ từ AI mọi lúc, mọi nơi.",
+      "startLearning": "Bắt đầu học",
+      "exploreDocuments": "Khám phá tài liệu",
+      "stats": {
+        "documents": "Tài liệu",
+        "users": "Người dùng",
+        "aiChats": "AI Chat"
+      }
+    }
+  },
+  "nav": {
+    "home": "Trang chủ",
+    "community": "Cộng đồng"
+  },
+  "sidebar": {
+    "myDocuments": "Tài liệu của tôi",
+    "community": "Cộng đồng",
+    "aiChat": "AI Chat",
+    "bookmarks": "Đã lưu",
+    "notifications": "Thông báo",
+    "leaderboard": "Bảng xếp hạng",
+    "profile": "Hồ sơ",
+    "dashboard": "Bảng điều khiển",
+    "settings": "Cài đặt"
+  },
+  "settings": {
+    "label": "Cài đặt",
+    "title": "Cài đặt ứng dụng",
+    "description": "Quản lý ngôn ngữ, giao diện, tài khoản và trải nghiệm sử dụng.",
+    "language": {
+      "title": "Ngôn ngữ",
+      "description": "Chọn ngôn ngữ hiển thị cho AI Study Hub."
+    }
+  },
+  "success": {
+    "login": "Đăng nhập thành công!",
+    "otpSent": "OTP đã được gửi đến email của bạn!",
+    "forgotPasswordOtpSent": "OTP đã được gửi đến email của bạn!",
+    "resendOtp": "OTP đã được gửi lại thành công!",
+    "resetPassword": "Đặt lại mật khẩu thành công!",
+    "verifyOtp": "Xác thực email thành công!"
+  },
+  "error": {
+    "accountBanned": "Tài khoản của bạn đã bị khóa",
+    "emailNotVerified": "Vui lòng xác thực email",
+    "invalidCredentials": "Email hoặc mật khẩu không đúng",
+    "googleLoginFailed": "Đăng nhập Google thất bại"
+  }
+}

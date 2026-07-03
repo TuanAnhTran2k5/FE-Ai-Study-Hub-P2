@@ -1,43 +1,45 @@
 import { Button } from "@/components/ui/button";
 import { ROUTE } from "@/models/routePath";
 import { ArrowRight, FileText, MessageCircle, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-
-const heroStats = [
-  {
-    value: "12K+",
-    label: "Documents",
-    icon: FileText,
-  },
-  {
-    value: "5K+",
-    label: "Users",
-    icon: Users,
-  },
-  {
-    value: "25K+",
-    label: "AI Chats",
-    icon: MessageCircle,
-  },
-];
 
 function HeroSection() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const heroStats = [
+    {
+      value: "12K+",
+      label: t("home.hero.stats.documents"),
+      icon: FileText,
+    },
+    {
+      value: "5K+",
+      label: t("home.hero.stats.users"),
+      icon: Users,
+    },
+    {
+      value: "25K+",
+      label: t("home.hero.stats.aiChats"),
+      icon: MessageCircle,
+    },
+  ];
+
   return (
     <section className="relative overflow-hidden py-4">
       <div className="mx-auto grid items-center gap-5 py-5 backdrop-blur-sm lg:grid-cols-[1.05fr_0.95fr] lg:px-10">
         <div className="max-w-xl space-y-5">
           <div className="space-y-2">
             <h1 className="max-w-xl text-5xl font-black leading-tight tracking-tight text-card-foreground lg:text-[64px]">
-              Learn Smarter with{" "}
+              {t("home.hero.title")}{" "}
               <span className="bg-gradient-to-r from-primary-start to-primary-end bg-clip-text text-transparent">
                 AI Study Hub
               </span>
             </h1>
 
             <p className="max-w-xl text-base leading-8 text-muted-foreground">
-              Upload, discover and learn from thousands of study materials. Get
-              AI-powered help anytime, anywhere.
+              {t("home.hero.description")}
             </p>
           </div>
 
@@ -47,15 +49,15 @@ function HeroSection() {
               type="button"
               className="h-12 cursor-pointer gap-2 rounded-xl bg-gradient-to-r from-primary-start to-primary-end px-6 text-sm font-bold text-primary-foreground shadow-lg transition hover:-translate-y-0.5 hover:from-primary-start-hover hover:to-primary-end-hover"
             >
-              Start Learning
+              {t("home.hero.startLearning")}
               <ArrowRight className="size-4" />
             </Button>
 
             <Button
               type="button"
-              className=" h-12 cursor-pointer rounded-xl border border-border bg-card px-6 text-sm font-bold text-card-foreground shadow-sm transition hover:-translate-y-0.5 hover:bg-primary-bg-hover hover:text-primary"
+              className="h-12 cursor-pointer rounded-xl border border-border bg-card px-6 text-sm font-bold text-card-foreground shadow-sm transition hover:-translate-y-0.5 hover:bg-primary-bg-hover hover:text-primary"
             >
-              Explore Documents
+              {t("home.hero.exploreDocuments")}
             </Button>
           </div>
 
@@ -84,7 +86,7 @@ function HeroSection() {
         <div className="relative mx-auto w-full max-w-[600px]">
           <img
             src="/img/HomeHero_BG.png"
-            alt="AI Study Hub dashboard preview"
+            alt="AI Study Hub"
             className="h-auto w-full object-contain drop-shadow-xl"
           />
         </div>

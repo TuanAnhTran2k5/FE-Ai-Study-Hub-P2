@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { User, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-import { useMutation } from "@tanstack/react-query";
 import type { RegisterRequest, RegisterResponse } from "@/types/auth";
-import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
 import {
   registerSchema,
   type RegisterFormValues,
@@ -19,56 +19,54 @@ import { authRegister } from "@/services/authService";
 type RegisterErrors = Partial<Record<keyof RegisterFormValues, string>>;
 
 function RegisterForm() {
+  const { t } = useTranslation();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
   const [formData, setFormData] = useState<RegisterFormValues>({
     email: "",
     fullName: "",
     password: "",
     confirmPassword: "",
   });
-
   const [errors, setErrors] = useState<RegisterErrors>({});
 
   const navigate = useNavigate();
 
- const registerMutation = useMutation<
-  RegisterResponse,
-  Error,
-  RegisterRequest
->({
-  mutationFn: authRegister,
+  const registerMutation = useMutation<
+    RegisterResponse,
+    Error,
+    RegisterRequest
+  >({
+    mutationFn: authRegister,
 
-  onSuccess: (data) => {
-    toast.success("OTP has been sent to your email");
+    onSuccess: (data) => {
+      toast.success(t("success.otpSent"));
 
-    navigate(`/${ROUTE.AUTH}/${ROUTE.REGISTER}/${ROUTE.VERIFY_OTP}`, {
-      state: {
-        email: data.email,
-        otpExpiredAt: data.otpExpiredAt,
-      },
-    });
-  },
+      navigate(`/${ROUTE.AUTH}/${ROUTE.REGISTER}/${ROUTE.VERIFY_OTP}`, {
+        state: {
+          email: data.email,
+          otpExpiredAt: data.otpExpiredAt,
+        },
+      });
+    },
 
-  onError: (error: any) => {
-    const message =
-      error.response?.data?.message || error.message;
-
-    toast.error(message);
-  },
-});
+    onError: (error: any) => {
+      const message = error.response?.data?.message || error.message;
+      toast.error(message);
+    },
+  });
 
   const handleChange = (field: keyof RegisterFormValues, value: string) => {
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [field]: value,
-    });
+    }));
 
-    setErrors({
-      ...errors,
+    setErrors((prev) => ({
+      ...prev,
       [field]: "",
-    });
+    }));
   };
 
   const handleSubmit = () => {
@@ -97,17 +95,18 @@ function RegisterForm() {
     <div className="mx-auto w-full max-w-[520px] rounded-[28px] border border-card/70 bg-card/95 px-8 py-9 shadow-2xl shadow-primary/10 backdrop-blur md:px-10">
       <div className="mb-8 text-center">
         <h1 className="text-3xl font-black tracking-tight text-card-foreground">
-          Create Your Account
+          {t("auth.registerForm.title")}
         </h1>
+
         <p className="mt-2 text-sm text-muted-foreground">
-          Fill in the details below to get started.
+          {t("auth.registerForm.description")}
         </p>
       </div>
 
       <form className="space-y-4">
         <div>
           <Label className="mb-2 block text-sm font-semibold text-foreground">
-            Email Address
+            {t("auth.emailAddress")}
           </Label>
 
           <div className="relative">
@@ -116,8 +115,8 @@ function RegisterForm() {
             <Input
               type="email"
               value={formData.email}
-              onChange={(e) => handleChange("email", e.target.value)}
-              placeholder="Enter your email"
+              onChange={(event) => handleChange("email", event.target.value)}
+              placeholder={t("auth.enterEmail")}
               className={`h-12 rounded-lg bg-muted pl-11 ${
                 errors.email
                   ? "border-destructive focus-visible:ring-destructive/20"
@@ -135,7 +134,7 @@ function RegisterForm() {
 
         <div>
           <Label className="mb-2 block text-sm font-semibold text-foreground">
-            Full Name
+            {t("auth.fullName")}
           </Label>
 
           <div className="relative">
@@ -143,8 +142,8 @@ function RegisterForm() {
 
             <Input
               value={formData.fullName}
-              onChange={(e) => handleChange("fullName", e.target.value)}
-              placeholder="Enter your full name"
+              onChange={(event) => handleChange("fullName", event.target.value)}
+              placeholder={t("auth.enterFullName")}
               className={`h-12 rounded-lg bg-muted pl-11 ${
                 errors.fullName
                   ? "border-destructive focus-visible:ring-destructive/20"
@@ -162,7 +161,7 @@ function RegisterForm() {
 
         <div>
           <Label className="mb-2 block text-sm font-semibold text-foreground">
-            Password
+            {t("auth.password")}
           </Label>
 
           <div className="relative">
@@ -171,8 +170,8 @@ function RegisterForm() {
             <Input
               type={showPassword ? "text" : "password"}
               value={formData.password}
-              onChange={(e) => handleChange("password", e.target.value)}
-              placeholder="Create a password"
+              onChange={(event) => handleChange("password", event.target.value)}
+              placeholder={t("auth.createPassword")}
               className={`h-12 rounded-lg bg-muted px-11 ${
                 errors.password
                   ? "border-destructive focus-visible:ring-destructive/20"
@@ -198,7 +197,7 @@ function RegisterForm() {
 
         <div>
           <Label className="mb-2 block text-sm font-semibold text-foreground">
-            Confirm Password
+            {t("auth.confirmPassword")}
           </Label>
 
           <div className="relative">
@@ -207,8 +206,10 @@ function RegisterForm() {
             <Input
               type={showConfirmPassword ? "text" : "password"}
               value={formData.confirmPassword}
-              onChange={(e) => handleChange("confirmPassword", e.target.value)}
-              placeholder="Confirm your password"
+              onChange={(event) =>
+                handleChange("confirmPassword", event.target.value)
+              }
+              placeholder={t("auth.confirmYourPassword")}
               className={`h-12 rounded-lg bg-muted px-11 ${
                 errors.confirmPassword
                   ? "border-destructive focus-visible:ring-destructive/20"
@@ -238,7 +239,9 @@ function RegisterForm() {
           disabled={registerMutation.isPending}
           className="h-12 w-full cursor-pointer rounded-lg bg-gradient-to-r from-success-start to-success-end text-sm font-bold text-success-foreground shadow-lg shadow-success/20 hover:from-success-start-hover hover:to-success-end-hover"
         >
-          Create Account
+          {registerMutation.isPending
+            ? t("auth.creatingAccount")
+            : t("auth.createAccount")}
         </Button>
       </form>
     </div>
