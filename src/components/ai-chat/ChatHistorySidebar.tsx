@@ -23,7 +23,7 @@ interface ChatHistorySidebarProps {
   activeSessionId: number | null;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
-  onSelectSession: (sessionId: number) => void;
+  onSelectSession: (sessionId: number, documentIds: number[]) => void;
   onDeletedActiveSession: () => void;
   onNewChat: () => void;
   onClearChat: () => void;
@@ -90,7 +90,7 @@ function ChatHistorySidebar({
         queryKey: ["ragSessionMessages", activeSessionId],
       });
     }
-    
+
     onClearChat();
   };
 
@@ -103,22 +103,28 @@ function ChatHistorySidebar({
         className={`group flex items-center gap-1 rounded-2xl transition-all duration-150 ${
           isActive
             ? "bg-primary/15 text-primary shadow-sm"
-            : "hover:bg-primary/5 text-card-foreground"
+            : "text-card-foreground hover:bg-primary/5"
         }`}
       >
         <button
           type="button"
-          onClick={() => onSelectSession(session.sessionId)}
+          onClick={() =>
+            onSelectSession(session.sessionId, session.documentIds ?? [])
+          }
           className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2.5 text-left"
         >
           <MessageSquare
-            className={`size-4 shrink-0 ${isActive ? "text-primary" : "text-muted-foreground"}`}
+            className={`size-4 shrink-0 ${
+              isActive ? "text-primary" : "text-muted-foreground"
+            }`}
           />
 
           {!isCollapsed && (
             <div className="min-w-0 flex-1">
               <p
-                className={`truncate text-sm font-semibold ${isActive ? "text-primary" : "text-card-foreground"}`}
+                className={`truncate text-sm font-semibold ${
+                  isActive ? "text-primary" : "text-card-foreground"
+                }`}
               >
                 {session.sessionTitle || "Untitled chat"}
               </p>
@@ -152,10 +158,11 @@ function ChatHistorySidebar({
           isCollapsed ? "w-14" : "w-full"
         }`}
       >
-        {/* Header */}
         <div className="shrink-0 p-4 pb-3">
           <div
-            className={`flex items-center gap-2 ${isCollapsed ? "justify-center" : "justify-between"}`}
+            className={`flex items-center gap-2 ${
+              isCollapsed ? "justify-center" : "justify-between"
+            }`}
           >
             {!isCollapsed && (
               <p className="text-base font-black text-card-foreground">
@@ -205,7 +212,6 @@ function ChatHistorySidebar({
           {!isCollapsed && <div className="mt-3 h-px bg-border/50" />}
         </div>
 
-        {/* Session List */}
         <div className="flex-1 space-y-1 overflow-y-auto px-2 pb-2">
           {isLoading ? (
             <div className="flex h-full items-center justify-center">
@@ -225,7 +231,6 @@ function ChatHistorySidebar({
           )}
         </div>
 
-        {/* Footer — View All */}
         {!isCollapsed && (
           <div className="shrink-0 border-t border-border/40 p-3">
             <Button

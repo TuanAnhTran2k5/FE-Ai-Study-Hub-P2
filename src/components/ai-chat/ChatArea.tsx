@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bot, FileText, Loader2, Send, Sparkles } from "lucide-react";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+
 import AvtAI from "/img/AvtAI.png";
 
 import { Button } from "@/components/ui/button";
@@ -11,7 +13,9 @@ import {
   askRagSessionQuestion,
   createRagChatSession,
   getRagSessionMessages,
+  updateRagSessionDocuments,
 } from "@/services/ragService";
+import type { RootState } from "@/redux/store";
 import type {
   RagChatMessagesPageResponse,
   RagChatRequest,
@@ -19,14 +23,13 @@ import type {
   RagChatSessionResponse,
   RagSessionAskResponse,
 } from "@/types/rag.type";
-import { useSelector } from "react-redux";
-import type { RootState } from "@/redux/store";
-import AvatarFrame from "../avatarFrame/AvatarFrame";
+import AvatarFrame from "@/components/avatarFrame/AvatarFrame";
 
 interface ChatAreaProps {
   activeSessionId: number | null;
   selectedDocumentIds: number[];
   pendingPrompt: string;
+  clearSignal: number;
   onPendingPromptConsumed: () => void;
   onSessionCreated: (sessionId: number) => void;
 }
@@ -45,12 +48,14 @@ interface CreateSessionVariables {
 interface AskInSessionVariables {
   sessionId: number;
   question: string;
+  documentIds: number[];
 }
 
 function ChatArea({
   activeSessionId,
   selectedDocumentIds,
   pendingPrompt,
+  clearSignal,
   onPendingPromptConsumed,
   onSessionCreated,
 }: ChatAreaProps) {
@@ -62,19 +67,18 @@ function ChatArea({
   const [optimisticMessages, setOptimisticMessages] = useState<ChatMessage[]>(
     [],
   );
+
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const currentSessionIdRef = useRef<number | null>(activeSessionId);
 
   const hasActiveSession = activeSessionId !== null;
 
-  const {
-    data: sessionMessagesPage,
-    isLoading: isLoadingMessages,
-    isFetching: isFetchingMessages,
-  } = useQuery<RagChatMessagesPageResponse>({
-    queryKey: ["ragSessionMessages", activeSessionId],
-    queryFn: () => getRagSessionMessages(activeSessionId as number, 0, 50),
-    enabled: hasActiveSession,
-  });
+  const { data: sessionMessagesPage, isLoading: isLoadingMessages } =
+    useQuery<RagChatMessagesPageResponse>({
+      queryKey: ["ragSessionMessages", activeSessionId],
+      queryFn: () => getRagSessionMessages(activeSessionId as number, 0, 50),
+      enabled: hasActiveSession,
+    });
 
   const sessionMessages = useMemo<ChatMessage[]>(() => {
     if (!sessionMessagesPage?.content) return [];
@@ -87,9 +91,7 @@ function ChatArea({
   }, [sessionMessagesPage]);
 
   const messages = hasActiveSession
-    ? optimisticMessages.length > 0
-      ? [...sessionMessages, ...optimisticMessages]
-      : sessionMessages
+    ? [...sessionMessages, ...optimisticMessages]
     : localMessages;
 
   const askWithoutSessionMutation = useMutation<
@@ -125,13 +127,41 @@ function ChatArea({
     mutationFn: createRagChatSession,
   });
 
+  const updateDocumentsMutation = useMutation({
+    mutationFn: ({
+      sessionId,
+      documentIds,
+    }: {
+      sessionId: number;
+      documentIds: number[];
+    }) =>
+      updateRagSessionDocuments(sessionId, {
+        documentIds,
+      }),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["ragChatSessions"],
+      });
+    },
+
+    onError: (error: any) => {
+      const serverMessage = error.response?.data?.message;
+      toast.error(serverMessage || ERROR_CODE.SERVER_ERROR);
+    },
+  });
+
   const askInSessionMutation = useMutation<
     RagSessionAskResponse,
     Error,
     AskInSessionVariables
   >({
-    mutationFn: ({ sessionId, question }) =>
-      askRagSessionQuestion(sessionId, { question }),
+    mutationFn: ({ sessionId, question, documentIds }) =>
+      askRagSessionQuestion(sessionId, {
+        question,
+        sessionId,
+        documentIds,
+      }),
 
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
@@ -152,7 +182,8 @@ function ChatArea({
   const isSending =
     askWithoutSessionMutation.isPending ||
     createSessionMutation.isPending ||
-    askInSessionMutation.isPending;
+    askInSessionMutation.isPending ||
+    updateDocumentsMutation.isPending;
 
   useEffect(() => {
     if (messages.length === 0) return;
@@ -164,10 +195,27 @@ function ChatArea({
   }, [messages.length]);
 
   useEffect(() => {
+    currentSessionIdRef.current = activeSessionId;
+  }, [activeSessionId]);
+
+  useEffect(() => {
     setQuestion("");
     setOptimisticMessages([]);
     setLocalMessages([]);
-  }, [activeSessionId]);
+
+    if (!activeSessionId) {
+      currentSessionIdRef.current = null;
+    }
+  }, [clearSignal, activeSessionId]);
+
+  useEffect(() => {
+    if (!activeSessionId) return;
+
+    updateDocumentsMutation.mutate({
+      sessionId: activeSessionId,
+      documentIds: selectedDocumentIds,
+    });
+  }, [activeSessionId, selectedDocumentIds]);
 
   const sendMessage = async (messageContent: string) => {
     const trimmedQuestion = messageContent.trim();
@@ -184,14 +232,19 @@ function ChatArea({
 
     if (!activeSessionId && selectedDocumentIds.length === 0) {
       setLocalMessages((prev) => [...prev, optimisticUserMessage]);
-      askWithoutSessionMutation.mutate({ question: trimmedQuestion });
+
+      askWithoutSessionMutation.mutate({
+        question: trimmedQuestion,
+        documentIds: [],
+      });
+
       return;
     }
 
     setOptimisticMessages((prev) => [...prev, optimisticUserMessage]);
 
     try {
-      let sessionId = activeSessionId;
+      let sessionId = currentSessionIdRef.current;
 
       if (!sessionId) {
         const createdSession = await createSessionMutation.mutateAsync({
@@ -199,6 +252,7 @@ function ChatArea({
         });
 
         sessionId = createdSession.sessionId;
+        currentSessionIdRef.current = createdSession.sessionId;
         onSessionCreated(createdSession.sessionId);
 
         queryClient.invalidateQueries({
@@ -209,6 +263,7 @@ function ChatArea({
       await askInSessionMutation.mutateAsync({
         sessionId,
         question: trimmedQuestion,
+        documentIds: selectedDocumentIds,
       });
 
       setOptimisticMessages([]);
@@ -241,8 +296,8 @@ function ChatArea({
     sendMessage(question);
   };
 
-  const handleEnterSend = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !isSending) {
+  const handleEnterSend = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter" && !isSending) {
       handleSendMessage();
     }
   };
@@ -255,6 +310,7 @@ function ChatArea({
             <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10">
               <Loader2 className="size-6 animate-spin text-primary" />
             </div>
+
             <p className="text-sm font-medium">Loading messages...</p>
           </div>
         ) : messages.length === 0 ? (
@@ -360,6 +416,7 @@ function ChatArea({
                 </div>
               </div>
             )}
+
             <div ref={messagesEndRef} />
           </div>
         )}
@@ -371,7 +428,7 @@ function ChatArea({
             <input
               type="text"
               value={question}
-              onChange={(e) => setQuestion(e.target.value)}
+              onChange={(event) => setQuestion(event.target.value)}
               onKeyDown={handleEnterSend}
               placeholder="Ask anything about your study materials..."
               disabled={isSending}
@@ -392,6 +449,7 @@ function ChatArea({
           <div className="mt-2.5 flex items-center justify-between px-1">
             <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <FileText className="size-3.5" />
+
               <span>
                 {selectedDocumentIds.length > 0
                   ? `${selectedDocumentIds.length} context doc(s) selected`

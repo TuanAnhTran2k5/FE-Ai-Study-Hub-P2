@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { FileText, Plus, Search, Sparkles, X } from "lucide-react";
 
@@ -13,9 +13,10 @@ import {
 } from "@/components/ui/dialog";
 import { MAX_CONTEXT_DOCUMENTS } from "@/constants/ragPrompt";
 import { getMyDocuments } from "@/services/documentService";
-import { getSuggestedPrompts, indexRagDocument } from "@/services/ragService";
+import { getSuggestedPrompts } from "@/services/ragService";
 
 interface ContextSidebarProps {
+  activeSessionId: number | null;
   selectedDocumentIds: number[];
   onSelectedDocumentIdsChange: (documentIds: number[]) => void;
   onPromptClick: (prompt: string) => void;
@@ -29,10 +30,12 @@ function formatFileSize(size: number) {
 
 function getFileColor(fileType: string) {
   const type = fileType.toLowerCase();
+
   if (type.includes("pdf")) return "text-red-500 bg-red-100";
   if (type.includes("doc")) return "text-blue-500 bg-blue-100";
   if (type.includes("ppt")) return "text-orange-500 bg-orange-100";
   if (type.includes("xls")) return "text-green-500 bg-green-100";
+
   return "text-gray-500 bg-gray-100";
 }
 
@@ -71,7 +74,9 @@ function ContextSidebar({
 
   const filteredDocuments = useMemo(() => {
     const q = keyword.trim().toLowerCase();
+
     if (!q) return availableDocuments;
+
     return availableDocuments.filter(
       (doc) =>
         doc.title.toLowerCase().includes(q) ||
@@ -81,32 +86,19 @@ function ContextSidebar({
     );
   }, [availableDocuments, keyword]);
 
-  const indexMutation = useMutation({
-    mutationFn: indexRagDocument,
-
-    onSuccess: (_, documentId) => {
-      if (!selectedDocumentIds.includes(documentId)) {
-        onSelectedDocumentIdsChange([...selectedDocumentIds, documentId]);
-      }
-      toast.success("Document added to AI context.");
-    },
-
-    onError: (error: any) => {
-      const serverMessage = error.response?.data?.message;
-      toast.error(serverMessage || "Cannot add document to AI context.");
-    },
-  });
-
   const handleAddContext = (documentId: number) => {
     if (selectedDocumentIds.includes(documentId)) {
       toast.info("This document is already in context.");
       return;
     }
+
     if (selectedDocumentIds.length >= MAX_CONTEXT_DOCUMENTS) {
       toast.warning(`You can select up to ${MAX_CONTEXT_DOCUMENTS} documents.`);
       return;
     }
-    indexMutation.mutate(documentId);
+
+    onSelectedDocumentIdsChange([...selectedDocumentIds, documentId]);
+    toast.success("Document added to AI context.");
   };
 
   const handleRemoveContext = (documentId: number) => {
@@ -118,14 +110,13 @@ function ContextSidebar({
   return (
     <>
       <div className="flex h-full flex-col gap-3 overflow-y-auto pb-4">
-        {/* Context Documents Card */}
         <div className="shrink-0 overflow-hidden rounded-3xl border border-border/40 bg-card/60 shadow-xl backdrop-blur-sm">
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 pt-4 pb-3">
+          <div className="flex items-center justify-between px-4 pb-3 pt-4">
             <div>
               <p className="text-sm font-black text-card-foreground">
                 Context Documents
               </p>
+
               <p className="text-[11px] text-muted-foreground">
                 {selectedDocumentIds.length}/{MAX_CONTEXT_DOCUMENTS} selected
               </p>
@@ -140,24 +131,26 @@ function ContextSidebar({
             </button>
           </div>
 
-          {/* Progress bar */}
           <div className="mx-4 mb-3 h-1.5 overflow-hidden rounded-full bg-border/50">
             <div
               className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70 transition-all duration-300"
               style={{
-                width: `${(selectedDocumentIds.length / MAX_CONTEXT_DOCUMENTS) * 100}%`,
+                width: `${
+                  (selectedDocumentIds.length / MAX_CONTEXT_DOCUMENTS) * 100
+                }%`,
               }}
             />
           </div>
 
-          {/* Document list */}
           <div className="px-3 pb-3">
             {contextDocuments.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-border/60 bg-muted/20 p-5 text-center">
                 <FileText className="mx-auto mb-2 size-6 text-muted-foreground/50" />
+
                 <p className="text-xs font-medium text-muted-foreground">
                   No documents in context yet
                 </p>
+
                 <p className="mt-0.5 text-[10px] text-muted-foreground/70">
                   Add documents to give AI more context
                 </p>
@@ -170,7 +163,9 @@ function ContextSidebar({
                     className="group flex items-center gap-2.5 rounded-2xl p-2 transition-colors hover:bg-muted/40"
                   >
                     <div
-                      className={`flex size-8 shrink-0 items-center justify-center rounded-xl ${getFileColor(doc.fileType)}`}
+                      className={`flex size-8 shrink-0 items-center justify-center rounded-xl ${getFileColor(
+                        doc.fileType,
+                      )}`}
                     >
                       <FileText className="size-3.5" />
                     </div>
@@ -182,6 +177,7 @@ function ContextSidebar({
                       >
                         {doc.title}
                       </p>
+
                       <p className="text-[10px] text-muted-foreground">
                         {formatFileSize(doc.fileSize)} · {doc.subjectCode}
                       </p>
@@ -210,40 +206,50 @@ function ContextSidebar({
           </div>
         </div>
 
-        {/* Suggested Prompts Card */}
         <div className="shrink-0 overflow-hidden rounded-3xl border border-border/40 bg-card/60 shadow-xl backdrop-blur-sm">
-          <div className="flex items-center gap-2 px-4 pt-4 pb-3">
+          <div className="flex items-center gap-2 px-4 pb-3 pt-4">
             <div className="flex size-7 items-center justify-center rounded-xl bg-primary/10">
               <Sparkles className="size-3.5 text-primary" />
             </div>
+
             <p className="text-sm font-black text-card-foreground">
               Suggested Prompts
             </p>
           </div>
 
           <div className="space-y-1.5 px-3 pb-4">
-            {suggestedPrompts.map((prompt) => (
-              <button
-                key={prompt}
-                type="button"
-                onClick={() => onPromptClick(prompt)}
-                className="w-full rounded-2xl border border-border/40 bg-muted/20 p-3 text-left text-xs font-medium text-muted-foreground transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
-                title={prompt}
-              >
-                {prompt}
-              </button>
-            ))}
+            {selectedDocumentIds.length === 0 ? (
+              <p className="rounded-2xl border border-dashed border-border/60 bg-muted/20 p-4 text-center text-xs text-muted-foreground">
+                Select documents to generate suggested prompts.
+              </p>
+            ) : suggestedPrompts.length === 0 ? (
+              <p className="rounded-2xl border border-dashed border-border/60 bg-muted/20 p-4 text-center text-xs text-muted-foreground">
+                No suggested prompts yet.
+              </p>
+            ) : (
+              suggestedPrompts.map((prompt) => (
+                <button
+                  key={prompt}
+                  type="button"
+                  onClick={() => onPromptClick(prompt)}
+                  className="w-full rounded-2xl border border-border/40 bg-muted/20 p-3 text-left text-xs font-medium text-muted-foreground transition-all hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
+                  title={prompt}
+                >
+                  {prompt}
+                </button>
+              ))
+            )}
           </div>
         </div>
       </div>
 
-      {/* Dialog chọn document */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl rounded-3xl border border-border/40 bg-card p-0 shadow-2xl">
           <DialogHeader className="border-b border-border/40 px-6 py-5">
             <DialogTitle className="text-lg font-black text-card-foreground">
               Select Documents for AI Context
             </DialogTitle>
+
             <p className="text-sm text-muted-foreground">
               {selectedDocumentIds.length}/{MAX_CONTEXT_DOCUMENTS} documents
               selected
@@ -251,18 +257,17 @@ function ContextSidebar({
           </DialogHeader>
 
           <div className="space-y-4 p-6">
-            {/* Search */}
             <div className="relative">
               <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+
               <Input
                 value={keyword}
-                onChange={(e) => setKeyword(e.target.value)}
+                onChange={(event) => setKeyword(event.target.value)}
                 placeholder="Search by title, subject..."
                 className="h-11 rounded-2xl border-border/60 pl-10 text-sm focus-visible:border-primary/50"
               />
             </div>
 
-            {/* States */}
             {isLoading && (
               <p className="py-8 text-center text-sm text-muted-foreground">
                 Loading your documents...
@@ -281,15 +286,11 @@ function ContextSidebar({
               </p>
             )}
 
-            {/* Document list */}
             <div className="max-h-[400px] space-y-2 overflow-y-auto pr-1">
               {filteredDocuments.map((doc) => {
                 const isAdded = selectedDocumentIds.includes(doc.documentId);
                 const isMaxSelected =
                   selectedDocumentIds.length >= MAX_CONTEXT_DOCUMENTS;
-                const isIndexing =
-                  indexMutation.isPending &&
-                  indexMutation.variables === doc.documentId;
 
                 return (
                   <div
@@ -301,7 +302,9 @@ function ContextSidebar({
                     }`}
                   >
                     <div
-                      className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${getFileColor(doc.fileType)}`}
+                      className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${getFileColor(
+                        doc.fileType,
+                      )}`}
                     >
                       <FileText className="size-5" />
                     </div>
@@ -310,16 +313,20 @@ function ContextSidebar({
                       <p className="truncate text-sm font-bold text-card-foreground">
                         {doc.title}
                       </p>
+
                       <p className="truncate text-xs text-muted-foreground">
                         {doc.fileName}
                       </p>
+
                       <div className="mt-1 flex items-center gap-1.5">
                         <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
                           {doc.subjectCode}
                         </span>
+
                         <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
                           {doc.visibilityStatus}
                         </span>
+
                         <span className="text-[10px] text-muted-foreground">
                           {formatFileSize(doc.fileSize)}
                         </span>
@@ -329,7 +336,7 @@ function ContextSidebar({
                     <Button
                       type="button"
                       size="sm"
-                      disabled={isAdded || isIndexing || isMaxSelected}
+                      disabled={isAdded || isMaxSelected}
                       onClick={() => handleAddContext(doc.documentId)}
                       className={`h-8 shrink-0 rounded-full px-4 text-xs font-bold ${
                         isAdded
@@ -337,13 +344,7 @@ function ContextSidebar({
                           : ""
                       }`}
                     >
-                      {isIndexing
-                        ? "Indexing..."
-                        : isAdded
-                          ? "✓ Added"
-                          : isMaxSelected
-                            ? "Max 5"
-                            : "Add"}
+                      {isAdded ? "✓ Added" : isMaxSelected ? "Max 5" : "Add"}
                     </Button>
                   </div>
                 );
