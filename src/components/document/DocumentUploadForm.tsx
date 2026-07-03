@@ -12,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import type { SemesterResponse, SubjectResponse } from "@/types/academic.type";
 
 type DocumentUploadFormProps = {
@@ -240,18 +239,6 @@ function DocumentUploadForm({
         </div>
 
         <div className="mt-5 space-y-2.5">
-          <Label htmlFor="upload-description">Description</Label>
-          <Textarea
-            id="upload-description"
-            name="description"
-            maxLength={500}
-            placeholder="Describe what this document contains, what topics it covers, and who it might help..."
-            className="min-h-32 resize-none text-base"
-          />
-          <p className="text-right text-xs text-muted-foreground">0 / 500</p>
-        </div>
-
-        <div className="mt-5 space-y-2.5">
           <Label>Visibility *</Label>
           <div className="grid gap-4 md:grid-cols-2">
             <button
@@ -309,19 +296,6 @@ function DocumentUploadForm({
             </button>
           </div>
           <input type="hidden" name="visibilityStatus" value={visibility} />
-        </div>
-
-        <div className="mt-5 space-y-2.5">
-          <Label htmlFor="upload-tags">Tags</Label>
-          <Input
-            id="upload-tags"
-            name="tags"
-            placeholder="Add tags (e.g., tutorial, lecture, exercises...)"
-            className="h-12 text-base"
-          />
-          <p className="text-xs text-muted-foreground">
-            Add relevant tags to help others find your document easily.
-          </p>
         </div>
 
         <div className="mt-8 border-t border-border pt-6">
