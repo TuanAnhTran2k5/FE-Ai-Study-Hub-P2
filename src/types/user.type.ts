@@ -1,6 +1,6 @@
-export interface UserRequest {
+export interface UpdateProfileRequest {
   fullName: string;
-  avatarUrl: string;
+  avatar?: File | null;
 }
 
 export interface RankInfo {
@@ -10,6 +10,10 @@ export interface RankInfo {
   maxScore: number;
   storageBonus: number;
   displayPriority: string;
+  iconUrl?: string | null;
+  color?: string | null;
+  badgeColor?: string | null;
+  textColor?: string | null;
 }
 
 export interface UserRank {
@@ -35,6 +39,23 @@ export interface UserBadge {
   achievedAt: string;
 }
 
+export interface ProfileStatistics {
+  documents: number;
+  downloads: number;
+  bookmarks: number;
+}
+
+export interface RankProgress {
+  nextRank: string | null;
+  remainingScore: number | null;
+  progressPercent: number | null;
+}
+
+export interface LeaderboardInfo {
+  globalRank: number | null;
+  weeklyRank: number | null;
+}
+
 export interface UserResponse {
   userId: number;
   fullName: string;
@@ -43,10 +64,21 @@ export interface UserResponse {
   email: string;
   role: "US" | "AD";
   status: "PENDING" | "ACTIVE" | "BANNED";
+  displayRole?: string;
+  displayStatus?: string;
+  createdAt?: string;
+
   storageUsed: number;
   storageLimit: number;
-  rank?: UserRank | null;
+  storageRemaining?: number | null;
+  storageUsagePercent?: number | null;
+
+  currentRank?: UserRank | null;
+  rankProgress?: RankProgress | null;
   badges?: UserBadge[];
-  createdAt?: string;
+  statistics?: ProfileStatistics | null;
+  leaderboard?: LeaderboardInfo | null;
+  unreadNotificationCount?: number | null;
+
   accessToken?: string;
 }

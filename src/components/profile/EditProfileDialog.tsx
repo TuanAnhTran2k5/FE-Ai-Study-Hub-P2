@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { Edit, Loader2, Save, X } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Camera, Edit, Loader2, Save, X } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { updateProfile } from "@/redux/features/userSlice";
 import { updateUserProfile } from "@/services/userService";
-import type { UserRequest, UserResponse } from "@/types/user.type";
+import type { UpdateProfileRequest, UserResponse } from "@/types/user.type";
 
 interface EditProfileDialogProps {
   user: UserResponse;
@@ -25,18 +25,20 @@ interface EditProfileDialogProps {
 
 function EditProfileDialog({ user }: EditProfileDialogProps) {
   const dispatch = useDispatch();
-  const [open, setOpen] = useState(false);
+  const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [formValues, setFormValues] = useState<UserRequest>({
-    fullName: user.fullName || "",
-    avatarUrl: user.avatarUrl || "",
-  });
+  const [open, setOpen] = useState(false);
+  const [fullName, setFullName] = useState(user.fullName || "");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [previewAvatar, setPreviewAvatar] = useState<string | null>(
+    user.avatarUrl,
+  );
 
   useEffect(() => {
-    setFormValues({
-      fullName: user.fullName || "",
-      avatarUrl: user.avatarUrl || "",
-    });
+    setFullName(user.fullName || "");
+    setPreviewAvatar(user.avatarUrl);
+    setAvatarFile(null);
   }, [user.fullName, user.avatarUrl]);
 
   const updateMutation = useMutation({
@@ -44,6 +46,7 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
 
     onSuccess: (data) => {
       dispatch(updateProfile(data));
+      queryClient.setQueryData(["my-profile"], data);
       toast.success(SUCCESS_MESSAGE.PROFILE_UPDATED);
       setOpen(false);
     },
@@ -53,30 +56,40 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
     },
   });
 
-  const handleChange = (field: keyof UserRequest, value: string) => {
-    setFormValues((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+  const handleChooseAvatar = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    setAvatarFile(file);
+    setPreviewAvatar(URL.createObjectURL(file));
   };
 
   const handleSubmit = () => {
-    if (!formValues.fullName.trim()) {
+    const trimmedFullName = fullName.trim();
+
+    if (!trimmedFullName) {
       toast.error(ERROR_CODE.FIELD_REQUIRED);
       return;
     }
 
-    updateMutation.mutate({
-      fullName: formValues.fullName.trim(),
-      avatarUrl: formValues.avatarUrl.trim(),
-    });
+    if (trimmedFullName.length < 5 || trimmedFullName.length > 50) {
+      toast.error("Full name must be between 5 and 50 characters");
+      return;
+    }
+
+    const payload: UpdateProfileRequest = {
+      fullName: trimmedFullName,
+      avatar: avatarFile,
+    };
+
+    updateMutation.mutate(payload);
   };
 
   const handleCancel = () => {
-    setFormValues({
-      fullName: user.fullName || "",
-      avatarUrl: user.avatarUrl || "",
-    });
+    setFullName(user.fullName || "");
+    setPreviewAvatar(user.avatarUrl);
+    setAvatarFile(null);
     setOpen(false);
   };
 
@@ -98,18 +111,36 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
 
         <div className="space-y-5">
           <div className="flex justify-center">
-            <div className="h-28 w-28 overflow-hidden rounded-full border-4 border-primary/30 bg-secondary">
-              {formValues.avatarUrl ? (
-                <img
-                  src={formValues.avatarUrl}
-                  alt={formValues.fullName}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-3xl font-black text-primary">
-                  {formValues.fullName.charAt(0).toUpperCase() || "U"}
-                </div>
-              )}
+            <div className="relative">
+              <div className="h-28 w-28 overflow-hidden rounded-full border-4 border-primary/30 bg-secondary">
+                {previewAvatar ? (
+                  <img
+                    src={previewAvatar}
+                    alt={fullName}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-3xl font-black text-primary">
+                    {fullName.charAt(0).toUpperCase() || "U"}
+                  </div>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow"
+              >
+                <Camera className="h-4 w-4" />
+              </button>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleChooseAvatar}
+              />
             </div>
           </div>
 
@@ -117,24 +148,17 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
             <label className="mb-2 block text-sm font-bold text-card-foreground">
               Full name
             </label>
+
             <Input
-              value={formValues.fullName}
-              onChange={(event) => handleChange("fullName", event.target.value)}
+              value={fullName}
+              onChange={(event) => setFullName(event.target.value)}
               placeholder="Enter your full name"
               className="h-11 rounded-xl"
             />
-          </div>
 
-          <div>
-            <label className="mb-2 block text-sm font-bold text-card-foreground">
-              Avatar URL
-            </label>
-            <Input
-              value={formValues.avatarUrl}
-              onChange={(event) => handleChange("avatarUrl", event.target.value)}
-              placeholder="Enter avatar image URL"
-              className="h-11 rounded-xl"
-            />
+            <p className="mt-2 text-xs text-muted-foreground">
+              Full name must be between 5 and 50 characters.
+            </p>
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
