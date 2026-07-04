@@ -123,11 +123,18 @@ export interface DocumentDownloadResponse {
   fileSize: number;
   ownerId: number;
   ownerName: string;
+  ownerAvatar?: string | null;
+  originalUploaderId?: number | null;
+  originalUploaderName?: string | null;
+  originalUploaderAvatar?: string | null;
   firstDownload: boolean;
   addedPoint: number;
   ownerTotalScore: number;
   publicOwnerName: string;
   downloadedAt: string;
+  ownerCurrentRank?: unknown;
+  ownerNextRank?: string | null;
+  ownerProgressPercent?: number | null;
 }
 
 export interface RatingRequest {
@@ -141,6 +148,7 @@ export interface RatingResponse {
   ratingValue: number;
   averageRating: number;
   ratingCount: number;
+  myRating?: number | null;
 }
 
 export interface BookmarkResponse {
@@ -165,6 +173,7 @@ export interface ReportRequest {
 
 export interface ReportResponse {
   reportId: number;
+  reporterId?: number;
   documentId: number;
   reasonId: number;
   description?: string | null;
