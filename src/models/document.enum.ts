@@ -25,3 +25,12 @@ export const ModerationStatus = {
 
 export type ModerationStatus =
   (typeof ModerationStatus)[keyof typeof ModerationStatus];
+
+export const UploadStatus = {
+  PENDING: "PENDING",
+  UPLOADING: "UPLOADING",
+  COMPLETED: "COMPLETED",
+  FAILED: "FAILED",
+} as const;
+
+export type UploadStatus = (typeof UploadStatus)[keyof typeof UploadStatus];

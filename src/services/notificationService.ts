@@ -1,6 +1,6 @@
 import api from "@/configs/api";
 import type { APIResponse } from "@/types/auth";
-import type { DeleteDocumentResponse } from "@/types/document.type";
+import type { DeleteResponse } from "@/types/document.type";
 import type {
   NotificationPageResponse,
   NotificationQueryParams,
@@ -62,8 +62,8 @@ export const markAllNotificationsAsRead = async (): Promise<number> => {
 // NOTE API: Xoa 1 notification cua current user.
 export const deleteNotification = async (
   notificationId: number,
-): Promise<DeleteDocumentResponse> => {
-  const response = await api.delete<APIResponse<DeleteDocumentResponse>>(
+): Promise<DeleteResponse> => {
+  const response = await api.delete<APIResponse<DeleteResponse>>(
     `/notifications/${notificationId}`,
   );
 
