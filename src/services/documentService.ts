@@ -3,7 +3,7 @@ import type { APIResponse } from "@/types/auth";
 import type {
   BookmarkRequest,
   BookmarkResponse,
-  DeleteDocumentResponse,
+  DeleteResponse,
   DocumentDownloadResponse,
   DocumentResponse,
   DocumentUpdateRequest,
@@ -107,9 +107,9 @@ export const updateDocument = async (
 
 export const deleteDocument = async (
   documentId: number,
-): Promise<DeleteDocumentResponse> => {
+): Promise<DeleteResponse> => {
   // NOTE API: Xóa document của chính user. Không dùng để xóa document người khác trong Community.
-  const response = await api.delete<APIResponse<DeleteDocumentResponse>>(
+  const response = await api.delete<APIResponse<DeleteResponse>>(
     `/user/document/${documentId}`,
   );
 
@@ -188,9 +188,9 @@ export const addBookmark = async (
 
 export const removeBookmark = async (
   documentId: number,
-): Promise<DeleteDocumentResponse> => {
+): Promise<DeleteResponse> => {
   // NOTE API COMMUNITY: Bỏ bookmark theo documentId.
-  const response = await api.delete<APIResponse<DeleteDocumentResponse>>(
+  const response = await api.delete<APIResponse<DeleteResponse>>(
     `/user/bookmarks/${documentId}`,
   );
 

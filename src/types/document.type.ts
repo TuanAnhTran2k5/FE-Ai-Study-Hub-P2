@@ -1,6 +1,7 @@
 import {
   FileType,
   ModerationStatus,
+  UploadStatus,
   VisibilityStatus,
 } from "@/models/document.enum";
 
@@ -11,6 +12,10 @@ export interface DocumentResponse {
   ownerName?: string;
   ownerAvatar?: string | null;
 
+  originalUploaderId?: number;
+  originalUploaderName?: string;
+  originalUploaderAvatar?: string | null;
+
   subjectId: number;
   subjectCode?: string;
   subjectName?: string;
@@ -20,11 +25,12 @@ export interface DocumentResponse {
 
   fileName: string;
   fileUrl: string;
-  fileType: FileType;
+  fileType: string;
   fileSize: number;
 
   visibilityStatus: VisibilityStatus;
   moderationStatus?: ModerationStatus;
+  uploadStatus?: UploadStatus;
 
   averageRating?: number;
   ratingCount?: number;
@@ -77,6 +83,10 @@ export interface DocumentUploadResponse {
   visibilityStatus: VisibilityStatus;
   createdAt: string;
   message: string;
+  uploadStatus?: UploadStatus;
+  storageUsed?: number;
+  storageRemaining?: number;
+  storageUsagePercent?: number;
 }
 
 export interface DocumentUpdateRequest {
@@ -93,20 +103,23 @@ export interface DocumentUpdateResponse {
   updatedAt: string;
 }
 
-export interface DeleteDocumentResponse {
+export interface DeleteResponse {
   success: boolean;
   message: string;
   deletedId: number;
   entityName: string;
   entityIdentifier: string;
   deletedAt: string;
+  storageUsed?: number;
+  storageRemaining?: number;
+  storageUsagePercent?: number;
 }
 
 export interface DocumentDownloadResponse {
   documentId: number;
   title: string;
   fileName: string;
-  fileType: FileType;
+  fileType: string;
   fileSize: number;
   ownerId: number;
   ownerName: string;
@@ -135,6 +148,8 @@ export interface BookmarkResponse {
   userId: number;
   document: DocumentResponse;
   bookmarkedAt: string;
+  bookmarkCount: number;
+  isBookmarked: boolean;
 }
 
 export interface BookmarkRequest {

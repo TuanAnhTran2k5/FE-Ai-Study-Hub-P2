@@ -12,7 +12,6 @@ type DocumentPreviewProps = {
   title: string;
 };
 
-// Chọn component preview phù hợp theo loại file: PDF, TXT hoặc DOCX.
 function DocumentPreview({ blob, fileTypeLabel, title }: DocumentPreviewProps) {
   if (fileTypeLabel === "PDF") {
     return <PdfPreview blob={blob} title={title} />;
@@ -29,9 +28,11 @@ function DocumentPreview({ blob, fileTypeLabel, title }: DocumentPreviewProps) {
   return (
     <div className="flex h-full flex-col items-center justify-center px-6 text-center">
       <FileText className="h-16 w-16 text-muted-foreground" />
+
       <h2 className="mt-4 text-xl font-bold text-card-foreground">
         Preview is not available
       </h2>
+
       <p className="mt-2 max-w-md text-muted-foreground">
         This file type cannot be previewed directly in the browser.
       </p>
@@ -50,7 +51,81 @@ function getElementTopInsideContainer(
   );
 }
 
-// Render PDF trực tiếp trong web bằng pdfjs, không cần mở bên thứ ba.
+type PreviewToolbarProps = {
+  currentPage: number;
+  totalPages: number;
+  zoom: number;
+  onPageChange: (pageNumber: number) => void;
+  onZoomOut: () => void;
+  onZoomReset: () => void;
+  onZoomIn: () => void;
+};
+
+function PreviewToolbar({
+  currentPage,
+  totalPages,
+  zoom,
+  onPageChange,
+  onZoomOut,
+  onZoomReset,
+  onZoomIn,
+}: PreviewToolbarProps) {
+  return (
+    <div className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-slate-200 bg-white px-5 text-slate-900 shadow-sm">
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-semibold text-slate-700">Page</span>
+
+        <input
+          type="number"
+          min={1}
+          max={totalPages || 1}
+          value={currentPage}
+          onChange={(event) => {
+            const value = Number(event.target.value);
+
+            if (Number.isFinite(value)) {
+              onPageChange(value);
+            }
+          }}
+          className="h-9 w-16 rounded-xl border border-slate-300 bg-slate-900 px-2 text-center text-sm font-bold text-white outline-none focus:ring-2 focus:ring-slate-400"
+        />
+
+        <span className="text-sm font-bold text-slate-700">
+          / {totalPages || "-"}
+        </span>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+          onClick={onZoomOut}
+          aria-label="Zoom out"
+        >
+          <Minus className="h-4 w-4" />
+        </button>
+
+        <button
+          type="button"
+          className="h-9 min-w-16 rounded-xl border border-slate-300 bg-white px-3 text-sm font-bold text-slate-700 hover:bg-slate-100"
+          onClick={onZoomReset}
+        >
+          {Math.round(zoom * 100)}%
+        </button>
+
+        <button
+          type="button"
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+          onClick={onZoomIn}
+          aria-label="Zoom in"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function PdfPreview({ blob, title }: { blob: Blob; title: string }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -200,9 +275,11 @@ function PdfPreview({ blob, title }: { blob: Blob; title: string }) {
     return (
       <div className="flex h-full flex-col items-center justify-center px-6 text-center">
         <FileText className="h-16 w-16 text-muted-foreground" />
+
         <h2 className="mt-4 text-xl font-bold text-card-foreground">
           Cannot preview this PDF
         </h2>
+
         <p className="mt-2 max-w-md text-muted-foreground">
           The PDF content could not be rendered in the browser.
         </p>
@@ -220,63 +297,19 @@ function PdfPreview({ blob, title }: { blob: Blob; title: string }) {
         className="relative h-full overflow-auto bg-slate-100"
         onScroll={handleScroll}
       >
-        {/* PDF TOOLBAR */}
-        <div className="sticky top-0 z-20 flex h-12 items-center justify-between border-b border-border bg-white px-5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-bold text-card-foreground">Page</span>
-
-            <input
-              type="number"
-              min={1}
-              max={totalPages || 1}
-              value={currentPage}
-              className="h-9 w-16 rounded-lg border border-border bg-background text-center text-sm font-bold outline-none focus:ring-2 focus:ring-ring"
-              onChange={(event) => {
-                const value = Number(event.target.value);
-
-                if (Number.isFinite(value)) {
-                  goToPage(value);
-                }
-              }}
-            />
-
-            <span className="text-sm font-bold text-card-foreground">
-              / {totalPages || "-"}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              className="rounded-lg p-2 text-card-foreground hover:bg-secondary"
-              onClick={() => setZoom((value) => Math.max(0.5, value - 0.1))}
-              aria-label="Zoom out"
-            >
-              <Minus className="h-5 w-5" />
-            </button>
-
-            <button
-              type="button"
-              className="rounded-xl px-4 py-2 text-sm font-bold text-card-foreground hover:bg-secondary"
-              onClick={() => setZoom(1)}
-            >
-              {Math.round(zoom * 100)}%
-            </button>
-
-            <button
-              type="button"
-              className="rounded-lg p-2 text-card-foreground hover:bg-secondary"
-              onClick={() => setZoom((value) => Math.min(2, value + 0.1))}
-              aria-label="Zoom in"
-            >
-              <Plus className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
+        <PreviewToolbar
+          currentPage={currentPage}
+          totalPages={totalPages}
+          zoom={zoom}
+          onPageChange={goToPage}
+          onZoomOut={() => setZoom((value) => Math.max(0.5, value - 0.1))}
+          onZoomReset={() => setZoom(1)}
+          onZoomIn={() => setZoom((value) => Math.min(2, value + 0.1))}
+        />
 
         {isRendering ? (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 px-6 text-center">
-            <p className="text-sm font-semibold text-muted-foreground">
+            <p className="text-sm font-semibold text-slate-700">
               Rendering PDF preview...
             </p>
           </div>
@@ -288,7 +321,6 @@ function PdfPreview({ blob, title }: { blob: Blob; title: string }) {
   );
 }
 
-// Đọc nội dung file TXT từ Blob và hiển thị dưới dạng text trong trang.
 function TextPreview({ blob }: { blob: Blob }) {
   const [textContent, setTextContent] = useState("");
   const [isLoadingText, setIsLoadingText] = useState(true);
@@ -297,6 +329,7 @@ function TextPreview({ blob }: { blob: Blob }) {
     let isMounted = true;
 
     setIsLoadingText(true);
+
     blob
       .text()
       .then((text) => {
@@ -334,7 +367,6 @@ function TextPreview({ blob }: { blob: Blob }) {
   );
 }
 
-// Render file DOCX thành HTML bằng thư viện docx-preview để xem ngay trong web.
 function DocxPreview({ blob, title }: { blob: Blob; title: string }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -366,10 +398,7 @@ function DocxPreview({ blob, title }: { blob: Blob; title: string }) {
       ignoreFonts: false,
       ignoreHeight: false,
       ignoreWidth: false,
-
-      // Tắt wrapper mặc định để bỏ nền xám của docx-preview.
       inWrapper: false,
-
       renderFooters: true,
       renderHeaders: true,
     })
@@ -386,6 +415,7 @@ function DocxPreview({ blob, title }: { blob: Blob; title: string }) {
 
         pages.forEach((page) => {
           page.style.background = "#ffffff";
+          page.style.backgroundColor = "#ffffff";
           page.style.boxShadow = "0 12px 32px rgba(15, 23, 42, 0.14)";
           page.style.margin = "0 auto 28px auto";
           page.style.display = "block";
@@ -455,9 +485,11 @@ function DocxPreview({ blob, title }: { blob: Blob; title: string }) {
     return (
       <div className="flex h-full flex-col items-center justify-center px-6 text-center">
         <FileText className="h-16 w-16 text-muted-foreground" />
+
         <h2 className="mt-4 text-xl font-bold text-card-foreground">
           Cannot preview this document
         </h2>
+
         <p className="mt-2 max-w-md text-muted-foreground">
           The document content could not be rendered in the browser.
         </p>
@@ -471,67 +503,23 @@ function DocxPreview({ blob, title }: { blob: Blob; title: string }) {
       className="h-full overflow-hidden bg-white"
     >
       <div
-  ref={scrollContainerRef}
-  className="relative h-full overflow-auto bg-slate-100"
-  onScroll={handleScroll}
->
-        {/* DOCX TOOLBAR */}
-        <div className="sticky top-0 z-20 flex h-12 items-center justify-between border-b border-border bg-white px-5 shadow-sm">
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-bold text-card-foreground">Page</span>
-
-            <input
-              type="number"
-              min={1}
-              max={totalPages || 1}
-              value={currentPage}
-              className="h-9 w-16 rounded-lg border border-border bg-background text-center text-sm font-bold outline-none focus:ring-2 focus:ring-ring"
-              onChange={(event) => {
-                const value = Number(event.target.value);
-
-                if (Number.isFinite(value)) {
-                  goToPage(value);
-                }
-              }}
-            />
-
-            <span className="text-sm font-bold text-card-foreground">
-              / {totalPages || "-"}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              className="rounded-lg p-2 text-card-foreground hover:bg-secondary"
-              onClick={() => setZoom((value) => Math.max(0.6, value - 0.1))}
-              aria-label="Zoom out"
-            >
-              <Minus className="h-5 w-5" />
-            </button>
-
-            <button
-              type="button"
-              className="rounded-xl px-4 py-2 text-sm font-bold text-card-foreground hover:bg-secondary"
-              onClick={() => setZoom(1)}
-            >
-              {Math.round(zoom * 100)}%
-            </button>
-
-            <button
-              type="button"
-              className="rounded-lg p-2 text-card-foreground hover:bg-secondary"
-              onClick={() => setZoom((value) => Math.min(1.8, value + 0.1))}
-              aria-label="Zoom in"
-            >
-              <Plus className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
+        ref={scrollContainerRef}
+        className="relative h-full overflow-auto bg-slate-100"
+        onScroll={handleScroll}
+      >
+        <PreviewToolbar
+          currentPage={currentPage}
+          totalPages={totalPages}
+          zoom={zoom}
+          onPageChange={goToPage}
+          onZoomOut={() => setZoom((value) => Math.max(0.5, value - 0.1))}
+          onZoomReset={() => setZoom(1)}
+          onZoomIn={() => setZoom((value) => Math.min(1.8, value + 0.1))}
+        />
 
         {isRendering ? (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 px-6 text-center">
-            <p className="text-sm font-semibold text-muted-foreground">
+            <p className="text-sm font-semibold text-slate-700">
               Rendering document preview...
             </p>
           </div>
