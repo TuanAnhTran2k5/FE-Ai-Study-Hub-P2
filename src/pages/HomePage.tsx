@@ -17,7 +17,7 @@ function HomePage() {
     <div className="px-10">
       <HeroSection />
 
-      <TopSubjectsSection />
+      {/* <TopSubjectsSection />  */}
     </div>
   );
 }

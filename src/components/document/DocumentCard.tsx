@@ -197,7 +197,7 @@ function DocumentCard({ document, onView }: DocumentCardProps) {
   const rating = Math.min(5, Math.round(document.averageRating ?? 0));
 
   return (
-    <Card className="group flex h-full overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+    <Card className="group flex h-full min-w-0 overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
       <div className="flex w-full flex-col">
         <div className="relative h-40 bg-secondary">
           <div className="absolute inset-0 bg-gradient-to-br from-secondary via-primary-bg-hover to-card" />
@@ -206,7 +206,7 @@ function DocumentCard({ document, onView }: DocumentCardProps) {
             <FileText className="h-6 w-6" />
           </div>
 
-          <div className="absolute right-5 top-5 flex gap-2">
+          <div className="absolute right-4 top-5 flex max-w-[calc(100%-5.5rem)] flex-wrap justify-end gap-2">
             <Badge className="max-w-[90px] truncate rounded-full bg-card px-3 py-1 text-xs font-bold text-primary shadow-sm hover:bg-card">
               {formatFileType(document.fileType)}
             </Badge>
@@ -229,7 +229,7 @@ function DocumentCard({ document, onView }: DocumentCardProps) {
           </div>
         </div>
 
-        <CardContent className="flex flex-1 flex-col p-6">
+        <CardContent className="flex flex-1 flex-col p-5 sm:p-6">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div className="flex text-primary">
               {Array.from({ length: 5 }).map((_, index) => (
@@ -250,7 +250,7 @@ function DocumentCard({ document, onView }: DocumentCardProps) {
             </Badge>
           </div>
 
-          <h3 className="line-clamp-2 min-h-[60px] text-[22px] font-black leading-tight text-card-foreground">
+          <h3 className="line-clamp-2 min-h-[58px] text-xl font-black leading-tight text-card-foreground sm:text-[22px]">
             {document.title}
           </h3>
 
@@ -259,7 +259,7 @@ function DocumentCard({ document, onView }: DocumentCardProps) {
           </p>
 
           <div className="mt-5 border-t border-border pt-4">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary text-primary">
                   {document.ownerAvatar ? (
@@ -274,7 +274,7 @@ function DocumentCard({ document, onView }: DocumentCardProps) {
                 </div>
 
                 <div className="min-w-0">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground sm:tracking-[0.25em]">
                     Uploaded by
                   </p>
                   <p className="truncate text-sm font-bold text-card-foreground">
@@ -284,7 +284,7 @@ function DocumentCard({ document, onView }: DocumentCardProps) {
               </div>
 
               <div className="shrink-0 text-right">
-                <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-muted-foreground">
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground sm:tracking-[0.25em]">
                   Semester
                 </p>
                 <p className="text-sm font-black text-card-foreground">
