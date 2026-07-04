@@ -1,17 +1,9 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  ArrowLeft,
-  Download,
-  ExternalLink,
-  FileText,
-  Image,
-  X,
-} from "lucide-react";
+import { FileText, Image, X } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -31,10 +23,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import DocumentDeleteDialog from "@/components/document/detail/DocumentDeleteDialog";
-import DocumentDetailHeader from "@/components/document/detail/DocumentDetailHeader";
 import DocumentDetailSidebar from "@/components/document/detail/DocumentDetailSidebar";
 import DocumentPreview from "@/components/document/detail/DocumentPreview";
 import DocumentUpdateDialog from "@/components/document/detail/DocumentUpdateDialog";
+import DocumentDetailHeader from "@/components/document/detail/DocumentDetailHeader";
 import { VisibilityStatus } from "@/models/document.enum";
 import { ROUTE } from "@/models/routePath";
 import { getAllAcademicSubjects } from "@/services/academicService";
@@ -86,11 +78,6 @@ function formatFileType(fileType?: string) {
   return fileType.split("/").pop()?.toUpperCase() || "FILE";
 }
 
-// Đổi dung lượng file từ byte sang MB để người dùng dễ đọc hơn.
-function formatFileSize(bytes?: number) {
-  if (!bytes) return "0 MB";
-  return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
-}
 
 // Kiểm tra loại file nào có thể lấy dạng Blob từ API và preview trực tiếp trong web.
 function canPreviewWithBlob(fileTypeLabel: string) {
@@ -661,30 +648,36 @@ function DocumentDetailPage() {
 
   // Xử lý form update: lấy title/visibility, validate title rồi gọi API update.
   const handleUpdateSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  event.preventDefault();
 
-    if (!document || updateMutation.isPending) return;
+  if (!document || updateMutation.isPending) return;
 
-    const formData = new FormData(event.currentTarget);
-    const title = String(formData.get("title") ?? "").trim();
-    const visibilityStatus = String(
-      formData.get("visibilityStatus") ?? document.visibilityStatus,
-    );
+  const formData = new FormData(event.currentTarget);
+  const title = String(formData.get("title") ?? "").trim();
+  const subjectId = Number(formData.get("subjectId"));
+  const visibilityStatus = String(
+    formData.get("visibilityStatus") ?? document.visibilityStatus,
+  );
 
-    if (!title) {
-      toast.error("Please enter document title");
-      return;
-    }
+  if (!title) {
+    toast.error("Please enter document title");
+    return;
+  }
 
-    updateMutation.mutate({
-      title,
-      subjectId: document.subjectId,
-      visibilityStatus:
-        visibilityStatus === VisibilityStatus.PUBLIC
-          ? VisibilityStatus.PUBLIC
-          : VisibilityStatus.PRIVATE,
-    });
-  };
+  if (!Number.isFinite(subjectId) || subjectId <= 0) {
+    toast.error("Please select subject");
+    return;
+  }
+
+  updateMutation.mutate({
+    title,
+    subjectId,
+    visibilityStatus:
+      visibilityStatus === VisibilityStatus.PUBLIC
+        ? VisibilityStatus.PUBLIC
+        : VisibilityStatus.PRIVATE,
+  });
+};
 
   if (isLoading) {
     return (
@@ -724,73 +717,41 @@ function DocumentDetailPage() {
         ? 1
         : 0;
   const rating = Math.min(5, Math.round(averageRating));
-  const subjectCode =
-    document.subjectCode ?? academicSubject?.subjectCode ?? `Subject ${document.subjectId}`;
-  const subjectName =
-    document.subjectName ?? academicSubject?.subjectName ?? "N/A";
-  const semesterNo = document.semesterNo ?? academicSubject?.semesterNo;
-  const comboName = document.comboName ?? academicSubject?.comboName;
-  const isOwner = Number(currentUser?.userId) === Number(document.ownerId);
+
+const subjectCode =
+  document.subjectCode ??
+  academicSubject?.subjectCode ??
+  `Subject ${document.subjectId}`;
+
+const isOwner = Number(currentUser?.userId) === Number(document.ownerId);
 
   return (
-    <section className="w-full px-8 py-10">
-      <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-center">
-        <Button
-          type="button"
-          variant="outline"
-          className="w-fit rounded-xl  cursor-pointer"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
-
-        <div className="flex gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            className="rounded-xl cursor-pointer"
-            onClick={() => blobPreviewUrl && window.open(blobPreviewUrl, "_blank")}
-            disabled={!canOpenInNewTab}
-          >
-            <ExternalLink className="mr-2 h-4 w-4" />
-            Open New Tab
-          </Button>
-
-          <Button
-            type="button"
-            className="rounded-xl bg-gradient-to-r from-primary-start to-primary-end font-bold text-primary-foreground hover:from-primary-start-hover hover:to-primary-end-hover"
-            onClick={handleDownload}
-          >
-            <Download className="mr-2 h-4 w-4  cursor-pointer" />
-            Download
-          </Button>
-        </div>
-      </div>
-
-      <DocumentDetailHeader
-        document={document}
-        fileTypeLabel={fileTypeLabel}
-        subjectCode={subjectCode}
-        subjectName={subjectName}
-        semesterNo={semesterNo}
-        comboName={comboName}
-        fileSizeLabel={formatFileSize(document.fileSize)}
-        isOwner={isOwner}
-        isDeleting={deleteMutation.isPending}
-        onUpdate={() => setIsUpdateOpen(true)}
-        onDelete={handleDelete}
-      />
+   <section className="w-full px-6 py-4">
+  {/* DOCUMENT HEADER */}
+ <DocumentDetailHeader
+  document={document}
+  fileTypeLabel={fileTypeLabel}
+  subjectCode={subjectCode}
+  isOwner={isOwner}
+  isDeleting={deleteMutation.isPending}
+  canOpenInNewTab={!!canOpenInNewTab}
+  onBack={() => navigate(-1)}
+  onUpdate={() => setIsUpdateOpen(true)}
+  onDelete={handleDelete}
+  onOpenNewTab={() => blobPreviewUrl && window.open(blobPreviewUrl, "_blank")}
+  onDownload={handleDownload}
+/>
 
       {isOwner && (
         <>
           <DocumentUpdateDialog
-            document={document}
-            isOpen={isUpdateOpen}
-            isSaving={updateMutation.isPending}
-            onOpenChange={setIsUpdateOpen}
-            onSubmit={handleUpdateSubmit}
-          />
+              document={document}
+              subjects={academicSubjects}
+              isOpen={isUpdateOpen}
+              isSaving={updateMutation.isPending}
+              onOpenChange={setIsUpdateOpen}
+              onSubmit={handleUpdateSubmit}
+        />
 
           <DocumentDeleteDialog
             documentTitle={document.title}
@@ -802,15 +763,9 @@ function DocumentDetailPage() {
         </>
       )}
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_280px]">
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_260px] 2xl:grid-cols-[minmax(0,1fr)_280px]">
         <Card className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
-          <div className="border-b border-border px-5 py-4">
-            <h2 className="font-black text-card-foreground">
-              Document Preview
-            </h2>
-          </div>
-
-          <div className="h-[calc(100vh-190px)] min-h-[820px] w-full bg-white">
+          <div className="h-[calc(100vh-180px)] min-h-[580px] w-full bg-white">
             {isPreviewLoading ? (
               <div className="flex h-full items-center justify-center px-6 text-center">
                 <p className="text-sm font-semibold text-muted-foreground">

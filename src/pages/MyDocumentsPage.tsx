@@ -390,7 +390,7 @@ function MyDocumentsPage() {
       )}
 
       <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
-        <DialogContent className="max-h-[94vh] overflow-y-auto p-6 sm:max-w-[1120px]">
+        <DialogContent className="max-h-[92vh] overflow-y-auto p-6 sm:max-w-[1200px] lg:max-w-[1280px]">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black">
               Upload Document

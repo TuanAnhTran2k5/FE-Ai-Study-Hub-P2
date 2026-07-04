@@ -58,17 +58,16 @@ export const uploadDocument = async (
     {
       // NOTE UX: Axios trả tiến độ upload theo byte; đổi sang phần trăm để UI hiện progress bar.
       onUploadProgress: (progressEvent) => {
-        if (!progressEvent.total) {
-          return;
-        }
+  if (!progressEvent.total) {
+    return;
+  }
 
-        onUploadProgress?.(
-          Math.min(
-            100,
-            Math.round((progressEvent.loaded * 100) / progressEvent.total),
-          ),
-        );
-      },
+  const percent = Math.round(
+    (progressEvent.loaded * 100) / progressEvent.total,
+  );
+
+  onUploadProgress?.(Math.min(99, percent));
+},
     },
   );
 
