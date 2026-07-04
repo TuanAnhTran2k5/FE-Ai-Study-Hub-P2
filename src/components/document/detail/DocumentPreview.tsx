@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { renderAsync } from "docx-preview";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
-import { FileText } from "lucide-react";
+import { FileText, Minus, Plus } from "lucide-react";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
@@ -39,11 +39,28 @@ function DocumentPreview({ blob, fileTypeLabel, title }: DocumentPreviewProps) {
   );
 }
 
+function getElementTopInsideContainer(
+  element: HTMLElement,
+  container: HTMLElement,
+) {
+  return (
+    element.getBoundingClientRect().top -
+    container.getBoundingClientRect().top +
+    container.scrollTop
+  );
+}
+
 // Render PDF trực tiếp trong web bằng pdfjs, không cần mở bên thứ ba.
 function PdfPreview({ blob, title }: { blob: Blob; title: string }) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
+  const pageRefs = useRef<HTMLDivElement[]>([]);
+
   const [isRendering, setIsRendering] = useState(true);
   const [renderError, setRenderError] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [zoom, setZoom] = useState(1);
 
   useEffect(() => {
     const previewElement = previewRef.current;
@@ -51,22 +68,44 @@ function PdfPreview({ blob, title }: { blob: Blob; title: string }) {
     if (!previewElement) return;
 
     let isMounted = true;
+
     previewElement.innerHTML = "";
+    pageRefs.current = [];
     setIsRendering(true);
     setRenderError(false);
+    setCurrentPage(1);
+    setTotalPages(0);
 
     const renderPdf = async () => {
       const arrayBuffer = await blob.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      const availableWidth = previewElement.clientWidth || 900;
+
+      if (!isMounted) return;
+
+      setTotalPages(pdf.numPages || 1);
+      setCurrentPage(1);
+
+      const availableWidth =
+        scrollContainerRef.current?.clientWidth ||
+        previewElement.clientWidth ||
+        900;
+
+      const pageMaxWidth = Math.max(760, availableWidth - 96);
 
       for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
         if (!isMounted) return;
 
         const page = await pdf.getPage(pageNumber);
-        const defaultViewport = page.getViewport({ scale: 1 });
-        const scale = availableWidth / defaultViewport.width;
-        const viewport = page.getViewport({ scale });
+        const defaultViewport = page.getViewport({
+          scale: 1,
+        });
+
+        const fitScale = pageMaxWidth / defaultViewport.width;
+        const scale = fitScale * zoom;
+        const viewport = page.getViewport({
+          scale,
+        });
+
         const outputScale = window.devicePixelRatio || 1;
         const canvas = window.document.createElement("canvas");
         const context = canvas.getContext("2d");
@@ -75,13 +114,15 @@ function PdfPreview({ blob, title }: { blob: Blob; title: string }) {
 
         canvas.width = Math.floor(viewport.width * outputScale);
         canvas.height = Math.floor(viewport.height * outputScale);
-        canvas.style.width = "100%";
+        canvas.style.width = `${viewport.width}px`;
         canvas.style.height = `${viewport.height}px`;
-        canvas.className = "block bg-white";
+        canvas.className = "block bg-white shadow-sm";
 
         const pageContainer = window.document.createElement("div");
-        pageContainer.className = "w-full bg-white";
+        pageContainer.className = "flex justify-center bg-slate-100 py-4";
         pageContainer.appendChild(canvas);
+
+        pageRefs.current[pageNumber - 1] = pageContainer;
         previewElement.appendChild(pageContainer);
 
         await page.render({
@@ -89,7 +130,9 @@ function PdfPreview({ blob, title }: { blob: Blob; title: string }) {
           canvasContext: context,
           viewport,
           transform:
-            outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : undefined,
+            outputScale !== 1
+              ? [outputScale, 0, 0, outputScale, 0, 0]
+              : undefined,
         }).promise;
       }
     };
@@ -110,7 +153,48 @@ function PdfPreview({ blob, title }: { blob: Blob; title: string }) {
       isMounted = false;
       previewElement.innerHTML = "";
     };
-  }, [blob]);
+  }, [blob, zoom]);
+
+  const goToPage = (pageNumber: number) => {
+    const safePage = Math.min(Math.max(pageNumber, 1), totalPages || 1);
+    setCurrentPage(safePage);
+
+    const pageElement = pageRefs.current[safePage - 1];
+    const container = scrollContainerRef.current;
+
+    if (!pageElement || !container) return;
+
+    const toolbarHeight = 56;
+    const pageTop = getElementTopInsideContainer(pageElement, container);
+
+    container.scrollTo({
+      top: Math.max(0, pageTop - toolbarHeight),
+      behavior: "smooth",
+    });
+  };
+
+  const handleScroll = () => {
+    const container = scrollContainerRef.current;
+
+    if (!container || pageRefs.current.length === 0) return;
+
+    const toolbarHeight = 56;
+    const checkPoint = container.scrollTop + toolbarHeight + 120;
+
+    let nextPage = 1;
+
+    pageRefs.current.forEach((pageElement, index) => {
+      const pageTop = getElementTopInsideContainer(pageElement, container);
+
+      if (pageTop <= checkPoint) {
+        nextPage = index + 1;
+      }
+    });
+
+    setCurrentPage((prevPage) => {
+      return prevPage === nextPage ? prevPage : nextPage;
+    });
+  };
 
   if (renderError) {
     return (
@@ -129,17 +213,77 @@ function PdfPreview({ blob, title }: { blob: Blob; title: string }) {
   return (
     <div
       aria-label={`Preview of ${title}`}
-      className="relative h-full overflow-auto bg-white p-6"
+      className="h-full overflow-hidden bg-white"
     >
-      {isRendering ? (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 px-6 text-center">
-          <p className="text-sm font-semibold text-muted-foreground">
-            Rendering PDF preview...
-          </p>
-        </div>
-      ) : null}
+      <div
+        ref={scrollContainerRef}
+        className="relative h-full overflow-auto bg-slate-100"
+        onScroll={handleScroll}
+      >
+        {/* PDF TOOLBAR */}
+        <div className="sticky top-0 z-20 flex h-12 items-center justify-between border-b border-border bg-white px-5 shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-bold text-card-foreground">Page</span>
 
-      <div ref={previewRef} className="mx-auto w-fit min-w-[760px]" />
+            <input
+              type="number"
+              min={1}
+              max={totalPages || 1}
+              value={currentPage}
+              className="h-9 w-16 rounded-lg border border-border bg-background text-center text-sm font-bold outline-none focus:ring-2 focus:ring-ring"
+              onChange={(event) => {
+                const value = Number(event.target.value);
+
+                if (Number.isFinite(value)) {
+                  goToPage(value);
+                }
+              }}
+            />
+
+            <span className="text-sm font-bold text-card-foreground">
+              / {totalPages || "-"}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              className="rounded-lg p-2 text-card-foreground hover:bg-secondary"
+              onClick={() => setZoom((value) => Math.max(0.5, value - 0.1))}
+              aria-label="Zoom out"
+            >
+              <Minus className="h-5 w-5" />
+            </button>
+
+            <button
+              type="button"
+              className="rounded-xl px-4 py-2 text-sm font-bold text-card-foreground hover:bg-secondary"
+              onClick={() => setZoom(1)}
+            >
+              {Math.round(zoom * 100)}%
+            </button>
+
+            <button
+              type="button"
+              className="rounded-lg p-2 text-card-foreground hover:bg-secondary"
+              onClick={() => setZoom((value) => Math.min(2, value + 0.1))}
+              aria-label="Zoom in"
+            >
+              <Plus className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        {isRendering ? (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 px-6 text-center">
+            <p className="text-sm font-semibold text-muted-foreground">
+              Rendering PDF preview...
+            </p>
+          </div>
+        ) : null}
+
+        <div ref={previewRef} className="mx-auto w-fit" />
+      </div>
     </div>
   );
 }
@@ -192,9 +336,15 @@ function TextPreview({ blob }: { blob: Blob }) {
 
 // Render file DOCX thành HTML bằng thư viện docx-preview để xem ngay trong web.
 function DocxPreview({ blob, title }: { blob: Blob; title: string }) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
+  const pageRefs = useRef<HTMLElement[]>([]);
+
   const [isRendering, setIsRendering] = useState(true);
   const [renderError, setRenderError] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [zoom, setZoom] = useState(1);
 
   useEffect(() => {
     const previewElement = previewRef.current;
@@ -202,9 +352,13 @@ function DocxPreview({ blob, title }: { blob: Blob; title: string }) {
     if (!previewElement) return;
 
     let isMounted = true;
+
     previewElement.innerHTML = "";
+    pageRefs.current = [];
     setIsRendering(true);
     setRenderError(false);
+    setCurrentPage(1);
+    setTotalPages(0);
 
     renderAsync(blob, previewElement, undefined, {
       breakPages: true,
@@ -212,10 +366,33 @@ function DocxPreview({ blob, title }: { blob: Blob; title: string }) {
       ignoreFonts: false,
       ignoreHeight: false,
       ignoreWidth: false,
-      inWrapper: true,
+
+      // Tắt wrapper mặc định để bỏ nền xám của docx-preview.
+      inWrapper: false,
+
       renderFooters: true,
       renderHeaders: true,
     })
+      .then(() => {
+        if (!isMounted) return;
+
+        const pages = previewElement.querySelectorAll(
+          "section.docx",
+        ) as NodeListOf<HTMLElement>;
+
+        pageRefs.current = Array.from(pages);
+        setTotalPages(pages.length || 1);
+        setCurrentPage(1);
+
+        pages.forEach((page) => {
+          page.style.background = "#ffffff";
+          page.style.boxShadow = "0 12px 32px rgba(15, 23, 42, 0.14)";
+          page.style.margin = "0 auto 28px auto";
+          page.style.display = "block";
+          page.style.borderRadius = "6px";
+          page.style.overflow = "hidden";
+        });
+      })
       .catch(() => {
         if (isMounted) {
           setRenderError(true);
@@ -232,6 +409,47 @@ function DocxPreview({ blob, title }: { blob: Blob; title: string }) {
       previewElement.innerHTML = "";
     };
   }, [blob]);
+
+  const goToPage = (pageNumber: number) => {
+    const safePage = Math.min(Math.max(pageNumber, 1), totalPages || 1);
+    setCurrentPage(safePage);
+
+    const pageElement = pageRefs.current[safePage - 1];
+    const container = scrollContainerRef.current;
+
+    if (!pageElement || !container) return;
+
+    const toolbarHeight = 56;
+    const pageTop = getElementTopInsideContainer(pageElement, container);
+
+    container.scrollTo({
+      top: Math.max(0, pageTop - toolbarHeight),
+      behavior: "smooth",
+    });
+  };
+
+  const handleScroll = () => {
+    const container = scrollContainerRef.current;
+
+    if (!container || pageRefs.current.length === 0) return;
+
+    const toolbarHeight = 56;
+    const checkPoint = container.scrollTop + toolbarHeight + 120;
+
+    let nextPage = 1;
+
+    pageRefs.current.forEach((pageElement, index) => {
+      const pageTop = getElementTopInsideContainer(pageElement, container);
+
+      if (pageTop <= checkPoint) {
+        nextPage = index + 1;
+      }
+    });
+
+    setCurrentPage((prevPage) => {
+      return prevPage === nextPage ? prevPage : nextPage;
+    });
+  };
 
   if (renderError) {
     return (
@@ -250,17 +468,86 @@ function DocxPreview({ blob, title }: { blob: Blob; title: string }) {
   return (
     <div
       aria-label={`Preview of ${title}`}
-      className="relative h-full overflow-auto bg-white"
+      className="h-full overflow-hidden bg-white"
     >
-      {isRendering ? (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 px-6 text-center">
-          <p className="text-sm font-semibold text-muted-foreground">
-            Rendering document preview...
-          </p>
-        </div>
-      ) : null}
+      <div
+  ref={scrollContainerRef}
+  className="relative h-full overflow-auto bg-slate-100"
+  onScroll={handleScroll}
+>
+        {/* DOCX TOOLBAR */}
+        <div className="sticky top-0 z-20 flex h-12 items-center justify-between border-b border-border bg-white px-5 shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-bold text-card-foreground">Page</span>
 
-      <div ref={previewRef} className="w-full bg-white" />
+            <input
+              type="number"
+              min={1}
+              max={totalPages || 1}
+              value={currentPage}
+              className="h-9 w-16 rounded-lg border border-border bg-background text-center text-sm font-bold outline-none focus:ring-2 focus:ring-ring"
+              onChange={(event) => {
+                const value = Number(event.target.value);
+
+                if (Number.isFinite(value)) {
+                  goToPage(value);
+                }
+              }}
+            />
+
+            <span className="text-sm font-bold text-card-foreground">
+              / {totalPages || "-"}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              className="rounded-lg p-2 text-card-foreground hover:bg-secondary"
+              onClick={() => setZoom((value) => Math.max(0.6, value - 0.1))}
+              aria-label="Zoom out"
+            >
+              <Minus className="h-5 w-5" />
+            </button>
+
+            <button
+              type="button"
+              className="rounded-xl px-4 py-2 text-sm font-bold text-card-foreground hover:bg-secondary"
+              onClick={() => setZoom(1)}
+            >
+              {Math.round(zoom * 100)}%
+            </button>
+
+            <button
+              type="button"
+              className="rounded-lg p-2 text-card-foreground hover:bg-secondary"
+              onClick={() => setZoom((value) => Math.min(1.8, value + 0.1))}
+              aria-label="Zoom in"
+            >
+              <Plus className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        {isRendering ? (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 px-6 text-center">
+            <p className="text-sm font-semibold text-muted-foreground">
+              Rendering document preview...
+            </p>
+          </div>
+        ) : null}
+
+        <div className="flex min-h-full justify-center bg-slate-100 px-6 py-6">
+          <div
+            style={{
+              transform: `scale(${zoom})`,
+              transformOrigin: "top center",
+            }}
+          >
+            <div ref={previewRef} className="w-fit max-w-full bg-white" />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

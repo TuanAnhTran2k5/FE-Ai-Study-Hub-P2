@@ -1,4 +1,11 @@
-import { Bookmark, Download, Flag, Star, UserRound } from "lucide-react";
+import {
+  Bookmark,
+  CalendarDays,
+  Download,
+  Flag,
+  Star,
+  UserRound,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -37,26 +44,30 @@ function DocumentDetailSidebar({
   onReport,
 }: DocumentDetailSidebarProps) {
   return (
-    <aside className="space-y-6">
+    <aside className="space-y-3">
       <Card className="rounded-3xl border border-border bg-card shadow-sm">
-        <CardContent className="p-5">
-          <h3 className="font-black text-card-foreground">Uploaded By</h3>
+        <CardContent className="p-4">
+          <h3 className="text-base font-black text-card-foreground">
+            Uploaded By
+          </h3>
 
-          <div className="mt-4 flex items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary text-primary">
+          <div className="mt-5 flex items-center gap-3">
+            <div className="flex h-13 w-13 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-orange-500 to-red-500 text-lg font-black text-white">
               {document.ownerAvatar ? (
                 <img
                   src={document.ownerAvatar}
                   alt={document.ownerName ?? "Document owner"}
                   className="h-full w-full object-cover"
                 />
+              ) : document.ownerName ? (
+                document.ownerName.charAt(0).toUpperCase()
               ) : (
                 <UserRound className="h-6 w-6" />
               )}
             </div>
 
             <div className="min-w-0">
-              <p className="truncate font-bold text-card-foreground">
+              <p className="truncate font-black text-card-foreground">
                 {document.ownerName ?? "Unknown owner"}
               </p>
               <p className="text-sm text-muted-foreground">
@@ -70,7 +81,7 @@ function DocumentDetailSidebar({
       {!isOwner && (
         <Card className="rounded-3xl border border-border bg-card shadow-sm">
           <CardContent className="p-5">
-            <h3 className="font-black text-card-foreground">
+            <h3 className="text-base font-black text-card-foreground">
               Community Actions
             </h3>
 
@@ -119,7 +130,7 @@ function DocumentDetailSidebar({
                       <button
                         key={value}
                         type="button"
-                        className="cursor-pointer text-primary disabled:cursor-not-allowed disabled:opacity-60"
+                        className="cursor-pointer text-yellow-400 disabled:cursor-not-allowed disabled:opacity-60"
                         disabled={isRating}
                         onClick={() => onRate(value)}
                       >
@@ -127,7 +138,7 @@ function DocumentDetailSidebar({
                           className={`h-5 w-5 ${
                             value <= selectedRating
                               ? "fill-current"
-                              : "opacity-50"
+                              : "opacity-40"
                           }`}
                         />
                       </button>
@@ -152,9 +163,45 @@ function DocumentDetailSidebar({
 
       <Card className="rounded-3xl border border-border bg-card shadow-sm">
         <CardContent className="p-5">
-          <h3 className="font-black text-card-foreground">Statistics</h3>
+          <h3 className="text-base font-black text-card-foreground">
+            Document Info
+          </h3>
 
-          <div className="mt-4 space-y-4">
+          <div className="mt-5 space-y-5">
+            <InfoRow
+              label="Subject"
+              value={document.subjectName ?? document.subjectCode ?? "N/A"}
+            />
+
+            <InfoRow
+              label="Semester"
+              value={
+                document.semesterNo
+                  ? `Semester ${document.semesterNo}`
+                  : "N/A"
+              }
+            />
+
+            <InfoRow
+              label="File Size"
+              value={formatFileSize(document.fileSize)}
+            />
+
+            <InfoRow
+              label="Course Code"
+              value={document.subjectCode ?? `Subject ${document.subjectId}`}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="rounded-3xl border border-border bg-card shadow-sm">
+        <CardContent className="p-5">
+          <h3 className="text-base font-black text-card-foreground">
+            Statistics
+          </h3>
+
+          <div className="mt-5 space-y-3">
             <StatItem
               icon={<Download className="h-4 w-4" />}
               label="Downloads"
@@ -173,30 +220,32 @@ function DocumentDetailSidebar({
               value={document.bookmarkCount ?? 0}
             />
 
-            <div>
+            <div className="pt-2">
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-sm font-semibold text-muted-foreground">
+                <span className="text-sm font-bold text-card-foreground">
                   Rating
                 </span>
-                <span className="font-bold text-card-foreground">
+                <span className="font-black text-card-foreground">
                   {averageRating} / 5
                 </span>
               </div>
 
-              <div className="flex text-primary">
-                {Array.from({ length: 5 }).map((_, index) => (
-                  <Star
-                    key={index}
-                    className={`h-4 w-4 ${
-                      index < rating ? "fill-current" : "opacity-20"
-                    }`}
-                  />
-                ))}
-              </div>
+              <div className="flex items-center gap-2">
+                <div className="flex text-yellow-400">
+                  {Array.from({ length: 5 }).map((_, index) => (
+                    <Star
+                      key={index}
+                      className={`h-5 w-5 ${
+                        index < rating ? "fill-current" : "opacity-30"
+                      }`}
+                    />
+                  ))}
+                </div>
 
-              <p className="mt-1 text-xs text-muted-foreground">
-                {document.ratingCount ?? 0} ratings
-              </p>
+                <span className="text-sm text-muted-foreground">
+                  ({document.ratingCount ?? 0} ratings)
+                </span>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -204,13 +253,31 @@ function DocumentDetailSidebar({
 
       <Card className="rounded-3xl border border-border bg-card shadow-sm">
         <CardContent className="p-5">
-          <h3 className="font-black text-card-foreground">Created At</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {new Date(document.createdAt).toLocaleString("vi-VN")}
-          </p>
+          <h3 className="text-base font-black text-card-foreground">
+            Created
+          </h3>
+
+          <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+            <CalendarDays className="h-4 w-4" />
+            <span>{new Date(document.createdAt).toLocaleString("vi-VN")}</span>
+          </div>
         </CardContent>
       </Card>
     </aside>
+  );
+}
+
+function formatFileSize(bytes?: number) {
+  if (!bytes) return "0 MB";
+  return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+}
+
+function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-[78px_1fr] gap-3 text-sm">
+      <span className="font-medium text-muted-foreground">{label}</span>
+      <span className="font-bold leading-5 text-card-foreground">{value}</span>
+    </div>
   );
 }
 
@@ -225,7 +292,7 @@ function StatItem({
   value: number;
 }) {
   return (
-    <div className="flex items-center justify-between rounded-2xl bg-secondary p-3">
+    <div className="flex items-center justify-between rounded-2xl bg-secondary px-4 py-3">
       <div className="flex items-center gap-2 text-muted-foreground">
         {icon}
         <span className="text-sm font-semibold">{label}</span>
