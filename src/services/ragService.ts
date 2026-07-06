@@ -2,8 +2,6 @@ import api from "@/configs/api";
 import type { APIResponse } from "@/types/auth";
 import type {
   RagChatMessagesPageResponse,
-  RagChatRequest,
-  RagChatResponse,
   RagChatSessionResponse,
   RagCreateSessionRequest,
   RagDeleteResponse,
@@ -12,18 +10,6 @@ import type {
   RagSessionAskResponse,
   RagUpdateSessionDocumentsRequest,
 } from "@/types/rag.type";
-
-export const askRagQuestion = async (
-  data: RagChatRequest,
-): Promise<RagChatResponse> => {
-  const response = await api.post<APIResponse<RagChatResponse>>(
-    "/user/rag/chat/ask",
-    data,
-  );
-
-  return response.data.result;
-};
-
 export const getRagChatSessions = async (): Promise<
   RagChatSessionResponse[]
 > => {
@@ -92,8 +78,8 @@ export const getRagSessionMessages = async (
 
 export const deleteRagChatSession = async (
   sessionId: number,
-): Promise<RagChatResponse> => {
-  const response = await api.delete<APIResponse<RagChatResponse>>(
+): Promise<RagSessionAskResponse> => {
+  const response = await api.delete<APIResponse<RagSessionAskResponse>>(
     `/user/rag/chat/sessions/${sessionId}`,
   );
 

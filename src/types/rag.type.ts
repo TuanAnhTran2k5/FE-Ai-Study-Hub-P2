@@ -1,19 +1,3 @@
-export interface RagChatRequest {
-  question: string;
-  sessionId?: number;
-  documentIds?: number[];
-}
-
-export interface RagChatResponse {
-  sessionId?: number;
-  sessionTitle?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  documentIds?: number[];
-  answer: string;
-  sources?: string[];
-}
-
 export interface RagCreateSessionRequest {
   documentIds: number[];
 }
@@ -56,7 +40,15 @@ export interface RagSessionAskRequest {
   documentIds?: number[];
 }
 
-export type RagSessionAskResponse = RagChatResponse;
+export interface RagSessionAskResponse {
+  sessionId?: number;
+  sessionTitle?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  documentIds?: number[];
+  answer: string;
+  sources?: string[];
+}
 
 export interface RagDocumentResponse {
   id: number;

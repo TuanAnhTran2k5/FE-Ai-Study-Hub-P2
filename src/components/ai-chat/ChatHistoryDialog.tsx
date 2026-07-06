@@ -54,7 +54,7 @@ function ChatHistoryDialog({
                     onSelectSession(session.sessionId, session.documentIds ?? []);
                     onOpenChange(false);
                   }}
-                  className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                  className="flex min-w-0 flex-1 items-center gap-3 text-left cursor-pointer"
                 >
                   <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
                     <MessageSquare className="size-5" />
@@ -75,7 +75,7 @@ function ChatHistoryDialog({
                   variant="ghost"
                   size="icon"
                   onClick={() => onDeleteSession(session.sessionId)}
-                  className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                  className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive cursor-pointer"
                 >
                   <Trash2 className="size-4" />
                 </Button>

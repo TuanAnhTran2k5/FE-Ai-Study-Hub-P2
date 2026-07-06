@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bot, FileText, Loader2, Send, Sparkles } from "lucide-react";
+import { FileText, Loader2, Send, Sparkles } from "lucide-react";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 
@@ -9,7 +9,6 @@ import AvtAI from "/img/AvtAI.png";
 import { Button } from "@/components/ui/button";
 import { ERROR_CODE } from "@/constants/errorCode";
 import {
-  askRagQuestion,
   askRagSessionQuestion,
   createRagChatSession,
   getRagSessionMessages,
@@ -18,8 +17,6 @@ import {
 import type { RootState } from "@/redux/store";
 import type {
   RagChatMessagesPageResponse,
-  RagChatRequest,
-  RagChatResponse,
   RagChatSessionResponse,
   RagSessionAskResponse,
 } from "@/types/rag.type";
@@ -29,7 +26,6 @@ interface ChatAreaProps {
   activeSessionId: number | null;
   selectedDocumentIds: number[];
   pendingPrompt: string;
-  clearSignal: number;
   onPendingPromptConsumed: () => void;
   onSessionCreated: (sessionId: number) => void;
 }
@@ -55,7 +51,6 @@ function ChatArea({
   activeSessionId,
   selectedDocumentIds,
   pendingPrompt,
-  clearSignal,
   onPendingPromptConsumed,
   onSessionCreated,
 }: ChatAreaProps) {
@@ -63,7 +58,6 @@ function ChatArea({
   const currentUser = useSelector((state: RootState) => state.user);
 
   const [question, setQuestion] = useState("");
-  const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
   const [optimisticMessages, setOptimisticMessages] = useState<ChatMessage[]>(
     [],
   );
@@ -90,34 +84,7 @@ function ChatArea({
     }));
   }, [sessionMessagesPage]);
 
-  const messages = hasActiveSession
-    ? [...sessionMessages, ...optimisticMessages]
-    : localMessages;
-
-  const askWithoutSessionMutation = useMutation<
-    RagChatResponse,
-    Error,
-    RagChatRequest
-  >({
-    mutationFn: askRagQuestion,
-
-    onSuccess: (data) => {
-      setLocalMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now(),
-          role: "assistant",
-          content: data.answer,
-          sources: data.sources,
-        },
-      ]);
-    },
-
-    onError: (error: any) => {
-      const serverMessage = error.response?.data?.message;
-      toast.error(serverMessage || ERROR_CODE.SERVER_ERROR);
-    },
-  });
+  const messages = [...sessionMessages, ...optimisticMessages];
 
   const createSessionMutation = useMutation<
     RagChatSessionResponse,
@@ -180,7 +147,6 @@ function ChatArea({
   });
 
   const isSending =
-    askWithoutSessionMutation.isPending ||
     createSessionMutation.isPending ||
     askInSessionMutation.isPending ||
     updateDocumentsMutation.isPending;
@@ -195,18 +161,10 @@ function ChatArea({
   }, [messages.length]);
 
   useEffect(() => {
-    currentSessionIdRef.current = activeSessionId;
-  }, [activeSessionId]);
-
-  useEffect(() => {
     setQuestion("");
     setOptimisticMessages([]);
-    setLocalMessages([]);
-
-    if (!activeSessionId) {
-      currentSessionIdRef.current = null;
-    }
-  }, [clearSignal, activeSessionId]);
+    currentSessionIdRef.current = activeSessionId;
+  }, [activeSessionId]);
 
   useEffect(() => {
     if (!activeSessionId) return;
@@ -230,51 +188,44 @@ function ChatArea({
       content: trimmedQuestion,
     };
 
-    if (!activeSessionId && selectedDocumentIds.length === 0) {
-      setLocalMessages((prev) => [...prev, optimisticUserMessage]);
-
-      askWithoutSessionMutation.mutate({
-        question: trimmedQuestion,
-        documentIds: [],
-      });
-
-      return;
-    }
-
+    // Đẩy tin nhắn của User lên giao diện ngay lập tức
     setOptimisticMessages((prev) => [...prev, optimisticUserMessage]);
 
-    try {
-      let sessionId = currentSessionIdRef.current;
+    // Trì hoãn cuộc gọi API 1 chút để React hoàn tất render tin nhắn của user trước, triệt tiêu cảm giác khựng UI
+    setTimeout(async () => {
+      try {
+        let sessionId = currentSessionIdRef.current;
 
-      if (!sessionId) {
-        const createdSession = await createSessionMutation.mutateAsync({
+        if (!sessionId) {
+          const createdSession = await createSessionMutation.mutateAsync({
+            documentIds: selectedDocumentIds,
+          });
+
+          sessionId = createdSession.sessionId;
+          currentSessionIdRef.current = createdSession.sessionId;
+          onSessionCreated(createdSession.sessionId);
+
+          queryClient.invalidateQueries({
+            queryKey: ["ragChatSessions"],
+          });
+        }
+
+        await askInSessionMutation.mutateAsync({
+          sessionId,
+          question: trimmedQuestion,
           documentIds: selectedDocumentIds,
         });
 
-        sessionId = createdSession.sessionId;
-        currentSessionIdRef.current = createdSession.sessionId;
-        onSessionCreated(createdSession.sessionId);
+        setOptimisticMessages([]);
+      } catch (error: any) {
+        setOptimisticMessages((prev) =>
+          prev.filter((message) => message.id !== optimisticUserMessage.id),
+        );
 
-        queryClient.invalidateQueries({
-          queryKey: ["ragChatSessions"],
-        });
+        const serverMessage = error.response?.data?.message;
+        toast.error(serverMessage || ERROR_CODE.SERVER_ERROR);
       }
-
-      await askInSessionMutation.mutateAsync({
-        sessionId,
-        question: trimmedQuestion,
-        documentIds: selectedDocumentIds,
-      });
-
-      setOptimisticMessages([]);
-    } catch (error: any) {
-      setOptimisticMessages((prev) =>
-        prev.filter((message) => message.id !== optimisticUserMessage.id),
-      );
-
-      const serverMessage = error.response?.data?.message;
-      toast.error(serverMessage || ERROR_CODE.SERVER_ERROR);
-    }
+    }, 50);
   };
 
   useEffect(() => {
@@ -403,8 +354,14 @@ function ChatArea({
 
             {isSending && (
               <div className="flex items-end gap-3">
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 shadow-sm">
-                  <Bot className="size-4 text-primary" />
+                <div className="shrink-0">
+                  <div className="flex size-10 items-center justify-center overflow-hidden rounded-full border border-cyan-400/30 bg-card shadow-[0_0_10px_rgba(34,211,238,0.35)]">
+                    <img
+                      src={AvtAI}
+                      alt="AI Study Assistant"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
                 </div>
 
                 <div className="rounded-3xl rounded-bl-lg border border-border/60 bg-card px-4 py-3 shadow-sm">
@@ -440,7 +397,7 @@ function ChatArea({
               size="icon"
               disabled={isSending || !question.trim()}
               onClick={handleSendMessage}
-              className="size-10 shrink-0 rounded-xl bg-primary shadow-md shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-primary/30 disabled:opacity-40"
+              className="size-10 shrink-0 rounded-xl bg-primary shadow-md shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-primary/30 disabled:opacity-40 cursor-pointer"
             >
               <Send className="size-4 text-white" />
             </Button>
