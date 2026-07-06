@@ -9,19 +9,13 @@ function AIChatPage() {
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<number[]>([]);
   const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false);
   const [pendingPrompt, setPendingPrompt] = useState("");
-  const [clearSignal, setClearSignal] = useState(0);
-
   const handleNewChat = () => {
     setActiveSessionId(null);
     setSelectedDocumentIds([]);
     setPendingPrompt("");
-    setClearSignal((prev) => prev + 1);
   };
 
-  const handleClearChat = () => {
-    setPendingPrompt("");
-    setClearSignal((prev) => prev + 1);
-  };
+
 
   const handleSelectSession = (sessionId: number, documentIds: number[]) => {
     setActiveSessionId(sessionId);
@@ -43,7 +37,6 @@ function AIChatPage() {
           onSelectSession={handleSelectSession}
           onDeletedActiveSession={handleNewChat}
           onNewChat={handleNewChat}
-          onClearChat={handleClearChat}
         />
       </div>
 
@@ -52,7 +45,6 @@ function AIChatPage() {
           activeSessionId={activeSessionId}
           selectedDocumentIds={selectedDocumentIds}
           pendingPrompt={pendingPrompt}
-          clearSignal={clearSignal}
           onPendingPromptConsumed={() => setPendingPrompt("")}
           onSessionCreated={setActiveSessionId}
         />

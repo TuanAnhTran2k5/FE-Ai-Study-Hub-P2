@@ -765,7 +765,7 @@ const isOwner = Number(currentUser?.userId) === Number(document.ownerId);
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_260px] 2xl:grid-cols-[minmax(0,1fr)_280px]">
         <Card className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
-          <div className="h-[calc(100vh-50px)] min-h-[800px] w-full bg-white">
+          <div className="h-[calc(100vh-50px)] min-h-[1000px] w-full bg-white">
             {isPreviewLoading ? (
               <div className="flex h-full items-center justify-center px-6 text-center">
                 <p className="text-sm font-semibold text-muted-foreground">

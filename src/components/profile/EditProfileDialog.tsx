@@ -44,12 +44,13 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
   const updateMutation = useMutation({
     mutationFn: updateUserProfile,
 
-    onSuccess: (data) => {
-      dispatch(updateProfile(data));
-      queryClient.setQueryData(["my-profile"], data);
-      toast.success(SUCCESS_MESSAGE.PROFILE_UPDATED);
-      setOpen(false);
-    },
+onSuccess: (data) => {
+  dispatch(updateProfile(data));
+  queryClient.setQueryData(["my-profile"], data);
+  queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+  toast.success(SUCCESS_MESSAGE.PROFILE_UPDATED);
+  setOpen(false);
+},
 
     onError: () => {
       toast.error(ERROR_CODE.PROFILE_UPDATE_FAILED);

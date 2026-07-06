@@ -26,7 +26,6 @@ interface ChatHistorySidebarProps {
   onSelectSession: (sessionId: number, documentIds: number[]) => void;
   onDeletedActiveSession: () => void;
   onNewChat: () => void;
-  onClearChat: () => void;
 }
 
 function ChatHistorySidebar({
@@ -36,7 +35,6 @@ function ChatHistorySidebar({
   onSelectSession,
   onDeletedActiveSession,
   onNewChat,
-  onClearChat,
 }: ChatHistorySidebarProps) {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -84,15 +82,7 @@ function ChatHistorySidebar({
     deleteMutation.mutate(sessionId);
   };
 
-  const handleClearChat = () => {
-    if (activeSessionId) {
-      queryClient.removeQueries({
-        queryKey: ["ragSessionMessages", activeSessionId],
-      });
-    }
 
-    onClearChat();
-  };
 
   const renderSessionItem = (session: RagChatSessionResponse) => {
     const isActive = activeSessionId === session.sessionId;
@@ -111,7 +101,7 @@ function ChatHistorySidebar({
           onClick={() =>
             onSelectSession(session.sessionId, session.documentIds ?? [])
           }
-          className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2.5 text-left"
+          className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2.5 text-left cursor-pointer"
         >
           <MessageSquare
             className={`size-4 shrink-0 ${
@@ -142,7 +132,7 @@ function ChatHistorySidebar({
             size="icon"
             disabled={deleteMutation.isPending}
             onClick={() => handleDeleteSession(session.sessionId)}
-            className="mr-1.5 size-7 shrink-0 rounded-xl opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
+            className="mr-1.5 size-7 shrink-0 opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100 cursor-pointer"
           >
             <Trash2 className="size-3.5" />
           </Button>
@@ -175,7 +165,7 @@ function ChatHistorySidebar({
               variant="ghost"
               size="icon"
               onClick={onToggleCollapse}
-              className="size-8 shrink-0 rounded-xl hover:bg-primary/10 hover:text-primary"
+              className="size-8 shrink-0 rounded-xl hover:bg-primary/10 hover:text-primary cursor-pointer"
             >
               {isCollapsed ? (
                 <ChevronRight className="size-4" />
@@ -186,25 +176,15 @@ function ChatHistorySidebar({
           </div>
 
           {!isCollapsed && (
-            <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="mt-3">
               <Button
                 type="button"
                 variant="ghost"
                 onClick={onNewChat}
-                className="h-9 rounded-2xl border border-primary/25 bg-primary/10 text-xs font-bold text-primary hover:bg-primary/20"
+                className="h-9 w-full rounded-2xl border border-primary/25 bg-primary/10 text-xs font-bold text-primary hover:bg-primary/20 cursor-pointer"
               >
                 <PlusCircle className="mr-1.5 size-3.5" />
-                New
-              </Button>
-
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={handleClearChat}
-                className="h-9 rounded-2xl border border-destructive/25 bg-destructive/10 text-xs font-bold text-destructive hover:bg-destructive/20 hover:text-destructive"
-              >
-                <Trash2 className="mr-1.5 size-3.5" />
-                Clear
+                New Chat
               </Button>
             </div>
           )}
@@ -236,7 +216,7 @@ function ChatHistorySidebar({
             <Button
               type="button"
               onClick={() => setIsDialogOpen(true)}
-              className="flex h-9 w-full items-center justify-center gap-2 rounded-2xl bg-primary/10 text-xs font-bold text-primary shadow-none hover:bg-primary/20"
+              className="flex h-9 w-full items-center justify-center gap-2 rounded-2xl bg-primary/10 text-xs font-bold text-primary shadow-none hover:bg-primary/20 cursor-pointer"
             >
               <Maximize2 className="size-3.5" />
               View All History
