@@ -46,6 +46,24 @@ export const ERROR_CODE = {
   FILE_UPLOAD_FAILED:
     "Failed to upload or process the image. Please try again with another image.",
 
+  SEMESTER_NO_REQUIRED: "Semester code or number is required",
+  COMBO_CODE_REQUIRED: "Combo code is required",
+  COMBO_NAME_REQUIRED: "Combo name is required",
+  COMBO_SUBJECTS_REQUIRED: "At least one subject must belong to this combo",
+  SUBJECT_CODE_REQUIRED: "Subject code is required",
+  SUBJECT_NAME_REQUIRED: "Subject name is required",
+  SEMESTER_SELECT_REQUIRED: "Semester selection is required for all subjects",
+
+  CREATE_SEMESTER_FAILED: "Failed to create semester",
+  UPDATE_SEMESTER_FAILED: "Failed to update semester",
+  DELETE_SEMESTER_FAILED: "Failed to delete semester",
+  CREATE_COMBO_FAILED: "Failed to create combo subject",
+  UPDATE_COMBO_FAILED: "Failed to update combo subject",
+  DELETE_COMBO_FAILED: "Failed to delete combo subject",
+  CREATE_SUBJECT_FAILED: "Failed to add subject",
+  UPDATE_SUBJECT_FAILED: "Failed to update subject",
+  DELETE_SUBJECT_FAILED: "Failed to delete subject",
+
   SERVER_ERROR: "Something went wrong. Please try again later",
 };
 
