@@ -35,7 +35,9 @@ import {
   cloudDownloadDocument,
   deleteDocument,
   downloadPublicDocument,
+  getBookmarks,
   getDocumentById,
+  getReportReasons,
   ratingDocument,
   removeBookmark,
   reportDocument,
@@ -44,7 +46,7 @@ import {
 } from "@/services/documentService";
 import type { RootState } from "@/redux/store";
 import type { User } from "@/models/user";
-import type { DocumentResponse } from "@/types/document.type";
+import type { BookmarkResponse, DocumentResponse } from "@/types/document.type";
 
 // Chuyển MIME type hoặc loại file từ BE thành nhãn ngắn để hiển thị trên giao diện.
 function formatFileType(fileType?: string) {
@@ -161,59 +163,6 @@ function getBackendErrorMessage(error: unknown) {
   return "";
 }
 
-// Khi DB/BE chưa có bảng dữ liệu report_reason, API report sẽ trả "ReportReason not found".
-// Hàm này giữ report tạm trong localStorage để FE vẫn test được luồng report.
-// TODO: Khi BE seed đầy đủ report_reason hoặc có API report reasons, bỏ fallback local này.
-function savePendingReportToLocalStorage(report: {
-  documentId: number;
-  reasonId: number;
-  reasonLabel?: string;
-  description?: string;
-  evidenceFileName?: string;
-}) {
-  const storageKey = "pendingDocumentReports";
-  const currentReports = JSON.parse(
-    localStorage.getItem(storageKey) || "[]",
-  ) as Array<typeof report & { createdAt: string }>;
-
-  currentReports.push({
-    ...report,
-    createdAt: new Date().toISOString(),
-  });
-
-  localStorage.setItem(storageKey, JSON.stringify(currentReports));
-}
-
-// Lý do report hard-code theo bảng report_reason trong database.
-// Nếu BE có API lấy report reasons thì thay mảng này bằng useQuery từ API.
-const REPORT_REASONS = [
-  {
-    reasonId: 1,
-    label: "Wrong subject",
-    helper: "Document is assigned to the wrong subject.",
-  },
-  {
-    reasonId: 2,
-    label: "Duplicate content",
-    helper: "Document duplicates another uploaded document.",
-  },
-  {
-    reasonId: 3,
-    label: "Advertising or spam",
-    helper: "Document contains ads, spam, or unrelated promotion.",
-  },
-  {
-    reasonId: 4,
-    label: "Invalid or harmful content",
-    helper: "Document contains inappropriate or harmful content.",
-  },
-  {
-    reasonId: 5,
-    label: "Other",
-    helper: "Another issue that does not match the reasons above.",
-  },
-];
-
 // Trang chi tiết tài liệu: lấy document, preview nội dung, tải xuống, cập nhật và xóa.
 function DocumentDetailPage() {
   const { id } = useParams();
@@ -234,7 +183,7 @@ function DocumentDetailPage() {
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [selectedRating, setSelectedRating] = useState(0);
-  const [reportReasonId, setReportReasonId] = useState("1");
+  const [reportReasonId, setReportReasonId] = useState("");
   const [reportDescription, setReportDescription] = useState("");
   const [reportEvidenceFile, setReportEvidenceFile] = useState<File | null>(
     null,
@@ -252,18 +201,46 @@ function DocumentDetailPage() {
     enabled: Number.isFinite(documentId),
   });
 
-  useEffect(() => {
-    if (!document) {
-      return;
-    }
+  const {
+    data: reportReasons,
+    isLoading: isReportReasonsLoading,
+    isError: isReportReasonsError,
+    refetch: refetchReportReasons,
+  } = useQuery({
+    queryKey: ["reportReasons"],
+    queryFn: getReportReasons,
+    enabled: isReportOpen,
+    retry: false,
+    staleTime: 0,
+    refetchOnMount: "always",
+  });
 
-    // BE mới trả trạng thái cá nhân của user trong DocumentResponse.
-    // isBookmarked dùng cho nút Bookmark, myRating dùng cho số sao user đã chọn.
-    setIsBookmarked(!!document.isBookmarked);
-    setSelectedRating(document.myRating ?? 0);
-  }, [document]);
+  const reportReasonOptions = reportReasons ?? [];
+  const hasSelectedReportReason = reportReasonOptions.some(
+    (reason) => String(reason.reasonId) === reportReasonId,
+  );
+  const effectiveReportReasonId =
+    hasSelectedReportReason
+      ? reportReasonId
+      : String(reportReasonOptions[0]?.reasonId ?? "");
+  const selectedReportReason = reportReasonOptions.find(
+    (reason) => String(reason.reasonId) === effectiveReportReasonId,
+  );
+  const reportReasonHelperText = isReportReasonsLoading
+    ? "Loading report reasons..."
+    : isReportReasonsError
+      ? "Cannot load report reasons from backend."
+      : reportReasonOptions.length === 0
+        ? "No report reasons are available."
+        : selectedReportReason?.description ||
+          "Select a report reason to see more details.";
 
-  // Tạo preview ảnh report ở phía FE; backend hiện chỉ nhận chuỗi evidenceUrl, chưa nhận file multipart.
+  const { data: bookmarks = [] } = useQuery({
+    queryKey: ["bookmarks", currentUser?.userId],
+    queryFn: getBookmarks,
+    enabled: !!currentUser?.userId,
+  });
+
   useEffect(() => {
     if (!reportEvidenceFile) {
       setReportEvidencePreview("");
@@ -275,6 +252,19 @@ function DocumentDetailPage() {
 
     return () => URL.revokeObjectURL(previewUrl);
   }, [reportEvidenceFile]);
+
+  useEffect(() => {
+    if (!document) {
+      return;
+    }
+
+    const bookmarkedByServer = bookmarks.some(
+      (bookmark) => Number(bookmark.document?.documentId) === Number(documentId),
+    );
+
+    setIsBookmarked(Boolean(document.isBookmarked || bookmarkedByServer));
+    setSelectedRating(document.myRating ?? 0);
+  }, [bookmarks, document, documentId]);
 
   // Nếu một document của người khác bị mở nhầm qua /app/mydocuments/:id,
   // tự chuyển về đúng route community để URL và ngữ cảnh trang khớp nhau.
@@ -457,6 +447,20 @@ function DocumentDetailPage() {
               : currentDocument,
           ),
       );
+      queryClient.setQueryData<BookmarkResponse[]>(
+        ["bookmarks", currentUser?.userId],
+        (currentBookmarks = []) => [
+          ...currentBookmarks,
+          {
+            bookmarkId: Date.now(),
+            userId: currentUser?.userId ?? 0,
+            document: document as DocumentResponse,
+            bookmarkedAt: new Date().toISOString(),
+            bookmarkCount: (document?.bookmarkCount ?? 0) + 1,
+            isBookmarked: true,
+          },
+        ],
+      );
       queryClient.invalidateQueries({ queryKey: ["document", documentId] });
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
       queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
@@ -499,6 +503,13 @@ function DocumentDetailPage() {
                   isBookmarked: false,
                 }
               : currentDocument,
+          ),
+      );
+      queryClient.setQueryData<BookmarkResponse[]>(
+        ["bookmarks", currentUser?.userId],
+        (currentBookmarks = []) =>
+          currentBookmarks.filter(
+            (bookmark) => Number(bookmark.document?.documentId) !== Number(documentId),
           ),
       );
       queryClient.invalidateQueries({ queryKey: ["document", documentId] });
@@ -556,15 +567,13 @@ function DocumentDetailPage() {
   });
 
   // NOTE COMMUNITY ACTION: Report document vi phạm cho moderation team.
-  // reasonId phải tồn tại trong bảng report reason của backend; nếu thiếu thì FE lưu pending local để không mất dữ liệu user nhập.
+  // reasonId lấy trực tiếp từ API /user/reports/reasons để khớp bảng report_reason của backend.
   const reportMutation = useMutation({
     mutationFn: () =>
       reportDocument({
         documentId: documentId as number,
-        reasonId: Number(reportReasonId),
+        reasonId: Number(effectiveReportReasonId),
         description: reportDescription.trim() || undefined,
-        // BE hiện đang nhận evidenceUrl dạng string, chưa có endpoint upload ảnh evidence.
-        // Tạm gửi tên file ảnh để moderation biết user đã đính kèm ảnh nào.
         evidenceUrl: reportEvidenceFile
           ? `image:${reportEvidenceFile.name}`
           : undefined,
@@ -577,29 +586,6 @@ function DocumentDetailPage() {
     },
     onError: (error) => {
       const message = getBackendErrorMessage(error);
-
-      if (message.toLowerCase().includes("reportreason not found")) {
-        const selectedReason = REPORT_REASONS.find(
-          (reason) => String(reason.reasonId) === reportReasonId,
-        );
-
-        savePendingReportToLocalStorage({
-          documentId: documentId as number,
-          reasonId: Number(reportReasonId),
-          reasonLabel: selectedReason?.label,
-          description: reportDescription.trim() || undefined,
-          evidenceFileName: reportEvidenceFile?.name,
-        });
-
-        toast.success(
-          "Report saved locally. Backend report reasons are not ready yet.",
-        );
-        setIsReportOpen(false);
-        setReportDescription("");
-        setReportEvidenceFile(null);
-        return;
-      }
-
       toast.error(message || "Report failed");
     },
   });
@@ -842,31 +828,43 @@ const isOwner = Number(currentUser?.userId) === Number(document.ownerId);
               </label>
 
               <Select
-                value={reportReasonId}
+                value={effectiveReportReasonId}
                 onValueChange={setReportReasonId}
+                disabled={
+                  isReportReasonsLoading ||
+                  isReportReasonsError ||
+                  reportReasonOptions.length === 0
+                }
               >
                 <SelectTrigger className="h-12 w-full rounded-xl">
                   <SelectValue placeholder="Choose a report reason" />
                 </SelectTrigger>
                 <SelectContent>
-                  {REPORT_REASONS.map((reason) => (
+                  {reportReasonOptions.map((reason) => (
                     <SelectItem
                       key={reason.reasonId}
                       value={String(reason.reasonId)}
                     >
-                      {reason.label}
+                      {reason.reasonName}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
 
               <p className="mt-1 text-xs text-muted-foreground">
-                {
-                  REPORT_REASONS.find(
-                    (reason) => String(reason.reasonId) === reportReasonId,
-                  )?.helper
-                }
+                {reportReasonHelperText}
               </p>
+              {(isReportReasonsError || reportReasonOptions.length === 0) &&
+                !isReportReasonsLoading && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="mt-1 h-auto px-0 py-0 text-xs font-semibold text-primary hover:bg-transparent"
+                    onClick={() => refetchReportReasons()}
+                  >
+                    Reload reasons
+                  </Button>
+                )}
             </div>
 
             <div>
@@ -949,7 +947,15 @@ const isOwner = Number(currentUser?.userId) === Number(document.ownerId);
             </Button>
             <Button
               type="button"
-              disabled={reportMutation.isPending || !reportDescription.trim()}
+              disabled={
+                reportMutation.isPending ||
+                !documentId ||
+                !effectiveReportReasonId ||
+                isReportReasonsLoading ||
+                isReportReasonsError ||
+                reportReasonOptions.length === 0 ||
+                !reportDescription.trim()
+              }
               onClick={() => reportMutation.mutate()}
             >
               {reportMutation.isPending ? "Submitting..." : "Submit Report"}

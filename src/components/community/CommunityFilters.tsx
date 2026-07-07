@@ -37,25 +37,34 @@ export function CommunityFilters({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {[
           { label: "5", value: 5 },
-          { label: "4 & up", value: 4 },
-          { label: "3 & up", value: 3 },
+          { label: "4", value: 4 },
+          { label: "3", value: 3 },
+          { label: "2", value: 2 },
+          { label: "1", value: 1 },
           { label: "All", value: 0 },
         ].map((rating) => (
           <button
-            key={rating.value}
+            key={rating.label}
             type="button"
             onClick={() => updateFilter("rating", rating.value)}
-            className={`flex h-9 cursor-pointer items-center gap-1 rounded-full border px-4 text-xs font-bold transition-colors ${
+            className={`flex h-12 w-full items-center justify-center gap-2 rounded-2xl border px-4 text-sm font-semibold transition-colors ${
               filters.rating === rating.value
                 ? "border-primary bg-primary/10 text-primary"
                 : "border-border bg-card text-muted-foreground hover:bg-secondary"
             }`}
           >
-            {rating.value > 0 && <Star className="size-3 fill-current" />}
-            {rating.label}
+            {rating.value > 0 ? (
+              <div className="flex items-center gap-1 text-base text-current">
+                {Array.from({ length: rating.value }).map((_, index) => (
+                  <Star key={index} className="h-4 w-4 fill-current" />
+                ))}
+              </div>
+            ) : (
+              <span>All</span>
+            )}
           </button>
         ))}
       </div>

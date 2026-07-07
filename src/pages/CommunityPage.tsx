@@ -381,16 +381,16 @@ function CommunityPage() {
           </div>
         </div>
 
-        <div className="mb-4 rounded-3xl border border-border bg-card p-4 shadow-sm">
+        <div className="mb-4 rounded-3xl border border-border bg-card p-5 shadow-sm">
           {/* NOTE UI: Thanh search/filter chinh cua Community. Search loc realtime, Enter de confirm lai keyword. */}
-          <div className="grid gap-3 lg:grid-cols-[minmax(320px,1fr)_minmax(280px,360px)_220px]">
+          <div className="grid gap-4 h-14 lg:grid-cols-[1fr_180px_180px]">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
 
               <Input
                 type="text"
                 placeholder="Search documents, subjects, or uploader..."
-                className="h-14 rounded-2xl border-border bg-secondary/50 pl-12 text-base shadow-sm"
+                className="h-full rounded-2xl border-border bg-card pl-12 text-base text-card-foreground shadow-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
                 value={communitySearchInput}
                 onChange={(event) => {
                   const nextValue = event.target.value;
@@ -412,7 +412,7 @@ function CommunityPage() {
                 }))
               }
             >
-              <SelectTrigger className="h-14 w-full rounded-2xl border-border bg-secondary/50 px-5 text-base font-bold shadow-sm transition-colors hover:bg-secondary">
+              <SelectTrigger className="!h-full w-full rounded-2xl border border-border bg-card px-4 text-base text-card-foreground shadow-none focus:ring-2 focus:ring-ring">
                 <SelectValue placeholder="All Subjects" />
               </SelectTrigger>
               <SelectContent sideOffset={8} className={selectContentClassName}>
@@ -441,7 +441,7 @@ function CommunityPage() {
                 }))
               }
             >
-              <SelectTrigger className="h-14 w-full rounded-2xl border-border bg-secondary/50 px-5 text-base font-bold shadow-sm transition-colors hover:bg-secondary">
+              <SelectTrigger className="!h-full w-full rounded-2xl border border-border bg-card px-4 text-base text-card-foreground shadow-none focus:ring-2 focus:ring-ring">
                 <SelectValue placeholder="All Semesters" />
               </SelectTrigger>
               <SelectContent sideOffset={8} className={selectContentClassName}>
