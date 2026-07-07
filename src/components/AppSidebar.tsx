@@ -25,6 +25,7 @@ import {
   Trophy,
   User,
   Settings,
+  BookOpen,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
@@ -76,6 +77,12 @@ const menuItems = [
     url: ROUTE.SETTINGS,
     icon: Settings,
   },
+  {
+    titleKey: "sidebar.curriculum",
+    url: ROUTE.ADMIN_CURRICULUM,
+    icon: BookOpen,
+    isAdminOnly: true,
+  },
 ];
 
 function AppSidebar() {
@@ -107,8 +114,10 @@ function AppSidebar() {
         <SidebarGroup className="p-0">
           <SidebarGroupContent>
             <SidebarMenu className="flex flex-col items-stretch gap-1 group-data-[collapsible=icon]:items-center">
-              {menuItems.map((item) => {
-                const Icon = item.icon;
+              {menuItems
+                .filter((item) => !item.isAdminOnly || currentUser?.role === "AD")
+                .map((item) => {
+                  const Icon = item.icon;
                 const isActive = location.pathname === `/app/${item.url}`;
                 const badge =
                   item.titleKey === "sidebar.notifications"

@@ -22,6 +22,7 @@ import ForgotPasswordForm from "@/components/auth/ForgotPasswordForm";
 import ForgotPasswordVerifyOtpForm from "@/components/auth/ForgotPasswordVerifyOtpForm";
 import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
 import SettingsPage from "@/pages/SettingsPage";
+import ManagementPage from "@/pages/ManagementPage";
 
 export const router = createBrowserRouter([
   {
@@ -131,6 +132,10 @@ export const router = createBrowserRouter([
       {
         path: ROUTE.SETTINGS,
         element: <SettingsPage />,
+      },
+      {
+        path: ROUTE.ADMIN_CURRICULUM,
+        element: <ManagementPage />,
       },
     ],
   },

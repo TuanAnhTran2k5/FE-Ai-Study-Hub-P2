@@ -1,0 +1,288 @@
+import { useState } from "react";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  Search,
+  BookMarked,
+  Loader2,
+  ChevronDown,
+  ChevronUp,
+  FileText,
+} from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
+import type { ComboSubjectResponse } from "@/types/curriculum.type";
+
+interface ComboAccordionProps {
+  combos: ComboSubjectResponse[];
+  isLoading: boolean;
+  searchKeyword: string;
+  onSearchChange: (keyword: string) => void;
+  onAddClick: () => void;
+  onEditClick: (combo: ComboSubjectResponse) => void;
+  onDeleteClick: (id: number, identifier: string) => void;
+  onEditSubjectClick: (subject: any, combo: ComboSubjectResponse) => void;
+  onDeleteSubjectClick: (subject: any, combo: ComboSubjectResponse) => void;
+  onAddSubjectClick: (combo: ComboSubjectResponse) => void;
+  onManageSyllabusClick: (subject: any) => void;
+}
+
+export default function ComboAccordion({
+  combos,
+  isLoading,
+  searchKeyword,
+  onSearchChange,
+  onAddClick,
+  onEditClick,
+  onDeleteClick,
+  onEditSubjectClick,
+  onDeleteSubjectClick,
+  onAddSubjectClick,
+  onManageSyllabusClick,
+}: ComboAccordionProps) {
+  const [expandedComboId, setExpandedComboId] = useState<number | null>(null);
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search combo subjects by name..."
+            value={searchKeyword}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="h-11 rounded-xl pl-10"
+          />
+        </div>
+
+        <Button
+          onClick={onAddClick}
+          className="cursor-pointer rounded-xl font-bold"
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Add Combo Subject
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="mt-2 text-sm">Loading combos data...</p>
+        </div>
+      ) : combos.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border py-16 text-center">
+          <BookMarked className="mx-auto h-12 w-12 text-muted-foreground" />
+          <h4 className="mt-4 font-bold text-card-foreground">
+            No Combo Subjects Found
+          </h4>
+          <p className="mt-1 text-sm text-muted-foreground">
+            No results found matching your search.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {combos.map((combo) => {
+            const isExpanded = expandedComboId === combo.comboId;
+            return (
+              <div
+                key={combo.comboId}
+                className="overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300"
+              >
+                <div
+                  onClick={() =>
+                    setExpandedComboId(isExpanded ? null : combo.comboId)
+                  }
+                  className="flex cursor-pointer items-center justify-between bg-secondary/20 p-5 hover:bg-secondary/40"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <span className="text-sm font-bold text-primary">
+                        {combo.comboCode}
+                      </span>
+                      <h4 className="text-lg font-black text-card-foreground">
+                        {combo.comboName}
+                      </h4>
+                      <Badge variant="secondary" className="rounded-full">
+                        {combo.subjects.length} Subjects
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <div
+                    className="flex items-center gap-3"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onEditClick(combo)}
+                      className="cursor-pointer rounded-xl hover:bg-primary/10 hover:text-primary"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        onDeleteClick(combo.comboId, combo.comboName)
+                      }
+                      className="cursor-pointer rounded-xl hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        setExpandedComboId(isExpanded ? null : combo.comboId)
+                      }
+                      className="cursor-pointer rounded-xl"
+                    >
+                      {isExpanded ? (
+                        <ChevronUp className="h-4 w-4" />
+                      ) : (
+                        <ChevronDown className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Expandable subjects list */}
+                {isExpanded && (
+                  <div className="border-t border-border bg-card/50 p-5 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h5 className="text-sm font-bold text-card-foreground">
+                        Subjects belonging to this Combo:
+                      </h5>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onAddSubjectClick(combo)}
+                        className="cursor-pointer rounded-lg text-xs font-bold"
+                      >
+                        <Plus className="mr-1 h-3.5 w-3.5" />
+                        Quick Add Subject
+                      </Button>
+                    </div>
+
+                    {combo.subjects.length === 0 ? (
+                      <p className="text-center text-sm text-muted-foreground py-6 border border-dashed border-border rounded-xl">
+                        No subjects in this combo. Please click "Quick Add
+                        Subject" to start.
+                      </p>
+                    ) : (
+                      <div className="overflow-hidden rounded-xl border border-border bg-card">
+                        <Table>
+                          <TableHeader className="bg-secondary/30">
+                            <TableRow>
+                              <TableHead className="w-[120px] font-bold">
+                                Subj Code
+                              </TableHead>
+                              <TableHead className="font-bold">
+                                Subject Name
+                              </TableHead>
+                              <TableHead className="w-[100px] font-bold">
+                                Type
+                              </TableHead>
+                              <TableHead className="w-[120px] font-bold">
+                                Semester
+                              </TableHead>
+                              <TableHead className="font-bold">
+                                Description
+                              </TableHead>
+                              <TableHead className="w-[120px] font-bold">
+                                Syllabus
+                              </TableHead>
+                              <TableHead className="w-[100px] text-right font-bold">
+                                Actions
+                              </TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {combo.subjects.map((subj) => (
+                              <TableRow key={subj.subjectId}>
+                                <TableCell className="font-bold text-primary">
+                                  {subj.subjectCode}
+                                </TableCell>
+                                <TableCell className="font-semibold text-card-foreground">
+                                  {subj.subjectName}
+                                </TableCell>
+                                <TableCell>
+                                  <Badge
+                                    className={
+                                      subj.subjectType === "CORE"
+                                        ? "bg-blue-500/10 text-blue-500 hover:bg-blue-500/10 rounded-full"
+                                        : "bg-purple-500/10 text-purple-500 hover:bg-purple-500/10 rounded-full"
+                                    }
+                                  >
+                                    {subj.subjectType}
+                                  </Badge>
+                                </TableCell>
+                                <TableCell className="text-muted-foreground font-semibold">
+                                  {subj.semesterNo}
+                                </TableCell>
+                                <TableCell className="max-w-xs truncate text-muted-foreground">
+                                  {subj.description || "N/A"}
+                                </TableCell>
+                                <TableCell>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => onManageSyllabusClick(subj)}
+                                    className="cursor-pointer h-7 rounded-lg text-xs font-bold gap-1 hover:bg-primary hover:text-primary-foreground border-primary/30"
+                                  >
+                                    <FileText className="h-3.5 w-3.5" />
+                                    Syllabus
+                                  </Button>
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex justify-end gap-1">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() =>
+                                        onEditSubjectClick(subj, combo)
+                                      }
+                                      className="cursor-pointer h-7 w-7 rounded-md hover:bg-primary/10 hover:text-primary"
+                                    >
+                                      <Edit2 className="h-3.5 w-3.5" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() =>
+                                        onDeleteSubjectClick(subj, combo)
+                                      }
+                                      className="cursor-pointer h-7 w-7 rounded-md hover:bg-destructive/10 hover:text-destructive"
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}

@@ -21,6 +21,7 @@ export const ROUTE = {
   LEADERBOARD: "leaderboard",
   PROFILE: "profile",
   SETTINGS: "settings",
+  ADMIN_CURRICULUM: "admin/curriculum",
 };
 
 export const NAVIGATE_KEY = [{}];

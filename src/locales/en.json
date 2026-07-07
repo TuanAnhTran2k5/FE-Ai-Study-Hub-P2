@@ -162,7 +162,8 @@
     "leaderboard": "Leaderboard",
     "profile": "Profile",
     "dashboard": "Dashboard",
-    "settings": "Settings"
+    "settings": "Settings",
+    "curriculum": "Curriculum"
   },
   "settings": {
     "label": "Settings",
