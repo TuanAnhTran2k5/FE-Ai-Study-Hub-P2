@@ -38,5 +38,14 @@ export const ERROR_CODE = {
 
   PROFILE_UPDATE_FAILED: "Update profile failed",
 
+  UNSUPPORTED_IMAGE_TYPE:
+    "Unsupported image format. Allowed formats: PNG, JPG, JPEG, WEBP, GIF, HEIC, HEIF, BMP, SVG, AVIF, TIFF, ICO.",
+
+  INVALID_IMAGE_SIZE: "Image size exceeds the 5MB limit.",
+
+  FILE_UPLOAD_FAILED:
+    "Failed to upload or process the image. Please try again with another image.",
+
   SERVER_ERROR: "Something went wrong. Please try again later",
 };
+

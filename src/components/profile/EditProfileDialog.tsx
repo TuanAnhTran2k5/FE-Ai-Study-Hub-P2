@@ -44,16 +44,26 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
   const updateMutation = useMutation({
     mutationFn: updateUserProfile,
 
-onSuccess: (data) => {
-  dispatch(updateProfile(data));
-  queryClient.setQueryData(["my-profile"], data);
-  queryClient.invalidateQueries({ queryKey: ["my-profile"] });
-  toast.success(SUCCESS_MESSAGE.PROFILE_UPDATED);
-  setOpen(false);
-},
+    onSuccess: (data) => {
+      dispatch(updateProfile(data));
+      queryClient.setQueryData(["my-profile"], data);
+      queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+      toast.success(SUCCESS_MESSAGE.PROFILE_UPDATED);
+      setOpen(false);
+    },
 
-    onError: () => {
-      toast.error(ERROR_CODE.PROFILE_UPDATE_FAILED);
+    onError: (error: any) => {
+      const errorMessage = error.response?.data?.message;
+
+      if (errorMessage === "UNSUPPORTED_IMAGE_TYPE") {
+        toast.error(ERROR_CODE.UNSUPPORTED_IMAGE_TYPE);
+      } else if (errorMessage === "INVALID_IMAGE_SIZE") {
+        toast.error(ERROR_CODE.INVALID_IMAGE_SIZE);
+      } else if (errorMessage === "FILE_UPLOAD_FAILED") {
+        toast.error(ERROR_CODE.FILE_UPLOAD_FAILED);
+      } else {
+        toast.error(ERROR_CODE.PROFILE_UPDATE_FAILED);
+      }
     },
   });
 
@@ -61,6 +71,29 @@ onSuccess: (data) => {
     const file = event.target.files?.[0];
 
     if (!file) return;
+
+    // 1. Kiểm tra định dạng ảnh (hỗ trợ MIME image/* hoặc các đuôi ảnh mở rộng phổ biến)
+    const allowedExtensions = /\.(heic|heif|bmp|tiff|svg|avif|webp|png|jpg|jpeg|gif|ico)$/i;
+    const isImageMime = file.type.startsWith("image/");
+    const isValidExtension = allowedExtensions.test(file.name);
+
+    if (!isImageMime && !isValidExtension) {
+      toast.error(ERROR_CODE.UNSUPPORTED_IMAGE_TYPE);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
+
+    // 2. Kiểm tra kích thước file (tối đa 5MB)
+    const MAX_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      toast.error(ERROR_CODE.INVALID_IMAGE_SIZE);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
 
     setAvatarFile(file);
     setPreviewAvatar(URL.createObjectURL(file));
@@ -97,7 +130,10 @@ onSuccess: (data) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-xl font-bold">
+        <Button
+          variant="outline"
+          className="h-11 cursor-pointer rounded-xl font-bold"
+        >
           <Edit className="mr-2 h-4 w-4" />
           Edit Profile
         </Button>
@@ -113,7 +149,10 @@ onSuccess: (data) => {
         <div className="space-y-5">
           <div className="flex justify-center">
             <div className="relative">
-              <div className="h-28 w-28 overflow-hidden rounded-full border-4 border-primary/30 bg-secondary">
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="h-28 w-28 cursor-pointer overflow-hidden rounded-full border-4 border-primary/30 bg-secondary transition-opacity hover:opacity-90"
+              >
                 {previewAvatar ? (
                   <img
                     src={previewAvatar}
@@ -130,7 +169,7 @@ onSuccess: (data) => {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="absolute bottom-1 right-1 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow"
+                className="absolute bottom-1 right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow transition-transform hover:scale-105"
               >
                 <Camera className="h-4 w-4" />
               </button>
@@ -138,7 +177,7 @@ onSuccess: (data) => {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                accept="image/*,.heic,.heif,.avif,.ico"
                 className="hidden"
                 onChange={handleChooseAvatar}
               />
@@ -167,7 +206,7 @@ onSuccess: (data) => {
               type="button"
               variant="outline"
               onClick={handleCancel}
-              className="rounded-xl font-bold"
+              className="cursor-pointer rounded-xl font-bold"
               disabled={updateMutation.isPending}
             >
               <X className="mr-2 h-4 w-4" />
@@ -177,7 +216,7 @@ onSuccess: (data) => {
             <Button
               type="button"
               onClick={handleSubmit}
-              className="rounded-xl font-bold"
+              className="cursor-pointer rounded-xl font-bold"
               disabled={updateMutation.isPending}
             >
               {updateMutation.isPending ? (
