@@ -43,6 +43,15 @@ function DocumentDetailSidebar({
   onRate,
   onReport,
 }: DocumentDetailSidebarProps) {
+  const uploadedByName =
+    document.originalUploaderName ?? document.ownerName ?? "Unknown owner";
+
+  const uploadedById =
+    document.originalUploaderId ?? document.ownerId;
+
+  const uploadedByAvatar =
+    document.originalUploaderAvatar ?? document.ownerAvatar ?? null;
+
   return (
     <aside className="space-y-3">
       <Card className="rounded-3xl border border-border bg-card shadow-sm">
@@ -53,26 +62,26 @@ function DocumentDetailSidebar({
 
           <div className="mt-5 flex items-center gap-3">
             <div className="flex h-13 w-13 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-orange-500 to-red-500 text-lg font-black text-white">
-              {document.ownerAvatar ? (
-                <img
-                  src={document.ownerAvatar}
-                  alt={document.ownerName ?? "Document owner"}
-                  className="h-full w-full object-cover"
-                />
-              ) : document.ownerName ? (
-                document.ownerName.charAt(0).toUpperCase()
-              ) : (
-                <UserRound className="h-6 w-6" />
-              )}
+              {uploadedByAvatar ? (
+  <img
+    src={uploadedByAvatar}
+    alt={uploadedByName}
+    className="h-full w-full object-cover"
+  />
+) : uploadedByName ? (
+  uploadedByName.charAt(0).toUpperCase()
+) : (
+  <UserRound className="h-6 w-6" />
+)}
             </div>
 
             <div className="min-w-0">
               <p className="truncate font-black text-card-foreground">
-                {document.ownerName ?? "Unknown owner"}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Owner ID: {document.ownerId}
-              </p>
+  {uploadedByName}
+</p>
+<p className="text-sm text-muted-foreground">
+  Original uploader ID: {uploadedById}
+</p>
             </div>
           </div>
         </CardContent>
