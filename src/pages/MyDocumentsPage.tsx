@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Upload } from "lucide-react";
+import { CheckSquare, Upload } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
+import DocumentBulkDeleteDialog from "@/components/document/DocumentBulkDeleteDialog";
 import DocumentGrid from "@/components/document/DocumentGrid";
 import DocumentSearch from "@/components/document/DocumentSearch";
 import DocumentUploadForm from "@/components/document/DocumentUploadForm";
@@ -20,7 +21,11 @@ import { VisibilityStatus } from "@/models/document.enum";
 import type { User } from "@/models/user";
 import type { RootState } from "@/redux/store";
 import { getAllAcademicSubjects, getSemesters } from "@/services/academicService";
-import { getMyDocuments, uploadDocument } from "@/services/documentService";
+import {
+  deleteDocument,
+  getMyDocuments,
+  uploadDocument,
+} from "@/services/documentService";
 import type {
   DocumentResponse,
   DocumentUploadRequest,
@@ -86,6 +91,8 @@ function MyDocumentsPage() {
   const [semesterNo, setSemesterNo] = useState("ALL");
   const [visibilityStatus, setVisibilityStatus] = useState("ALL");
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
+  const [selectedDocumentIds, setSelectedDocumentIds] = useState<number[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
 
   const navigate = useNavigate();
@@ -145,6 +152,23 @@ function MyDocumentsPage() {
       toast.error(getUploadErrorMessage(error), {
         toastId: "upload-document-error",
       });
+    },
+  });
+
+  const bulkDeleteMutation = useMutation<void, Error, number[]>({
+    mutationFn: async (documentIds) => {
+      await Promise.all(
+        documentIds.map((documentId) => deleteDocument(documentId)),
+      );
+    },
+    onSuccess: () => {
+      toast.success("Documents deleted successfully");
+      setSelectedDocumentIds([]);
+      setIsBulkDeleteOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
+    },
+    onError: () => {
+      toast.error("Delete documents failed");
     },
   });
 
@@ -244,6 +268,36 @@ function MyDocumentsPage() {
     navigate(`/app/mydocuments/${documentId}`);
   };
 
+  const handleBulkDeleteOpenChange = (open: boolean) => {
+    setIsBulkDeleteOpen(open);
+
+    if (!open && !bulkDeleteMutation.isPending) {
+      setSelectedDocumentIds([]);
+    }
+  };
+
+  const handleToggleDocumentSelect = (documentId: number) => {
+    setSelectedDocumentIds((currentIds) =>
+      currentIds.includes(documentId)
+        ? currentIds.filter((id) => id !== documentId)
+        : [...currentIds, documentId],
+    );
+  };
+
+  const handleSelectAllDocuments = () => {
+    setSelectedDocumentIds(
+      enrichedDocuments.map((document) => document.documentId),
+    );
+  };
+
+  const handleConfirmBulkDelete = () => {
+    if (selectedDocumentIds.length === 0 || bulkDeleteMutation.isPending) {
+      return;
+    }
+
+    bulkDeleteMutation.mutate(selectedDocumentIds);
+  };
+
   const handleUploadSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -324,14 +378,26 @@ function MyDocumentsPage() {
         </div>
 
         <div className="flex flex-col items-start gap-3 md:items-end">
-          <Button
-            type="button"
-            onClick={() => setIsUploadOpen(true)}
-            className="h-11 cursor-pointer rounded-xl bg-gradient-to-r from-primary-start to-primary-end px-5 font-bold text-primary-foreground shadow-sm hover:from-primary-start-hover hover:to-primary-end-hover"
-          >
-            <Upload className="mr-2 h-4 w-4" />
-            Upload Document
-          </Button>
+          <div className="flex flex-wrap justify-start gap-3 md:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsBulkDeleteOpen(true)}
+              className="h-11 cursor-pointer rounded-xl px-5 font-bold"
+            >
+              <CheckSquare className="mr-2 h-4 w-4" />
+              Select Document
+            </Button>
+
+            <Button
+              type="button"
+              onClick={() => setIsUploadOpen(true)}
+              className="h-11 cursor-pointer rounded-xl bg-gradient-to-r from-primary-start to-primary-end px-5 font-bold text-primary-foreground shadow-sm hover:from-primary-start-hover hover:to-primary-end-hover"
+            >
+              <Upload className="mr-2 h-4 w-4" />
+              Upload Document
+            </Button>
+          </div>
 
           <div className="text-sm text-muted-foreground">
             Showing{" "}
@@ -411,6 +477,18 @@ function MyDocumentsPage() {
           />
         </DialogContent>
       </Dialog>
+
+      <DocumentBulkDeleteDialog
+        documents={enrichedDocuments}
+        isOpen={isBulkDeleteOpen}
+        isDeleting={bulkDeleteMutation.isPending}
+        selectedDocumentIds={selectedDocumentIds}
+        onOpenChange={handleBulkDeleteOpenChange}
+        onToggleDocument={handleToggleDocumentSelect}
+        onSelectAll={handleSelectAllDocuments}
+        onClearSelection={() => setSelectedDocumentIds([])}
+        onConfirmDelete={handleConfirmBulkDelete}
+      />
     </section>
   );
 }
