@@ -1,6 +1,11 @@
 {
   "common": {
-    "backToHome": "Back to Home"
+    "backToHome": "Back to Home",
+    "cancel": "Cancel",
+    "save": "Save",
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete"
   },
   "auth": {
     "login": "Login",
@@ -163,7 +168,8 @@
     "profile": "Profile",
     "dashboard": "Dashboard",
     "settings": "Settings",
-    "curriculum": "Curriculum"
+    "curriculum": "Curriculum",
+    "badges": "Badges Management"
   },
   "settings": {
     "label": "Settings",
@@ -187,5 +193,69 @@
     "emailNotVerified": "Please verify your email",
     "invalidCredentials": "Invalid email or password",
     "googleLoginFailed": "Google login failed"
+  },
+  "badges": {
+    "title": {
+      "dashboard": "Admin Dashboard",
+      "main": "Badges Management",
+      "description": "Create, edit, delete, and configure automatic achievement badges for users on the platform."
+    },
+    "placeholders": {
+      "search": "Search badges by name...",
+      "name": "e.g. Top Learner, Document Master...",
+      "downloads": "e.g. 50, 100...",
+      "description": "Enter badge description and details..."
+    },
+    "actions": {
+      "add": "Add New Badge"
+    },
+    "stats": {
+      "total": "Total Badges"
+    },
+    "condition": {
+      "downloads": "downloads"
+    },
+    "dialog": {
+      "editTitle": "Edit Achievement Badge",
+      "addTitle": "Create Achievement Badge"
+    },
+    "fields": {
+      "icon": "Badge Icon Logo",
+      "selectImage": "Select Image Logo",
+      "imageHint": "JPEG or PNG formats are supported, maximum size is 5MB.",
+      "name": "Badge Name",
+      "downloads": "Required Document Downloads",
+      "downloadsHint": "The minimum number of resource downloads users must achieve to earn this badge automatically.",
+      "downloadsSystemFixed": "This system badge has a fixed logic condition and cannot be customized.",
+      "description": "Description"
+    },
+    "validation": {
+      "imageType": "Please upload a valid image file only",
+      "imageSize": "Image file size exceeds 5MB limit",
+      "nameRequired": "Badge Name is required",
+      "descRequired": "Description is required",
+      "downloadsPositive": "Required downloads must be a non-negative number",
+      "iconRequired": "Badge Icon Logo is required"
+    },
+    "messages": {
+      "loading": "Loading gamification badges...",
+      "emptyTitle": "No Badges Configured",
+      "emptyDesc": "Get started by creating the first achievement badge for the system.",
+      "createSuccess": "Badge created successfully!",
+      "createFailed": "Failed to create badge",
+      "updateSuccess": "Badge updated successfully!",
+      "updateFailed": "Failed to update badge",
+      "deleteSuccess": "Badge deleted successfully!",
+      "deleteFailed": "Failed to delete badge"
+    }
+  },
+  "profile": {
+    "badges": {
+      "title": "Earned Badges",
+      "subtitle": "Badges you have unlocked through learning activities.",
+      "emptyTitle": "No badges yet",
+      "emptyDesc": "Upload documents, get downloads, and earn reputation points to unlock badges.",
+      "achievedAt": "Unlocked"
+    }
   }
 }

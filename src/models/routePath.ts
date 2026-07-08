@@ -22,6 +22,7 @@ export const ROUTE = {
   PROFILE: "profile",
   SETTINGS: "settings",
   ADMIN_CURRICULUM: "admin/curriculum",
+  ADMIN_BADGES: "admin/badges",
 };
 
 export const NAVIGATE_KEY = [{}];
