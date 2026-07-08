@@ -13,6 +13,7 @@ import type {
   MyDocumentResponse,
   RatingRequest,
   RatingResponse,
+  ReportReasonResponse,
   ReportRequest,
   ReportResponse,
 } from "@/types/document.type";
@@ -205,6 +206,15 @@ export const reportDocument = async (
   const response = await api.post<APIResponse<ReportResponse>>(
     "/user/reports",
     data,
+  );
+
+  return response.data.result;
+};
+
+export const getReportReasons = async (): Promise<ReportReasonResponse[]> => {
+  // NOTE API: Lấy danh sách report reasons từ backend để FE không dùng mảng cứng.
+  const response = await api.get<APIResponse<ReportReasonResponse[]>>(
+    "/user/reports/reasons",
   );
 
   return response.data.result;
