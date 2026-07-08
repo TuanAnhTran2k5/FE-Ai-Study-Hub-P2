@@ -26,7 +26,7 @@ export const getMyNotifications = async (
   params: NotificationQueryParams = {},
 ): Promise<NotificationResponse[]> => {
   const page = await getMyNotificationsPage(params);
-  return page.content;
+  return page.content ?? [];
 };
 
 // NOTE API: Lay so notification chua doc de hien badge do tren chuong/sidebar.

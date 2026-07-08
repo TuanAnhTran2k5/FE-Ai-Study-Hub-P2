@@ -151,6 +151,15 @@ export interface RatingResponse {
   myRating?: number | null;
 }
 
+export interface ReportReasonResponse {
+  reasonId: number;
+  reasonName: string;
+  description?: string | null;
+  severityLevel?: string | null;
+  reportThreshold?: number | null;
+  penaltyScore?: number | null;
+}
+
 export interface BookmarkResponse {
   bookmarkId: number;
   userId: number;
