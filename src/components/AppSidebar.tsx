@@ -83,6 +83,12 @@ const menuItems = [
     icon: BookOpen,
     isAdminOnly: true,
   },
+  {
+    titleKey: "sidebar.badges",
+    url: ROUTE.ADMIN_BADGES,
+    icon: Trophy,
+    isAdminOnly: true,
+  },
 ];
 
 function AppSidebar() {

@@ -14,7 +14,7 @@ interface DeleteConfirmDialogProps {
   onOpenChange: (open: boolean) => void;
   onConfirm: () => void;
   isPending: boolean;
-  type: "semester" | "combo" | "subject" | null;
+  type: "semester" | "combo" | "subject" | "badge" | null;
   identifier: string;
 }
 
@@ -42,6 +42,7 @@ export default function DeleteConfirmDialog({
               {type === "semester" && "Semester"}
               {type === "combo" && "Combo Subject"}
               {type === "subject" && "Subject"}
+              {type === "badge" && "Badge"}
             </span>
             : <span className="font-black text-destructive">{identifier}</span>.
           </p>

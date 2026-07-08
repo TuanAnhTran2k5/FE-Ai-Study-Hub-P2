@@ -1,6 +1,11 @@
 {
   "common": {
-    "backToHome": "Quay lại trang chủ"
+    "backToHome": "Quay lại trang chủ",
+    "cancel": "Hủy",
+    "save": "Lưu",
+    "create": "Tạo",
+    "edit": "Sửa",
+    "delete": "Xóa"
   },
   "auth": {
     "login": "Đăng nhập",
@@ -163,7 +168,8 @@
     "profile": "Hồ sơ",
     "dashboard": "Bảng điều khiển",
     "settings": "Cài đặt",
-    "curriculum": "Chương trình học"
+    "curriculum": "Chương trình học",
+    "badges": "Quản lý Danh hiệu"
   },
   "settings": {
     "label": "Cài đặt",
@@ -187,5 +193,69 @@
     "emailNotVerified": "Vui lòng xác thực email",
     "invalidCredentials": "Email hoặc mật khẩu không đúng",
     "googleLoginFailed": "Đăng nhập Google thất bại"
+  },
+  "badges": {
+    "title": {
+      "dashboard": "Bảng điều khiển Admin",
+      "main": "Quản lý Danh hiệu",
+      "description": "Tạo mới, chỉnh sửa, xóa và cấu hình các danh hiệu/huy hiệu đạt được tự động cho người dùng trên hệ thống."
+    },
+    "placeholders": {
+      "search": "Tìm kiếm danh hiệu theo tên...",
+      "name": "vd: Học giả chuyên cần, Vua tài liệu...",
+      "downloads": "vd: 50, 100...",
+      "description": "Nhập mô tả chi tiết của danh hiệu..."
+    },
+    "actions": {
+      "add": "Thêm danh hiệu mới"
+    },
+    "stats": {
+      "total": "Tổng số danh hiệu"
+    },
+    "condition": {
+      "downloads": "lượt tải"
+    },
+    "dialog": {
+      "editTitle": "Chỉnh sửa danh hiệu",
+      "addTitle": "Tạo danh hiệu mới"
+    },
+    "fields": {
+      "icon": "Ảnh logo danh hiệu",
+      "selectImage": "Chọn ảnh logo",
+      "imageHint": "Chỉ chấp nhận các định dạng JPEG hoặc PNG, dung lượng tối đa 5MB.",
+      "name": "Tên danh hiệu",
+      "downloads": "Số lượt tải tài liệu yêu cầu",
+      "downloadsHint": "Số lượng lượt tải tài liệu tối thiểu mà người dùng phải đạt được để tự động mở khóa danh hiệu này.",
+      "downloadsSystemFixed": "Danh hiệu hệ thống này có điều kiện logic cố định và không thể tùy chỉnh số lượt tải.",
+      "description": "Mô tả danh hiệu"
+    },
+    "validation": {
+      "imageType": "Vui lòng chỉ tải lên file ảnh hợp lệ",
+      "imageSize": "Dung lượng file ảnh vượt quá giới hạn 5MB",
+      "nameRequired": "Tên danh hiệu không được để trống",
+      "descRequired": "Mô tả không được để trống",
+      "downloadsPositive": "Số lượt tải yêu cầu phải là một số không âm",
+      "iconRequired": "Ảnh logo danh hiệu không được để trống"
+    },
+    "messages": {
+      "loading": "Đang tải danh sách danh hiệu...",
+      "emptyTitle": "Chưa có danh hiệu nào",
+      "emptyDesc": "Hãy bắt đầu bằng việc tạo danh hiệu thi đua đầu tiên cho hệ thống.",
+      "createSuccess": "Tạo danh hiệu thành công!",
+      "createFailed": "Tạo danh hiệu thất bại",
+      "updateSuccess": "Cập nhật danh hiệu thành công!",
+      "updateFailed": "Cập nhật danh hiệu thất bại",
+      "deleteSuccess": "Xóa danh hiệu thành công!",
+      "deleteFailed": "Xóa danh hiệu thất bại"
+    }
+  },
+  "profile": {
+    "badges": {
+      "title": "Danh hiệu đạt được",
+      "subtitle": "Các danh hiệu bạn đã mở khóa thông qua các hoạt động học tập tích cực.",
+      "emptyTitle": "Chưa có danh hiệu nào",
+      "emptyDesc": "Tải lên tài liệu, nhận lượt tải và tích lũy điểm uy tín để mở khóa các danh hiệu danh giá nhé.",
+      "achievedAt": "Đã đạt được"
+    }
   }
 }
