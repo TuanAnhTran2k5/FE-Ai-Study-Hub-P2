@@ -257,5 +257,45 @@
       "emptyDesc": "Upload documents, get downloads, and earn reputation points to unlock badges.",
       "achievedAt": "Unlocked"
     }
+  },
+  "dashboard": {
+    "welcome": "Welcome back,",
+    "subtitle": "Ready to discover and share knowledge today?",
+    "stats": {
+      "uploads": "Documents Uploaded",
+      "downloads": "Downloads Received",
+      "rank": "Global Rank"
+    },
+    "rank": {
+      "title": "Rank Progress",
+      "nextRank": "Next Rank",
+      "remaining": "Remaining Score",
+      "pointsToNext": "points to reach"
+    },
+    "storage": {
+      "title": "Cloud Storage",
+      "used": "used of",
+      "remaining": "remaining"
+    },
+    "recentDocs": {
+      "title": "Recent Documents",
+      "empty": "No documents uploaded yet.",
+      "viewAll": "View All",
+      "cols": {
+        "title": "Document Title",
+        "date": "Uploaded Date",
+        "status": "Status"
+      }
+    },
+    "badges": {
+      "title": "Latest Badges",
+      "empty": "No badges earned yet."
+    },
+    "quickActions": {
+      "title": "Quick Actions",
+      "upload": "Upload Document",
+      "aiChat": "Ask AI Coach",
+      "leaderboard": "View Leaderboard"
+    }
   }
 }

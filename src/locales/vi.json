@@ -257,5 +257,45 @@
       "emptyDesc": "Tải lên tài liệu, nhận lượt tải và tích lũy điểm uy tín để mở khóa các danh hiệu danh giá nhé.",
       "achievedAt": "Đã đạt được"
     }
+  },
+  "dashboard": {
+    "welcome": "Chào mừng quay trở lại,",
+    "subtitle": "Hôm nay bạn đã sẵn sàng khám phá và chia sẻ tri thức chưa?",
+    "stats": {
+      "uploads": "Tài liệu đã tải lên",
+      "downloads": "Lượt tải nhận được",
+      "rank": "Xếp hạng toàn cầu"
+    },
+    "rank": {
+      "title": "Tiến trình thăng hạng",
+      "nextRank": "Hạng tiếp theo",
+      "remaining": "Điểm còn thiếu",
+      "pointsToNext": "điểm để đạt"
+    },
+    "storage": {
+      "title": "Lưu trữ đám mây",
+      "used": "đã dùng trên",
+      "remaining": "còn trống"
+    },
+    "recentDocs": {
+      "title": "Tài liệu mới đăng gần đây",
+      "empty": "Bạn chưa tải lên tài liệu nào gần đây.",
+      "viewAll": "Xem tất cả",
+      "cols": {
+        "title": "Tên tài liệu",
+        "date": "Ngày đăng tải",
+        "status": "Trạng thái"
+      }
+    },
+    "badges": {
+      "title": "Danh hiệu mới nhất",
+      "empty": "Bạn chưa đạt danh hiệu nào."
+    },
+    "quickActions": {
+      "title": "Lối tắt nhanh",
+      "upload": "Đăng tải tài liệu",
+      "aiChat": "Hỏi trợ lý AI",
+      "leaderboard": "Xem bảng xếp hạng"
+    }
   }
 }

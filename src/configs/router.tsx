@@ -23,6 +23,7 @@ import ForgotPasswordVerifyOtpForm from "@/components/auth/ForgotPasswordVerifyO
 import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
 import SettingsPage from "@/pages/SettingsPage";
 import ManagementPage from "@/pages/ManagementPage";
+import DashboardPage from "@/pages/DashboardPage";
 import BadgesManagementPage from "@/pages/BadgesManagementPage";
 
 export const router = createBrowserRouter([
@@ -96,7 +97,7 @@ export const router = createBrowserRouter([
       },
       {
         path: ROUTE.DASHBOARD,
-        element: <div></div>,
+        element: <DashboardPage />,
       },
       {
         path: ROUTE.COMMUNITY,
