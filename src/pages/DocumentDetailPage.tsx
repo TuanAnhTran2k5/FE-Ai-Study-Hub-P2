@@ -702,7 +702,6 @@ function DocumentDetailPage() {
       : document.myRating
         ? 1
         : 0;
-  const rating = Math.min(5, Math.round(averageRating));
 
 const subjectCode =
   document.subjectCode ??
@@ -796,7 +795,6 @@ const isOwner = Number(currentUser?.userId) === Number(document.ownerId);
         <DocumentDetailSidebar
           document={{ ...document, ratingCount }}
           averageRating={averageRating}
-          rating={rating}
           isOwner={isOwner}
           isBookmarked={isBookmarked}
           selectedRating={selectedRating}
