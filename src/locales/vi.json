@@ -256,7 +256,18 @@
       "emptyTitle": "Chưa có danh hiệu nào",
       "emptyDesc": "Tải lên tài liệu, nhận lượt tải và tích lũy điểm uy tín để mở khóa các danh hiệu danh giá nhé.",
       "achievedAt": "Đã đạt được"
-    }
+    },
+    "rankPrivileges": "Đặc quyền danh hiệu",
+    "storageBonus": "Bộ nhớ đám mây tặng thêm",
+    "approvalPriority": "Mức độ ưu tiên duyệt",
+    "benefitsList": "Đặc quyền của bạn",
+    "activeStatus": "Đang hoạt động",
+    "storageBonusLabel": "Tặng thêm",
+    "xpRange": "Yêu cầu điểm XP",
+    "nextRankPreviewText": "Thăng hạng lên",
+    "nextRankBenefitText": "tiếp theo để mở rộng bộ nhớ lên",
+    "nextRankPriorityText": "và nâng cấp ưu tiên duyệt lên",
+    "privilegesFooterHint": "Cột mốc xếp hạng này được hệ thống tự động xác định dựa trên tổng số điểm XP tích lũy của bạn. Khi đạt các ngưỡng điểm XP cao hơn, các đặc quyền lưu trữ và duyệt bài sẽ được nâng cấp tương ứng."
   },
   "dashboard": {
     "welcome": "Chào mừng quay trở lại,",
@@ -296,6 +307,9 @@
       "upload": "Đăng tải tài liệu",
       "aiChat": "Hỏi trợ lý AI",
       "leaderboard": "Xem bảng xếp hạng"
-    }
+    },
+    "recentActivities": "Hoạt động gần đây",
+    "realtimeUpdates": "Cập nhật thời gian thực",
+    "noRecentActivities": "Chưa có hoạt động hoặc thông báo mới nào gần đây."
   }
 }

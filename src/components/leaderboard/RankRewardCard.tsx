@@ -13,15 +13,18 @@ function formatStorageBonus(bytes: number) {
   const gb = bytes / 1024 / 1024 / 1024;
 
   if (gb >= 1024) return `${(gb / 1024).toFixed(1)} TB`;
-
-  return `${gb.toFixed(0)} GB`;
+  if (gb >= 1) {
+    return `${gb.toFixed(1).replace(".0", "")} GB`;
+  }
+  const mb = bytes / 1024 / 1024;
+  return `${mb.toFixed(0)} MB`;
 }
 
 function RankRewardCard({ rank }: RankRewardCardProps) {
   const isUnlimitedRank = rank.maxScore >= 2147483647;
 
   const scoreLabel = isUnlimitedRank
-    ? `${rank.minScore}+`
+    ? `${rank.minScore > 0 ? rank.minScore - 1 : 0}+`
     : `${rank.minScore} - ${rank.maxScore}`;
 
   const frameScore = isUnlimitedRank ? rank.minScore : rank.maxScore;

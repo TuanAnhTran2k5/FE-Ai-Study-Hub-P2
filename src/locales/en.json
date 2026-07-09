@@ -256,7 +256,18 @@
       "emptyTitle": "No badges yet",
       "emptyDesc": "Upload documents, get downloads, and earn reputation points to unlock badges.",
       "achievedAt": "Unlocked"
-    }
+    },
+    "rankPrivileges": "Rank Privileges",
+    "storageBonus": "Storage Bonus",
+    "approvalPriority": "Review Priority",
+    "benefitsList": "Rank Benefits",
+    "activeStatus": "Active Status",
+    "storageBonusLabel": "Bonus",
+    "xpRange": "XP Requirements",
+    "nextRankPreviewText": "Upgrade to next rank",
+    "nextRankBenefitText": "to expand storage to",
+    "nextRankPriorityText": "and upgrade to",
+    "privilegesFooterHint": "This rank status is calculated automatically based on your total XP points. Reaching higher XP brackets unlocks superior storage and approval privileges."
   },
   "dashboard": {
     "welcome": "Welcome back,",
@@ -296,6 +307,9 @@
       "upload": "Upload Document",
       "aiChat": "Ask AI Coach",
       "leaderboard": "View Leaderboard"
-    }
+    },
+    "recentActivities": "Recent Activities",
+    "realtimeUpdates": "Live Updates",
+    "noRecentActivities": "No recent activities or notifications."
   }
 }
