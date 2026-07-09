@@ -1,7 +1,9 @@
 export const FileType = {
   PDF: "PDF",
   DOCX: "DOCX",
+  TXT: "TXT",
   PPTX: "PPTX",
+  XLS: "XLS",
   XLSX: "XLSX",
   PNG: "PNG",
   JPG: "JPG",

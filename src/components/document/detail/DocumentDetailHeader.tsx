@@ -41,7 +41,7 @@ function DocumentDetailHeader({
   onDownload,
 }: DocumentDetailHeaderProps) {
   return (
-    <div className="mb-5 rounded-3xl border border-border bg-white/95 p-5 shadow-sm backdrop-blur-sm">
+    <div className="mb-5 rounded-3xl border border-border bg-card p-5 shadow-sm backdrop-blur-sm">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="flex min-w-0 flex-1 items-start gap-4">
@@ -56,7 +56,7 @@ function DocumentDetailHeader({
             </Button>
 
             <div className="min-w-0 flex-1">
-              <h1 className="truncate text-3xl font-black tracking-tight text-slate-950">
+              <h1 className="truncate text-3xl font-black tracking-tight text-card-foreground">
                 {document.title}
               </h1>
 
