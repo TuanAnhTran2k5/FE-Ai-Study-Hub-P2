@@ -146,8 +146,11 @@ function CommunityPage() {
         filters.semester === "ALL" ||
         String(document.semesterNo ?? "") === filters.semester;
 
-      const rating = Math.round(document.averageRating ?? 0);
-      const matchesRating = filters.rating === 0 || rating >= filters.rating;
+      const rating = document.averageRating ?? 0;
+      const matchesRating =
+        filters.rating === 0 ||
+        (rating >= filters.rating &&
+          (filters.rating === 5 || rating < filters.rating + 1));
 
       return matchesSearch && matchesSubject && matchesSemester && matchesRating;
     });

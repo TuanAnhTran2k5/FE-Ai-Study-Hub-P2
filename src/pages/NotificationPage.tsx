@@ -9,6 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -45,6 +52,7 @@ function NotificationPage() {
   // NOTE UI STATE: Tab đang chọn. ALL không gửi isRead, UNREAD gửi false, READ gửi true.
   const [activeFilter, setActiveFilter] =
     useState<NotificationFilterType>("ALL");
+  const [isDeleteAllConfirmOpen, setIsDeleteAllConfirmOpen] = useState(false);
 
   // NOTE FILTER: Chuyen tab UI thanh query param cho backend.
   const queryParams = {
@@ -129,6 +137,7 @@ function NotificationPage() {
     },
     onSuccess: (deletedCount) => {
       toast.success(`${deletedCount} notifications deleted successfully.`);
+      setIsDeleteAllConfirmOpen(false);
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
     onError: () => {
@@ -176,15 +185,7 @@ function NotificationPage() {
             variant="outline"
             className="w-fit rounded-xl border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
             disabled={deleteAllMutation.isPending || summary.total === 0}
-            onClick={() => {
-              if (
-                window.confirm(
-                  "Delete all notifications? This action cannot be undone.",
-                )
-              ) {
-                deleteAllMutation.mutate();
-              }
-            }}
+            onClick={() => setIsDeleteAllConfirmOpen(true)}
           >
             <Trash2 className="mr-2 size-4" />
             {deleteAllMutation.isPending ? "Deleting..." : "Delete all"}
@@ -314,6 +315,50 @@ function NotificationPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog
+        open={isDeleteAllConfirmOpen}
+        onOpenChange={setIsDeleteAllConfirmOpen}
+      >
+        <DialogContent className="overflow-hidden rounded-3xl border border-border bg-card p-0 shadow-2xl shadow-black/20 sm:max-w-[500px]">
+          <div className="bg-card px-8 pb-7 pt-8">
+            <DialogHeader className="items-center text-center">
+              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10 text-destructive ring-8 ring-destructive/5">
+                <Trash2 className="h-6 w-6" />
+              </div>
+
+              <DialogTitle className="text-xl font-black text-card-foreground">
+                Delete all notifications?
+              </DialogTitle>
+              <DialogDescription className="max-w-sm text-sm leading-6 text-muted-foreground">
+                Are you sure you want to delete all notifications? This action
+                cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="mt-7 grid gap-3 sm:grid-cols-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="h-12 rounded-2xl border-border bg-secondary font-bold text-secondary-foreground hover:bg-accent hover:text-accent-foreground"
+                onClick={() => setIsDeleteAllConfirmOpen(false)}
+                disabled={deleteAllMutation.isPending}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                type="button"
+                className="h-12 rounded-2xl bg-destructive font-black text-destructive-foreground shadow-lg shadow-destructive/20 hover:bg-destructive/90"
+                onClick={() => deleteAllMutation.mutate()}
+                disabled={deleteAllMutation.isPending}
+              >
+                {deleteAllMutation.isPending ? "Deleting..." : "Delete all"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

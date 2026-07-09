@@ -14,7 +14,6 @@ import type { DocumentResponse } from "@/types/document.type";
 type DocumentDetailSidebarProps = {
   document: DocumentResponse;
   averageRating: number;
-  rating: number;
   isOwner: boolean;
   isBookmarked: boolean;
   selectedRating: number;
@@ -31,7 +30,6 @@ type DocumentDetailSidebarProps = {
 function DocumentDetailSidebar({
   document,
   averageRating,
-  rating,
   isOwner,
   isBookmarked,
   selectedRating,
@@ -240,16 +238,7 @@ function DocumentDetailSidebar({
               </div>
 
               <div className="flex items-center gap-2">
-                <div className="flex text-yellow-400">
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <Star
-                      key={index}
-                      className={`h-5 w-5 ${
-                        index < rating ? "fill-current" : "opacity-30"
-                      }`}
-                    />
-                  ))}
-                </div>
+                <RatingStars value={averageRating} />
 
                 <span className="text-sm text-muted-foreground">
                   ({document.ratingCount ?? 0} ratings)
@@ -273,6 +262,30 @@ function DocumentDetailSidebar({
         </CardContent>
       </Card>
     </aside>
+  );
+}
+
+function RatingStars({ value }: { value: number }) {
+  const rating = Math.max(0, Math.min(5, value));
+
+  return (
+    <div className="flex text-yellow-400">
+      {Array.from({ length: 5 }).map((_, index) => {
+        const fillPercent = Math.max(0, Math.min(1, rating - index)) * 100;
+
+        return (
+          <span key={index} className="relative inline-flex h-5 w-5">
+            <Star className="h-5 w-5 opacity-30" />
+            <span
+              className="absolute inset-0 overflow-hidden"
+              style={{ width: `${fillPercent}%` }}
+            >
+              <Star className="h-5 w-5 fill-current" />
+            </span>
+          </span>
+        );
+      })}
+    </div>
   );
 }
 
