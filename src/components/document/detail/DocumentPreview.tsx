@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { renderAsync } from "docx-preview";
 import * as pdfjsLib from "pdfjs-dist";
 import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+import * as XLSX from "xlsx";
 import { FileText, Minus, Plus } from "lucide-react";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
@@ -23,6 +24,10 @@ function DocumentPreview({ blob, fileTypeLabel, title }: DocumentPreviewProps) {
 
   if (fileTypeLabel === "DOCX") {
     return <DocxPreview blob={blob} title={title} />;
+  }
+
+  if (fileTypeLabel === "XLS" || fileTypeLabel === "XLSX") {
+    return <ExcelPreview blob={blob} title={title} />;
   }
 
   return (
@@ -535,6 +540,334 @@ function DocxPreview({ blob, title }: { blob: Blob; title: string }) {
             <div ref={previewRef} className="w-fit max-w-full bg-white" />
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+type ExcelSheetPreview = {
+  name: string;
+  rows: ExcelCellPreview[][];
+  columnWidths: number[];
+  rowHeights: Array<number | undefined>;
+  totalRows: number;
+  totalCols: number;
+};
+
+type ExcelCellPreview = {
+  value: string;
+  hidden: boolean;
+  rowSpan: number;
+  colSpan: number;
+};
+
+const EXCEL_MAX_ROWS = 300;
+const EXCEL_MAX_COLS = 80;
+const DEFAULT_EXCEL_COLUMN_WIDTH = 128;
+
+function getExcelColumnName(index: number) {
+  let columnName = "";
+  let value = index + 1;
+
+  while (value > 0) {
+    const remainder = (value - 1) % 26;
+    columnName = String.fromCharCode(65 + remainder) + columnName;
+    value = Math.floor((value - 1) / 26);
+  }
+
+  return columnName;
+}
+
+function getExcelColumnWidth(column?: XLSX.ColInfo) {
+  const width =
+    column?.wpx ??
+    (typeof column?.wch === "number" ? column.wch * 7 + 12 : undefined) ??
+    (typeof column?.width === "number" ? column.width * 7 + 12 : undefined) ??
+    DEFAULT_EXCEL_COLUMN_WIDTH;
+
+  return Math.min(Math.max(width, 48), 420);
+}
+
+function getExcelRowHeight(row?: XLSX.RowInfo) {
+  const height =
+    row?.hpx ?? (typeof row?.hpt === "number" ? row.hpt * 1.333 : undefined);
+
+  return height ? Math.min(Math.max(height, 24), 480) : undefined;
+}
+
+function getMergeInfo(rowIndex: number, columnIndex: number, merges: XLSX.Range[]) {
+  const merge = merges.find(
+    (range) =>
+      rowIndex >= range.s.r &&
+      rowIndex <= range.e.r &&
+      columnIndex >= range.s.c &&
+      columnIndex <= range.e.c,
+  );
+
+  if (!merge) {
+    return {
+      hidden: false,
+      rowSpan: 1,
+      colSpan: 1,
+    };
+  }
+
+  const isStart = merge.s.r === rowIndex && merge.s.c === columnIndex;
+
+  if (!isStart) {
+    return {
+      hidden: true,
+      rowSpan: 1,
+      colSpan: 1,
+    };
+  }
+
+  return {
+    hidden: false,
+    rowSpan: Math.min(merge.e.r, EXCEL_MAX_ROWS - 1) - rowIndex + 1,
+    colSpan: Math.min(merge.e.c, EXCEL_MAX_COLS - 1) - columnIndex + 1,
+  };
+}
+
+function getExcelCellText(cell?: XLSX.CellObject) {
+  if (!cell) return "";
+  if (cell.w !== undefined) return String(cell.w);
+  if (cell.v === null || cell.v === undefined) return "";
+
+  return String(cell.v);
+}
+
+function buildExcelRows(
+  sheet: XLSX.WorkSheet,
+  rowCount: number,
+  columnCount: number,
+  merges: XLSX.Range[],
+) {
+  return Array.from({ length: rowCount }).map((_, rowIndex) =>
+    Array.from({ length: columnCount }).map((__, columnIndex) => {
+      const mergeInfo = getMergeInfo(rowIndex, columnIndex, merges);
+
+      return {
+        value: mergeInfo.hidden
+          ? ""
+          : getExcelCellText(
+              sheet[XLSX.utils.encode_cell({ r: rowIndex, c: columnIndex })],
+            ),
+        ...mergeInfo,
+      };
+    }),
+  );
+}
+
+function ExcelPreview({ blob, title }: { blob: Blob; title: string }) {
+  const [sheets, setSheets] = useState<ExcelSheetPreview[]>([]);
+  const [activeSheetName, setActiveSheetName] = useState("");
+  const [isRendering, setIsRendering] = useState(true);
+  const [renderError, setRenderError] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    setIsRendering(true);
+    setRenderError(false);
+    setSheets([]);
+    setActiveSheetName("");
+
+    const renderExcel = async () => {
+      const workbook = XLSX.read(await blob.arrayBuffer(), {
+        cellDates: true,
+        dense: false,
+      });
+
+      return workbook.SheetNames.map((sheetName) => {
+        const sheet = workbook.Sheets[sheetName];
+        const range = sheet?.["!ref"]
+          ? XLSX.utils.decode_range(sheet["!ref"])
+          : null;
+        const totalRows = range ? range.e.r + 1 : 0;
+        const totalCols = range ? range.e.c + 1 : 0;
+        const rowCount = Math.min(totalRows, EXCEL_MAX_ROWS);
+        const columnCount = Math.min(totalCols, EXCEL_MAX_COLS);
+        const merges = sheet?.["!merges"] ?? [];
+
+        return {
+          name: sheetName,
+          rows: buildExcelRows(sheet, rowCount, columnCount, merges),
+          columnWidths: Array.from({ length: columnCount }).map((_, index) =>
+            getExcelColumnWidth(sheet?.["!cols"]?.[index]),
+          ),
+          rowHeights: Array.from({ length: rowCount }).map((_, index) =>
+            getExcelRowHeight(sheet?.["!rows"]?.[index]),
+          ),
+          totalRows,
+          totalCols,
+        };
+      });
+    };
+
+    renderExcel()
+      .then((nextSheets) => {
+        if (!isMounted) return;
+
+        setSheets(nextSheets);
+        setActiveSheetName(nextSheets[0]?.name ?? "");
+      })
+      .catch(() => {
+        if (isMounted) {
+          setRenderError(true);
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsRendering(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [blob]);
+
+  const activeSheet =
+    sheets.find((sheet) => sheet.name === activeSheetName) ?? sheets[0];
+  const columnCount = Math.max(
+    1,
+    activeSheet?.columnWidths.length ??
+      activeSheet?.rows.reduce((max, row) => Math.max(max, row.length), 0) ??
+      1,
+  );
+
+  if (renderError) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center px-6 text-center">
+        <FileText className="h-16 w-16 text-muted-foreground" />
+
+        <h2 className="mt-4 text-xl font-bold text-card-foreground">
+          Cannot preview this spreadsheet
+        </h2>
+
+        <p className="mt-2 max-w-md text-muted-foreground">
+          The spreadsheet content could not be rendered in the browser.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      aria-label={`Preview of ${title}`}
+      className="flex h-full flex-col overflow-hidden bg-white"
+    >
+      <div className="flex min-h-14 items-center gap-2 overflow-x-auto border-b border-slate-200 bg-white px-4">
+        {sheets.map((sheet) => (
+          <button
+            key={sheet.name}
+            type="button"
+            className={`h-9 shrink-0 rounded-xl border px-3 text-sm font-bold transition ${
+              sheet.name === activeSheet?.name
+                ? "border-slate-900 bg-slate-900 text-white"
+                : "border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
+            }`}
+            onClick={() => setActiveSheetName(sheet.name)}
+          >
+            {sheet.name}
+          </button>
+        ))}
+      </div>
+
+      <div className="relative min-h-0 flex-1 overflow-auto bg-slate-100 p-5">
+        {isRendering ? (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 px-6 text-center">
+            <p className="text-sm font-semibold text-slate-700">
+              Rendering spreadsheet preview...
+            </p>
+          </div>
+        ) : null}
+
+        {!isRendering && !activeSheet ? (
+          <div className="flex h-full flex-col items-center justify-center px-6 text-center">
+            <FileText className="h-16 w-16 text-muted-foreground" />
+            <h2 className="mt-4 text-xl font-bold text-card-foreground">
+              This spreadsheet is empty
+            </h2>
+          </div>
+        ) : null}
+
+        {activeSheet ? (
+          <div className="w-fit min-w-full rounded-xl border border-slate-200 bg-white shadow-sm">
+            <div className="border-b border-slate-200 px-4 py-3 text-sm font-semibold text-slate-600">
+              Showing up to {EXCEL_MAX_ROWS} rows and {EXCEL_MAX_COLS} columns
+              {activeSheet.totalRows > EXCEL_MAX_ROWS ||
+              activeSheet.totalCols > EXCEL_MAX_COLS
+                ? ` of ${activeSheet.totalRows} rows x ${activeSheet.totalCols} columns`
+                : ""}
+            </div>
+
+            <table className="border-collapse text-sm text-slate-900">
+              <colgroup>
+                <col className="w-12" />
+                {Array.from({ length: columnCount }).map((_, columnIndex) => (
+                  <col
+                    key={columnIndex}
+                    style={{
+                      width:
+                        activeSheet.columnWidths[columnIndex] ??
+                        DEFAULT_EXCEL_COLUMN_WIDTH,
+                    }}
+                  />
+                ))}
+              </colgroup>
+              <thead>
+                <tr>
+                  <th className="sticky left-0 top-0 z-20 min-w-12 border border-slate-200 bg-slate-100 px-2 py-2 text-center text-xs font-bold text-slate-500" />
+                  {Array.from({ length: columnCount }).map((_, columnIndex) => (
+                    <th
+                      key={columnIndex}
+                      className="sticky top-0 z-10 border border-slate-200 bg-slate-100 px-3 py-2 text-center text-xs font-bold text-slate-600"
+                    >
+                      {getExcelColumnName(columnIndex)}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {activeSheet.rows.map((row, rowIndex) => (
+                  <tr
+                    key={rowIndex}
+                    style={{
+                      height: activeSheet.rowHeights[rowIndex],
+                    }}
+                  >
+                    <th className="sticky left-0 z-10 border border-slate-200 bg-slate-100 px-2 py-2 text-center text-xs font-bold text-slate-500">
+                      {rowIndex + 1}
+                    </th>
+                    {Array.from({ length: columnCount }).map((_, columnIndex) => {
+                      const cell = row[columnIndex] ?? {
+                        value: "",
+                        hidden: false,
+                        rowSpan: 1,
+                        colSpan: 1,
+                      };
+
+                      if (cell.hidden) return null;
+
+                      return (
+                        <td
+                          key={columnIndex}
+                          rowSpan={cell.rowSpan}
+                          colSpan={cell.colSpan}
+                          className="whitespace-pre-wrap break-words border border-slate-200 bg-white px-3 py-2 align-top"
+                        >
+                          {cell.value}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : null}
       </div>
     </div>
   );

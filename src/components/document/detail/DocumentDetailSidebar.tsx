@@ -50,6 +50,13 @@ function DocumentDetailSidebar({
   const uploadedByAvatar =
     document.originalUploaderAvatar ?? document.ownerAvatar ?? null;
 
+  const canRate =
+    !isOwner ||
+    Boolean(
+      document.originalUploaderId &&
+        Number(document.originalUploaderId) !== Number(document.ownerId),
+    );
+
   return (
     <aside className="space-y-3">
       <Card className="rounded-3xl border border-border bg-card shadow-sm">
@@ -85,14 +92,14 @@ function DocumentDetailSidebar({
         </CardContent>
       </Card>
 
-      {!isOwner && (
-        <Card className="rounded-3xl border border-border bg-card shadow-sm">
-          <CardContent className="p-5">
-            <h3 className="text-base font-black text-card-foreground">
-              Community Actions
-            </h3>
+      <Card className="rounded-3xl border border-border bg-card shadow-sm">
+        <CardContent className="p-5">
+          <h3 className="text-base font-black text-card-foreground">
+            {isOwner ? "Actions" : "Community Actions"}
+          </h3>
 
-            <div className="mt-4 space-y-3">
+          <div className="mt-4 space-y-3">
+            {!isOwner && (
               <Button
                 type="button"
                 className="w-full rounded-xl"
@@ -102,28 +109,30 @@ function DocumentDetailSidebar({
                 <Download className="mr-2 h-4 w-4" />
                 {isSavingToStorage ? "Saving..." : "Save to Storage"}
               </Button>
+            )}
 
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full rounded-xl"
-                disabled={isBookmarking}
-                onClick={onBookmark}
-              >
-                <Bookmark
-                  className={`mr-2 h-4 w-4 ${
-                    isBookmarked ? "fill-yellow-400 text-yellow-400" : ""
-                  }`}
-                />
-                {isBookmarking
-                  ? isBookmarked
-                    ? "Removing..."
-                    : "Saving..."
-                  : isBookmarked
-                    ? "Bookmarked"
-                    : "Bookmark"}
-              </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full rounded-xl"
+              disabled={isBookmarking}
+              onClick={onBookmark}
+            >
+              <Bookmark
+                className={`mr-2 h-4 w-4 ${
+                  isBookmarked ? "fill-yellow-400 text-yellow-400" : ""
+                }`}
+              />
+              {isBookmarking
+                ? isBookmarked
+                  ? "Removing..."
+                  : "Saving..."
+                : isBookmarked
+                  ? "Bookmarked"
+                  : "Bookmark"}
+            </Button>
 
+            {canRate && (
               <div className="rounded-2xl bg-secondary p-3">
                 <p className="mb-2 text-sm font-bold text-card-foreground">
                   Rate this document
@@ -153,7 +162,9 @@ function DocumentDetailSidebar({
                   })}
                 </div>
               </div>
+            )}
 
+            {canRate && (
               <Button
                 type="button"
                 variant="outline"
@@ -163,10 +174,10 @@ function DocumentDetailSidebar({
                 <Flag className="mr-2 h-4 w-4" />
                 Report Document
               </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="rounded-3xl border border-border bg-card shadow-sm">
         <CardContent className="p-5">
@@ -183,8 +194,7 @@ function DocumentDetailSidebar({
             <InfoRow
               label="Semester"
               value={
-                document.semesterNo
-                  ? `Semester ${document.semesterNo}`
+                document.semesterNo? `Semester ${document.semesterNo}`
                   : "N/A"
               }
             />
@@ -294,8 +304,7 @@ function formatFileSize(bytes?: number) {
   return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
 }
 
-function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
+function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {return (
     <div className="grid grid-cols-[78px_1fr] gap-3 text-sm">
       <span className="font-medium text-muted-foreground">{label}</span>
       <span className="font-bold leading-5 text-card-foreground">{value}</span>

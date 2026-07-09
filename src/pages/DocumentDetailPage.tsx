@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileText, Image, X } from "lucide-react";
 import { useSelector } from "react-redux";
@@ -76,6 +76,12 @@ function formatFileType(fileType?: string) {
   if (normalizedType.includes("text/plain") || normalizedType.includes("txt")) {
     return "TXT";
   }
+  if (
+  normalizedType.includes("vnd.ms-excel") ||
+  normalizedType.includes("xls")
+) {
+  return "XLS";
+}
 
   return fileType.split("/").pop()?.toUpperCase() || "FILE";
 }
@@ -84,7 +90,7 @@ function formatFileType(fileType?: string) {
 // Kiểm tra loại file nào có thể lấy dạng Blob từ API và preview trực tiếp trong web.
 function canPreviewWithBlob(fileTypeLabel: string) {
   // Các định dạng này có thể lấy file từ API dạng Blob rồi render trực tiếp trong trang.
-  return ["PDF", "TXT", "DOCX"].includes(fileTypeLabel);
+  return ["PDF", "TXT", "DOCX","XLS", "XLSX"].includes(fileTypeLabel);
 }
 
 // Chuẩn hóa MIME type cho Blob để browser/thư viện biết cách render file.
@@ -94,6 +100,10 @@ function getPreviewMimeType(fileTypeLabel: string, fallbackType?: string) {
   if (fileTypeLabel === "TXT") return "text/plain";
   if (fileTypeLabel === "DOCX") {
     return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+  }
+  if (fileTypeLabel === "XLS") return "application/vnd.ms-excel";
+  if (fileTypeLabel === "XLSX") {
+    return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
   }
 
   return fallbackType || "application/octet-stream";

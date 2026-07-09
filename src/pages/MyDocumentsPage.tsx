@@ -36,6 +36,9 @@ const MAX_UPLOAD_SIZE = 20 * 1024 * 1024;
 const ALLOWED_UPLOAD_TYPES = [
   "application/pdf",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   "text/plain",
 ];
 
@@ -321,7 +324,7 @@ function MyDocumentsPage() {
     }
 
     if (!ALLOWED_UPLOAD_TYPES.includes(file.type)) {
-      toast.error("Only PDF, DOCX, and TXT files are supported", {
+      toast.error("Only PDF, DOCX, PPTX, XLS, XLSX, and TXT files are supported", {
         toastId: "upload-document-validation",
       });
       return;

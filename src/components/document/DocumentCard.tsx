@@ -33,6 +33,24 @@ function formatFileType(fileType?: string) {
   if (normalizedType.includes("wordprocessingml") || normalizedType.includes("docx")) {
     return "DOCX";
   }
+  if (
+    normalizedType.includes("presentationml") ||
+    normalizedType.includes("pptx")
+  ) {
+    return "PPTX";
+  }
+  if (
+    normalizedType.includes("spreadsheetml") ||
+    normalizedType.includes("xlsx")
+  ) {
+    return "XLSX";
+  }
+  if (
+    normalizedType.includes("vnd.ms-excel") ||
+    normalizedType.includes("xls")
+  ) {
+    return "XLS";
+  }
   if (normalizedType.includes("text/plain") || normalizedType.includes("txt")) {
     return "TXT";
   }

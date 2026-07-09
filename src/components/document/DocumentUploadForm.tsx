@@ -105,7 +105,7 @@ function DocumentUploadForm({
             ref={fileInputRef}
             name="file"
             type="file"
-            accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+            accept=".pdf,.docx,.pptx,.xls,.xlsx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/plain"
             className="hidden"
             onChange={(event) => handleFileChange(event.target.files?.[0])}
           />
@@ -162,7 +162,7 @@ function DocumentUploadForm({
           )}
 
           <p className="mt-5 text-sm font-medium text-muted-foreground">
-            Supported formats: PDF, DOCX, TXT
+            Supported formats: PDF, DOCX, PPTX, XLS, XLSX, TXT
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
             Maximum file size: 20MB
