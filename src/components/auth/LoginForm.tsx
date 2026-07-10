@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { Lock, Eye, ArrowRight, Mail, EyeOff } from "lucide-react";
+import { Lock, Eye, ArrowRight, Mail, EyeOff, ShieldAlert } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -20,6 +20,13 @@ import {
   loginSchema,
   type LoginFormValues,
 } from "@/validations/auth.validation";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 type LoginErrors = Partial<Record<keyof LoginFormValues, string>>;
 
@@ -30,6 +37,9 @@ function saveAuthSession(user: User) {
 
 function LoginForm() {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<LoginErrors>({});
@@ -38,9 +48,9 @@ function LoginForm() {
     localStorage.getItem("rememberEmail") || "",
   );
 
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  // States for Appeal Suspension Dialog
+  const [showAppealDialog, setShowAppealDialog] = useState(false);
+  const [appealEmail, setAppealEmail] = useState("");
 
   const loginMutation = useMutation<User, Error, LoginRequest>({
     mutationFn: authLogin,
@@ -66,7 +76,8 @@ function LoginForm() {
       const serverMessage = error.response?.data?.message;
 
       if (serverMessage === "Account is banned") {
-        toast.error(t("error.accountBanned"));
+        setAppealEmail(emailValue);
+        setShowAppealDialog(true);
         return;
       }
 
@@ -100,6 +111,13 @@ function LoginForm() {
 
     onError: (error: any) => {
       const serverMessage = error.response?.data?.message;
+
+      if (serverMessage === "Account is banned") {
+        setAppealEmail("");
+        setShowAppealDialog(true);
+        return;
+      }
+
       toast.error(serverMessage || ERROR_CODE.SERVER_ERROR);
     },
   });
@@ -146,6 +164,15 @@ function LoginForm() {
     setErrors({});
 
     loginMutation.mutate(loginRequest);
+  };
+
+  const handleSendAppealEmail = () => {
+    const adminEmail = "aistudyhub062026@gmail.com";
+    const subject = encodeURIComponent("[AI Study Hub] Appeal Account Suspension Request");
+    const body = encodeURIComponent(
+      `Hello AI Study Hub Support Team,\n\nMy account has been suspended and I would like to request an appeal.\n\nAccount Email: ${appealEmail || "[Please enter your email here]"}\nFull Name: [Please enter your full name here]\n\nAppeal Reason & Details:\n[Explain why your account should be reactivated here]\n\nThank you.`
+    );
+    window.location.href = `mailto:${adminEmail}?subject=${subject}&body=${body}`;
   };
 
   return (
@@ -292,6 +319,58 @@ function LoginForm() {
           </Link>
         </p>
       </form>
+
+      {/* APPEAL ACCOUNT SUSPENSION DIALOG */}
+      <Dialog open={showAppealDialog} onOpenChange={setShowAppealDialog}>
+        <DialogContent className="rounded-3xl border border-slate-400 dark:border-border/80 bg-card/98 backdrop-blur-xl w-[92vw] max-w-md p-6 shadow-2xl overflow-hidden text-left z-50">
+          <DialogHeader className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="flex size-11 items-center justify-center rounded-2xl shrink-0 border bg-red-500/10 border-red-500/20 text-red-500">
+                <ShieldAlert className="h-5.5 w-5.5" />
+              </div>
+              <div className="min-w-0 text-left">
+                <span className="text-[9px] uppercase font-black tracking-wider text-red-500 bg-red-500/10 px-2 py-0.5 rounded-md border border-red-500/15">
+                  {t("admin.appealTitle", "Account Locked")}
+                </span>
+                <DialogTitle className="text-sm font-black text-card-foreground mt-0.5">
+                  {t("admin.appealHeader", "Suspension Appeal")}
+                </DialogTitle>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="py-4 space-y-3 my-1">
+            <p className="text-xs text-slate-700 dark:text-muted-foreground/90 font-semibold leading-relaxed">
+              {t("admin.appealMessage", "Your account has been locked due to a violation of community guidelines. If you believe this is a mistake or wish to appeal this decision, you can submit an appeal directly to the Support Team.")}
+            </p>
+            
+            <div className="p-3 bg-secondary/15 rounded-xl border border-border/30 text-[11px] font-bold text-slate-700 dark:text-muted-foreground">
+              <p className="flex items-center gap-1.5">
+                <Mail className="h-3.5 w-3.5 text-primary" />
+                <span>Support Email: <strong className="text-primary">aistudyhub062026@gmail.com</strong></span>
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 pt-2">
+            <Button
+              onClick={handleSendAppealEmail}
+              className="w-full sm:w-auto font-black text-xs px-4 py-2 flex items-center justify-center gap-1.5 rounded-2xl bg-red-600 hover:bg-red-700 text-white cursor-pointer"
+            >
+              <Mail className="h-3.5 w-3.5" />
+              {t("admin.sendAppealAction", "Appeal via Email")}
+            </Button>
+            
+            <Button
+              variant="secondary"
+              onClick={() => setShowAppealDialog(false)}
+              className="w-full sm:w-auto font-bold text-xs px-4 py-2 border border-border bg-secondary hover:bg-secondary-foreground/10 text-card-foreground rounded-2xl cursor-pointer sm:ml-auto"
+            >
+              {t("common.close", "Close")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
