@@ -7,6 +7,8 @@ import { toast } from "react-toastify";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { getNotificationBadgeStyles } from "@/lib/notificationUtils";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
@@ -201,7 +203,7 @@ function NotificationPage() {
               <button
                 key={filter.key}
                 type="button"
-                className={`h-12 flex-1 border-r border-border text-sm font-bold transition last:border-r-0 ${
+                className={`cursor-pointer h-12 flex-1 border-r border-border text-sm font-bold transition last:border-r-0 ${
                   activeFilter === filter.key
                     ? "bg-primary text-primary-foreground"
                     : "bg-card text-card-foreground hover:bg-accent"
@@ -247,7 +249,7 @@ function NotificationPage() {
                 <button
                   key={notification.notificationId}
                   type="button"
-                  className="flex w-full items-start gap-4 border-b border-border p-5 text-left transition last:border-b-0 hover:bg-accent"
+                  className="cursor-pointer flex w-full items-start gap-4 border-b border-border p-5 text-left transition last:border-b-0 hover:bg-accent"
                   onClick={() => handleRead(notification)}
                 >
                   <span
@@ -261,7 +263,7 @@ function NotificationPage() {
                       <h3 className="font-black text-card-foreground">
                         {notification.title}
                       </h3>
-                      <Badge variant="secondary" className="rounded-full">
+                      <Badge variant="outline" className={cn("rounded-full font-bold", getNotificationBadgeStyles(notification.type))}>
                         {notification.type}
                       </Badge>
                     </div>

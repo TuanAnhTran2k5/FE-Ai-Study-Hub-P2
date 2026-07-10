@@ -220,9 +220,8 @@ function CommunityPage() {
       )
       .map((subject) => ({
         code: String(subject.subjectId),
-        name: `${subject.subjectCode ?? "Subject"} - ${
-          subject.subjectName ?? ""
-        }`,
+        name: `${subject.subjectCode ?? "Subject"} - ${subject.subjectName ?? ""
+          }`,
         semesterNo: subject.semesterNo,
       }));
   }, [academicSubjects, filters.semester]);
@@ -261,8 +260,7 @@ function CommunityPage() {
     // NOTE NAVIGATION: Document cua minh -> My Documents detail de co edit/delete.
     // Document cua nguoi khac -> Community detail de co save/bookmark/rating/report.
     navigate(
-      `/${ROUTE.APP}/${
-        isMyDocument ? ROUTE.MY_DOCUMENTS : ROUTE.COMMUNITY
+      `/${ROUTE.APP}/${isMyDocument ? ROUTE.MY_DOCUMENTS : ROUTE.COMMUNITY
       }/${documentId}`,
     );
   };
@@ -386,7 +384,7 @@ function CommunityPage() {
 
         <div className="mb-4 rounded-3xl border border-border bg-card p-5 shadow-sm">
           {/* NOTE UI: Thanh search/filter chinh cua Community. Search loc realtime, Enter de confirm lai keyword. */}
-          <div className="grid gap-4 h-14 lg:grid-cols-[1fr_180px_180px]">
+          <div className="grid gap-4 h-14 lg:grid-cols-[1fr_300px_180px]">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
 
@@ -418,7 +416,7 @@ function CommunityPage() {
               <SelectTrigger className="!h-full w-full rounded-2xl border border-border bg-card px-4 text-base text-card-foreground shadow-none focus:ring-2 focus:ring-ring">
                 <SelectValue placeholder="All Subjects" />
               </SelectTrigger>
-              <SelectContent sideOffset={8} className={selectContentClassName}>
+              <SelectContent position="popper" sideOffset={8} className={selectContentClassName}>
                 <SelectItem value="ALL" className={selectItemClassName}>
                   All Subjects
                 </SelectItem>
@@ -447,7 +445,7 @@ function CommunityPage() {
               <SelectTrigger className="!h-full w-full rounded-2xl border border-border bg-card px-4 text-base text-card-foreground shadow-none focus:ring-2 focus:ring-ring">
                 <SelectValue placeholder="All Semesters" />
               </SelectTrigger>
-              <SelectContent sideOffset={8} className={selectContentClassName}>
+              <SelectContent position="popper" sideOffset={8} className={selectContentClassName}>
                 <SelectItem value="ALL" className={selectItemClassName}>
                   All Semesters
                 </SelectItem>
