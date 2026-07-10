@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell } from "lucide-react";
 import { useSelector } from "react-redux";
@@ -20,6 +21,7 @@ import {
 function NotificationBell() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const [isOpen, setIsOpen] = useState(false);
   const currentUser = useSelector(
     (state: RootState) => state.user as User | null,
   );
@@ -41,6 +43,7 @@ function NotificationBell() {
   });
 
   const openNotificationDetail = (notificationId: number) => {
+    setIsOpen(false);
     navigate(`/${ROUTE.APP}/${ROUTE.NOTIFICATIONS}/${notificationId}`);
   };
 
@@ -56,7 +59,7 @@ function NotificationBell() {
   const latestNotifications = notifications.slice(0, 5);
 
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <button className="relative flex size-11 cursor-pointer items-center justify-center rounded-full border border-border bg-card text-foreground shadow-sm transition-all duration-300 hover:scale-105 hover:border-primary-hover hover:bg-primary-bg-hover hover:text-primary active:scale-95">
           <Bell className="size-5" />
@@ -115,7 +118,10 @@ function NotificationBell() {
         <button
           type="button"
           className="w-full cursor-pointer border-t border-border px-5 py-3 text-sm font-bold text-primary hover:bg-accent"
-          onClick={() => navigate(`/${ROUTE.APP}/${ROUTE.NOTIFICATIONS}`)}
+          onClick={() => {
+            setIsOpen(false);
+            navigate(`/${ROUTE.APP}/${ROUTE.NOTIFICATIONS}`);
+          }}
         >
           View all notifications
         </button>

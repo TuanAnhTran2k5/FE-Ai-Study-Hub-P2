@@ -7,6 +7,8 @@ import { toast } from "react-toastify";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { getNotificationBadgeStyles } from "@/lib/notificationUtils";
 import { Card, CardContent } from "@/components/ui/card";
 import { ROUTE } from "@/models/routePath";
 import type { User } from "@/models/user";
@@ -127,14 +129,14 @@ function NotificationDetailPage() {
         </Button>
       </div>
 
-      <Card className="min-h-[520px] overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+      <Card className="min-h-[520px] overflow-hidden rounded-3xl border border-border bg-card shadow-sm p-0">
         <CardContent className="p-0">
-          <div className="border-b border-border bg-secondary/40 px-10 py-10">
+          <div className="bg-secondary/90 px-10 py-4 rounded-t-3xl">
             <div className="flex flex-wrap items-center gap-3">
               <span className="flex size-16 items-center justify-center rounded-3xl bg-primary/10 text-primary">
                 <Bell className="size-8" />
               </span>
-              <Badge variant="secondary" className="rounded-full px-3 py-1">
+              <Badge variant="outline" className={cn("rounded-full px-3 py-1 font-bold", getNotificationBadgeStyles(notification.type))}>
                 {notification.type}
               </Badge>
               <Badge
@@ -145,7 +147,7 @@ function NotificationDetailPage() {
               </Badge>
             </div>
 
-            <h1 className="mt-7 text-4xl font-black leading-tight text-card-foreground">
+            <h1 className="mt-4 text-2xl font-bold leading-tight text-card-foreground">
               {notification.title}
             </h1>
 

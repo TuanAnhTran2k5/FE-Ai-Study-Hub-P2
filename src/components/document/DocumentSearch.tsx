@@ -44,7 +44,7 @@ function DocumentSearch({
   return (
     <section className="mb-8">
       <div className="rounded-3xl bg-card p-5 shadow-sm">
-        <div className="grid gap-4 h-14 lg:grid-cols-[1fr_180px_180px_180px]">
+        <div className="grid gap-4 h-14 lg:grid-cols-[1fr_280px_160px_160px]">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
 
@@ -61,7 +61,7 @@ function DocumentSearch({
               <SelectValue placeholder="All Subjects" />
             </SelectTrigger>
 
-            <SelectContent className="max-h-72 rounded-2xl bg-popover text-popover-foreground">
+            <SelectContent position="popper" sideOffset={8} className="max-h-72 rounded-2xl bg-popover text-popover-foreground">
               <SelectItem className="h-10 rounded-xl text-base" value="ALL">
                 All Subjects
               </SelectItem>
@@ -82,7 +82,7 @@ function DocumentSearch({
               <SelectValue placeholder="All Semesters" />
             </SelectTrigger>
 
-            <SelectContent className="max-h-72 rounded-2xl bg-popover text-popover-foreground">
+            <SelectContent position="popper" sideOffset={8} className="max-h-72 rounded-2xl bg-popover text-popover-foreground">
               <SelectItem className="h-10 rounded-xl text-base" value="ALL">
                 All Semesters
               </SelectItem>
@@ -100,7 +100,7 @@ function DocumentSearch({
               <SelectValue placeholder="Visibility" />
             </SelectTrigger>
 
-            <SelectContent className="rounded-2xl">
+            <SelectContent position="popper" sideOffset={8} className="rounded-2xl">
               <SelectItem value="ALL">All Visibility</SelectItem>
               <SelectItem value={VisibilityStatus.PUBLIC}>Public</SelectItem>
               <SelectItem value={VisibilityStatus.PRIVATE}>Private</SelectItem>

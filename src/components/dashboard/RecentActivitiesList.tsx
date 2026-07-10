@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { getMyNotifications, markNotificationAsRead } from "@/services/notificationService";
 import type { NotificationResponse } from "@/types/notification.type";
 import { ROUTE } from "@/models/routePath";
+import { cn } from "@/lib/utils";
+import { getNotificationBadgeStyles } from "@/lib/notificationUtils";
 
 function getRelativeTime(dateString: string, lang: string) {
   const date = new Date(dateString);
@@ -186,7 +188,7 @@ export default function RecentActivitiesList() {
                     {getNotificationIcon(selectedNotif.type, "h-5.5 w-5.5")}
                   </div>
                   <div className="min-w-0 text-left">
-                    <span className="text-[9px] uppercase font-black tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-md border border-primary/15">
+                    <span className={cn("text-[9px] uppercase font-black tracking-wider px-2 py-0.5 rounded-md border", getNotificationBadgeStyles(selectedNotif.type))}>
                       {selectedNotif.type || "Notification"}
                     </span>
                     <DialogTitle className="text-sm font-black text-card-foreground mt-1 text-left leading-snug">
