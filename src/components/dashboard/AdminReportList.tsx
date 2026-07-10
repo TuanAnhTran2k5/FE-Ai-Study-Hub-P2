@@ -71,7 +71,7 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
 
   return (
     <>
-      <Card className="rounded-3xl border border-border bg-card/60 backdrop-blur-md shadow-sm">
+      <Card className="rounded-3xl border border-slate-400/80 dark:border-border/80 bg-card shadow-sm">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-5 border-b border-border/50 pb-4">
             <h3 className="text-sm font-black uppercase tracking-wider text-card-foreground flex items-center gap-2">
@@ -154,7 +154,7 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
 
       {/* RESOLVE CASE DIALOG */}
       <Dialog open={!!selectedCase} onOpenChange={(open) => !open && setSelectedCase(null)}>
-        <DialogContent className="rounded-3xl border border-border bg-card/98 backdrop-blur-xl w-[92vw] max-w-2xl p-6 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <DialogContent className="rounded-3xl border border-slate-400/80 dark:border-border/80 bg-card/98 backdrop-blur-xl w-[92vw] max-w-2xl p-6 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
           {selectedCase && (
             <>
               <DialogHeader className="space-y-3 pb-3 border-b border-border/40">
