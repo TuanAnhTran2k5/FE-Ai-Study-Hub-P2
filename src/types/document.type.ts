@@ -49,6 +49,8 @@ export interface DocumentResponse {
 
   isBookmarked?: boolean;
   myRating?: number | null;
+  moderatedByEmail?: string | null;
+  moderationNote?: string | null;
 }
 
 export type MyDocumentResponse = DocumentResponse & {

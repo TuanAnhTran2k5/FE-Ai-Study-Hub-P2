@@ -16,6 +16,7 @@ export interface ReportCaseAdminResponse {
   openedAt: string;
   resolvedAt: string | null;
   resolvedByName: string | null;
+  resolvedByEmail?: string | null;
   adminNote: string | null;
 }
 

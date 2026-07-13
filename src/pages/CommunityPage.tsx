@@ -98,18 +98,20 @@ function CommunityPage() {
   // NOTE DATA: Bo sung subjectCode, subjectName, semesterNo, comboName cho document.
   // Khong filter owner o day vi Community can hien tat ca tai lieu public.
   const hydratedDocuments = useMemo(() => {
-    return documents.map((document) => {
-      const subject = subjectMap.get(document.subjectId);
+    return documents
+      .filter((document) => !document.moderationStatus || document.moderationStatus === "NORMAL")
+      .map((document) => {
+        const subject = subjectMap.get(document.subjectId);
 
-      return {
-        ...document,
-        subjectCode: document.subjectCode ?? subject?.subjectCode,
-        subjectName: document.subjectName ?? subject?.subjectName,
-        semesterNo: document.semesterNo ?? subject?.semesterNo ?? null,
-        comboCode: document.comboCode ?? subject?.comboCode ?? null,
-        comboName: document.comboName ?? subject?.comboName ?? null,
-      };
-    });
+        return {
+          ...document,
+          subjectCode: document.subjectCode ?? subject?.subjectCode,
+          subjectName: document.subjectName ?? subject?.subjectName,
+          semesterNo: document.semesterNo ?? subject?.semesterNo ?? null,
+          comboCode: document.comboCode ?? subject?.comboCode ?? null,
+          comboName: document.comboName ?? subject?.comboName ?? null,
+        };
+      });
   }, [documents, subjectMap]);
 
   // NOTE DATA: Filter tren frontend theo search, subject, semester va rating.
