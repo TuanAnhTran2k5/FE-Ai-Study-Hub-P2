@@ -51,11 +51,20 @@ function LoginForm() {
   // States for Appeal Suspension Dialog
   const [showAppealDialog, setShowAppealDialog] = useState(false);
   const [appealEmail, setAppealEmail] = useState("");
+  const [appealResolvedByEmail, setAppealResolvedByEmail] = useState<string | null>(null);
+  const [banReason, setBanReason] = useState("");
 
   const loginMutation = useMutation<User, Error, LoginRequest>({
     mutationFn: authLogin,
 
     onSuccess: (data) => {
+      if (data.status === "BANNED") {
+        setAppealEmail(data.email || "");
+        setAppealResolvedByEmail((data as any).bannedByEmail || null);
+        setBanReason((data as any).banReason || "N/A");
+        setShowAppealDialog(true);
+        return;
+      }
       queryClient.clear();
       saveAuthSession(data);
 
@@ -76,7 +85,9 @@ function LoginForm() {
       const serverMessage = error.response?.data?.message;
 
       if (serverMessage === "Account is banned") {
-        setAppealEmail(emailValue);
+        setAppealEmail(error.response?.data?.result?.email || "");
+        setAppealResolvedByEmail(error.response?.data?.result?.bannedByEmail || null);
+        setBanReason(error.response?.data?.result?.banReason || "N/A");
         setShowAppealDialog(true);
         return;
       }
@@ -99,6 +110,13 @@ function LoginForm() {
     mutationFn: googleLogin,
 
     onSuccess: (data) => {
+      if (data.status === "BANNED") {
+        setAppealEmail(data.email || "");
+        setAppealResolvedByEmail((data as any).bannedByEmail || null);
+        setBanReason((data as any).banReason || "N/A");
+        setShowAppealDialog(true);
+        return;
+      }
       queryClient.clear();
       saveAuthSession(data);
 
@@ -113,7 +131,9 @@ function LoginForm() {
       const serverMessage = error.response?.data?.message;
 
       if (serverMessage === "Account is banned") {
-        setAppealEmail("");
+        setAppealEmail(error.response?.data?.result?.email || "");
+        setAppealResolvedByEmail(error.response?.data?.result?.bannedByEmail || null);
+        setBanReason(error.response?.data?.result?.banReason || "N/A");
         setShowAppealDialog(true);
         return;
       }
@@ -162,17 +182,32 @@ function LoginForm() {
     }
 
     setErrors({});
+    setAppealEmail(loginRequest.email);
 
     loginMutation.mutate(loginRequest);
   };
 
   const handleSendAppealEmail = () => {
-    const adminEmail = "aistudyhub062026@gmail.com";
+    const adminEmail = appealResolvedByEmail || "aistudyhub062026@gmail.com";
     const subject = encodeURIComponent("[AI Study Hub] Appeal Account Suspension Request");
     const body = encodeURIComponent(
-      `Hello AI Study Hub Support Team,\n\nMy account has been suspended and I would like to request an appeal.\n\nAccount Email: ${appealEmail || "[Please enter your email here]"}\nFull Name: [Please enter your full name here]\n\nAppeal Reason & Details:\n[Explain why your account should be reactivated here]\n\nThank you.`
+      `Hello AI Study Hub Support Team,\n\n` +
+      `My account has been suspended.\n\n` +
+      `Suspended Account Email: ${appealEmail || "[Please write your login email here]"}\n\n` +
+      `Reason: ${banReason}\n\n` +
+      `Appeal Details:\n` +
+      `[Please write your appeal here]`
     );
-    window.location.href = `mailto:${adminEmail}?subject=${subject}&body=${body}`;
+
+    let gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${adminEmail}&su=${subject}&body=${body}`;
+    if (appealEmail && appealEmail.endsWith("@gmail.com")) {
+      gmailUrl = `https://mail.google.com/mail/u/${appealEmail}/?view=cm&fs=1&to=${adminEmail}&su=${subject}&body=${body}`;
+    }
+
+    window.open(gmailUrl, "_blank");
+
+    toast.info(t("admin.redirectingToGmail", "Opening Gmail... Please review and send your appeal in the new tab."));
+    setShowAppealDialog(false);
   };
 
   return (
@@ -339,15 +374,21 @@ function LoginForm() {
             </div>
           </DialogHeader>
 
-          <div className="py-4 space-y-3 my-1">
+          <div className="py-4 space-y-4 my-1">
             <p className="text-xs text-slate-700 dark:text-muted-foreground/90 font-semibold leading-relaxed">
               {t("admin.appealMessage", "Your account has been locked due to a violation of community guidelines. If you believe this is a mistake or wish to appeal this decision, you can submit an appeal directly to the Support Team.")}
             </p>
-            
+
+            {banReason && (
+              <div className="p-3 bg-red-500/5 rounded-xl border border-red-500/10 text-[11px] font-bold text-red-600 dark:text-red-400 space-y-1">
+                <p>{t("admin.banReason", "Lý do")}: <span className="font-semibold text-slate-700 dark:text-slate-300">{banReason}</span></p>
+              </div>
+            )}
+
             <div className="p-3 bg-secondary/15 rounded-xl border border-border/30 text-[11px] font-bold text-slate-700 dark:text-muted-foreground">
               <p className="flex items-center gap-1.5">
                 <Mail className="h-3.5 w-3.5 text-primary" />
-                <span>Support Email: <strong className="text-primary">aistudyhub062026@gmail.com</strong></span>
+                <span>{t("admin.supportEmailLabel", "Support Email")}: <strong className="text-primary">aistudyhub062026@gmail.com</strong></span>
               </p>
             </div>
           </div>
@@ -355,12 +396,11 @@ function LoginForm() {
           <DialogFooter className="flex flex-col sm:flex-row gap-2 pt-2">
             <Button
               onClick={handleSendAppealEmail}
-              className="w-full sm:w-auto font-black text-xs px-4 py-2 flex items-center justify-center gap-1.5 rounded-2xl bg-red-600 hover:bg-red-700 text-white cursor-pointer"
+              className="w-full sm:w-auto font-black text-xs px-4 py-2 flex items-center justify-center gap-1.5 rounded-2xl bg-red-600 hover:bg-red-700 text-white cursor-pointer shadow-lg shadow-red-600/10"
             >
               <Mail className="h-3.5 w-3.5" />
-              {t("admin.sendAppealAction", "Appeal via Email")}
+              {t("admin.sendViaGmail", "Send via Web Gmail")}
             </Button>
-            
             <Button
               variant="secondary"
               onClick={() => setShowAppealDialog(false)}

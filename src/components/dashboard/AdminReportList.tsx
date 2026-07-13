@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { AlertTriangle, Eye, ShieldCheck, Trash2, Calendar, MessageSquare, ShieldAlert } from "lucide-react";
+import { Eye, ShieldCheck, Trash2, Calendar, MessageSquare, ShieldAlert, RotateCcw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "react-toastify";
-import { getPendingReportCases, getReportsByCase, resolveReportCase } from "@/services/adminReportService";
+import { getPendingReportCases, getReportsByCase, resolveReportCase, getHistoryReportCases, refundAppealCase } from "@/services/adminReportService";
 import type { ReportCaseAdminResponse, ReportDetailResponse, AdminDecision } from "@/types/adminReport.type";
 import type { UserResponse } from "@/types/user.type";
 
@@ -22,11 +22,27 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
   const [adminNote, setAdminNote] = useState("");
   const [decision, setDecision] = useState<AdminDecision>("REJECT_REPORT");
 
+  const [subTab, setSubTab] = useState<"PENDING" | "HISTORY">("PENDING");
+  const [showRefundModal, setShowRefundModal] = useState(false);
+  const [refundNote, setRefundNote] = useState("");
+  const [selectedRefundCaseId, setSelectedRefundCaseId] = useState<number | null>(null);
+
   // Fetch pending report cases
-  const { data: reportCases = [], isLoading } = useQuery<ReportCaseAdminResponse[]>({
+  const { data: pendingCases = [], isLoading: isLoadingPending } = useQuery<ReportCaseAdminResponse[]>({
     queryKey: ["admin-pending-reports"],
     queryFn: getPendingReportCases,
+    enabled: subTab === "PENDING",
   });
+
+  // Fetch history report cases
+  const { data: historyCases = [], isLoading: isLoadingHistory } = useQuery<ReportCaseAdminResponse[]>({
+    queryKey: ["admin-history-reports"],
+    queryFn: getHistoryReportCases,
+    enabled: subTab === "HISTORY",
+  });
+
+  const reportCases = subTab === "PENDING" ? pendingCases : historyCases;
+  const isLoading = subTab === "PENDING" ? isLoadingPending : isLoadingHistory;
 
   // Fetch details (reporters and comments) for the active dialog case
   const { data: caseReports = [], isLoading: isLoadingDetails } = useQuery<ReportDetailResponse[]>({
@@ -54,6 +70,20 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
     },
   });
 
+  const refundMutation = useMutation({
+    mutationFn: (data: { caseId: number; note: string }) =>
+      refundAppealCase(data.caseId, currentUser.userId, data.note),
+    onSuccess: () => {
+      toast.success(t("admin.refundSuccess", "Kháng nghị thành công! Tài liệu đã mở khóa, gỡ ban và hoàn lại điểm phạt."));
+      setShowRefundModal(false);
+      setRefundNote("");
+      queryClient.invalidateQueries({ queryKey: ["admin-history-reports"] });
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || t("admin.refundFailed", "Không thể thực hiện hoàn trả điểm phạt"));
+    }
+  });
+
   const handleResolve = () => {
     if (!selectedCase) return;
     resolveMutation.mutate({
@@ -61,6 +91,11 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
       decision,
       note: adminNote,
     });
+  };
+
+  const handleConfirmRefund = () => {
+    if (selectedRefundCaseId === null || !refundNote.trim()) return;
+    refundMutation.mutate({ caseId: selectedRefundCaseId, note: refundNote });
   };
 
   const getLevelBadgeColor = (level: number) => {
@@ -73,12 +108,24 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
     <>
       <Card className="rounded-3xl border border-slate-400/80 dark:border-border/80 bg-card shadow-sm">
         <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-5 border-b border-border/50 pb-4">
-            <h3 className="text-sm font-black uppercase tracking-wider text-card-foreground flex items-center gap-2">
-              <AlertTriangle className="h-4.5 w-4.5 text-amber-500 animate-pulse" />
-              {t("admin.pendingReports", "Pending Reports Queue")}
-            </h3>
-            <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-500">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 border-b border-border/50 pb-4">
+            <div className="flex gap-2 p-1 bg-secondary/15 rounded-xl border border-border/40 w-fit">
+              <Button
+                variant={subTab === "PENDING" ? "default" : "ghost"}
+                onClick={() => setSubTab("PENDING")}
+                className="h-8 rounded-lg text-[11px] font-black uppercase px-3 cursor-pointer"
+              >
+                {t("admin.pendingQueue", "Pending Queue")}
+              </Button>
+              <Button
+                variant={subTab === "HISTORY" ? "default" : "ghost"}
+                onClick={() => setSubTab("HISTORY")}
+                className="h-8 rounded-lg text-[11px] font-black uppercase px-3 cursor-pointer"
+              >
+                {t("admin.historyQueue", "History Queue")}
+              </Button>
+            </div>
+            <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-500 self-start sm:self-auto">
               {reportCases.length} {t("admin.cases", "Cases")}
             </span>
           </div>
@@ -101,8 +148,8 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
               {reportCases.map((rc) => (
                 <div 
                   key={rc.caseId}
-                  onClick={() => setSelectedCase(rc)}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl border border-border/50 bg-secondary/5 hover:border-border transition-all duration-300 hover:shadow-sm cursor-pointer hover:-translate-y-0.5"
+                  onClick={() => subTab === "PENDING" && setSelectedCase(rc)}
+                  className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl border border-border/50 bg-secondary/5 hover:border-border transition-all duration-300 hover:shadow-sm ${subTab === "PENDING" ? "cursor-pointer hover:-translate-y-0.5" : ""}`}
                 >
                   <div className="space-y-1.5 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -112,6 +159,17 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
                       <span className="text-[9px] font-black uppercase tracking-wider text-purple-500 bg-purple-500/10 px-2 py-0.5 border border-purple-500/15 rounded-md">
                         {rc.reasonName}
                       </span>
+                      {subTab === "HISTORY" && (
+                        rc.caseStatus === "REJECTED" ? (
+                          <span className="text-[9px] font-black uppercase tracking-wider text-slate-500 bg-slate-500/10 px-2 py-0.5 border border-slate-500/15 rounded-md">
+                            {t("admin.statusRejected", "REJECTED")}
+                          </span>
+                        ) : (
+                          <span className="text-[9px] font-black uppercase tracking-wider text-teal-500 bg-teal-500/10 px-2 py-0.5 border border-teal-500/15 rounded-md">
+                            {t("admin.statusResolved", "RESOLVED")}
+                          </span>
+                        )
+                      )}
                       <span className="text-[9px] font-bold text-muted-foreground flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
                         {new Date(rc.openedAt).toLocaleDateString()}
@@ -122,22 +180,58 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
                       {rc.documentTitle}
                     </h4>
 
-                    <p className="text-[10px] text-muted-foreground font-semibold flex items-center gap-1.5">
-                      <MessageSquare className="h-3.5 w-3.5" />
-                      {rc.reportCount} / {rc.requiredThreshold} {t("admin.reportCountHint", "Reports received")}
-                    </p>
+                    {subTab === "PENDING" ? (
+                      <p className="text-[10px] text-muted-foreground font-semibold flex items-center gap-1.5">
+                        <MessageSquare className="h-3.5 w-3.5" />
+                        {rc.reportCount} / {rc.requiredThreshold} {t("admin.reportCountHint", "Reports received")}
+                      </p>
+                    ) : (
+                      <div className="space-y-0.5">
+                        <p className="text-[9px] text-muted-foreground font-semibold">
+                          {t("admin.resolvedBy", "Resolved by")}: <strong className="text-card-foreground">{rc.resolvedByName || "System"}</strong> {rc.resolvedByEmail && `(${rc.resolvedByEmail})`}
+                        </p>
+                        {rc.adminNote && (
+                          <p className="text-[9px] text-amber-600 dark:text-amber-500 font-semibold truncate max-w-md">
+                            {t("admin.adminNotePrefix", "Note")}: {rc.adminNote}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
 
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedCase(rc);
-                    }}
-                    className="h-8 rounded-xl font-bold text-xs bg-primary/10 border border-primary/20 text-primary hover:bg-primary hover:text-primary-foreground flex items-center gap-1.5 shrink-0"
-                  >
-                    <Eye className="h-3.5 w-3.5" />
-                    {t("admin.reviewCase", "Review")}
-                  </Button>
+                  {subTab === "PENDING" ? (
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedCase(rc);
+                      }}
+                      className="h-8 rounded-xl font-bold text-xs bg-primary/10 border border-primary/20 text-primary hover:bg-primary hover:text-primary-foreground flex items-center gap-1.5 shrink-0"
+                    >
+                      <Eye className="h-3.5 w-3.5" />
+                      {t("admin.reviewCase", "Review")}
+                    </Button>
+                  ) : (
+                    rc.caseStatus === "RESOLVED" ? (
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedRefundCaseId(rc.caseId);
+                          setShowRefundModal(true);
+                        }}
+                        className="h-8 rounded-xl font-black text-xs bg-teal-600 hover:bg-teal-700 text-white flex items-center gap-1.5 shrink-0 cursor-pointer"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        {t("admin.refundAppealAction", "Hoàn điểm phạt")}
+                      </Button>
+                    ) : (
+                      <Button
+                        disabled
+                        className="h-8 rounded-xl font-bold text-xs bg-secondary text-muted-foreground/60 border border-border flex items-center gap-1.5 shrink-0 select-none opacity-60"
+                      >
+                        {t("admin.refundAppealDone", "Đã gỡ khóa / Hoàn điểm")}
+                      </Button>
+                    )
+                  )}
                 </div>
               ))}
             </div>
@@ -293,6 +387,66 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
               </DialogFooter>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* APPEAL REFUND DIALOG */}
+      <Dialog open={showRefundModal} onOpenChange={setShowRefundModal}>
+        <DialogContent className="rounded-3xl border border-slate-400/80 dark:border-border/80 bg-card/98 backdrop-blur-xl w-[92vw] max-w-md p-6 shadow-2xl overflow-hidden flex flex-col text-left z-50">
+          <DialogHeader className="space-y-3 pb-3 border-b border-border/40 text-left">
+            <div className="flex items-center gap-3">
+              <div className="flex size-11 items-center justify-center rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-600 shrink-0">
+                <RotateCcw className="h-5.5 w-5.5" />
+              </div>
+              <div className="min-w-0 text-left">
+                <span className="text-[9px] uppercase font-black tracking-wider text-teal-600 bg-teal-500/10 px-2 py-0.5 rounded-md border border-teal-500/15">
+                  Kháng nghị #{selectedRefundCaseId}
+                </span>
+                <DialogTitle className="text-sm font-black text-card-foreground mt-1 text-left leading-snug">
+                  Duyệt Kháng Nghị & Hoàn Điểm Phạt
+                </DialogTitle>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4 text-left">
+            <p className="text-xs text-muted-foreground font-semibold leading-relaxed">
+              Hệ thống sẽ thực hiện khôi phục tài khoản của tác giả về trạng thái hoạt động (ACTIVE), chuyển tài liệu về bình thường (NORMAL), gỡ bỏ cảnh cáo và hoàn trả toàn bộ điểm phạt đã trừ trong lịch sử của vụ việc này.
+            </p>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-wider text-muted-foreground">
+                Ghi chú giải quyết kháng nghị
+              </label>
+              <Textarea
+                placeholder="Nhập lý do gỡ khóa tài khoản, khôi phục tài liệu hoặc phản hồi kháng nghị..."
+                value={refundNote}
+                onChange={(e) => setRefundNote(e.target.value)}
+                className="min-h-[90px] max-h-[150px] rounded-2xl border border-border bg-background text-xs font-bold p-3 text-card-foreground focus:border-primary placeholder:text-muted-foreground/60 focus-visible:ring-0 focus-visible:ring-offset-0"
+              />
+            </div>
+          </div>
+
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-2">
+            <Button
+              onClick={handleConfirmRefund}
+              disabled={refundMutation.isPending || !refundNote.trim()}
+              className="w-full sm:w-auto font-black text-xs px-4 py-2 flex items-center justify-center gap-1.5 rounded-2xl bg-teal-600 hover:bg-teal-700 text-white cursor-pointer"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              Xác nhận & Hoàn điểm
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setShowRefundModal(false);
+                setRefundNote("");
+              }}
+              disabled={refundMutation.isPending}
+              className="w-full sm:w-auto font-bold text-xs px-4 py-2 border border-border bg-secondary hover:bg-secondary-foreground/10 text-card-foreground rounded-2xl cursor-pointer"
+            >
+              Hủy
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>

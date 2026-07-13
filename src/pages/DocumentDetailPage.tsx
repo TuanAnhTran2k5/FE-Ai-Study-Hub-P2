@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileText, Image, X } from "lucide-react";
 import { useSelector } from "react-redux";
@@ -27,6 +27,7 @@ import DocumentDetailSidebar from "@/components/document/detail/DocumentDetailSi
 import DocumentPreview from "@/components/document/detail/DocumentPreview";
 import DocumentUpdateDialog from "@/components/document/detail/DocumentUpdateDialog";
 import DocumentDetailHeader from "@/components/document/detail/DocumentDetailHeader";
+import BannedUserModal from "@/components/document/detail/BannedUserModal";
 import { VisibilityStatus } from "@/models/document.enum";
 import { ROUTE } from "@/models/routePath";
 import { getAllAcademicSubjects } from "@/services/academicService";
@@ -199,6 +200,7 @@ function DocumentDetailPage() {
     null,
   );
   const [reportEvidencePreview, setReportEvidencePreview] = useState("");
+  const [isBannedModalOpen, setIsBannedModalOpen] = useState(true);
 
   const {
     data: document,
@@ -691,13 +693,71 @@ function DocumentDetailPage() {
             <p className="text-lg font-bold text-card-foreground">
               Document not found
             </p>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <p className="mt-2 text-sm text-muted-foreground font-semibold">
               Please check your document id or MockAPI endpoint.
             </p>
           </CardContent>
         </Card>
       </section>
     );
+  }
+
+  const isOwner = Number(currentUser?.userId) === Number(document.ownerId);
+  const isBannedOrHidden = document.moderationStatus === "HIDDEN" || document.moderationStatus === "REMOVED";
+
+  if (isBannedOrHidden) {
+    if (isOwner) {
+      return (
+        <section className="w-full px-8 py-10 flex justify-center items-center min-h-[500px]">
+          <Card className="rounded-3xl border border-red-200/50 bg-card shadow-xl max-w-lg w-full overflow-hidden">
+            <div className="bg-gradient-to-b from-red-50/50 to-white dark:from-red-950/10 dark:to-card p-8 text-center space-y-4">
+              <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20 text-red-600 ring-8 ring-red-50 dark:ring-red-950/10">
+                <FileText className="h-7 w-7" />
+              </div>
+              <h2 className="text-lg font-black text-card-foreground">
+                Tài liệu bị tạm khoá / ẩn do vi phạm
+              </h2>
+              <p className="text-xs text-muted-foreground leading-relaxed font-semibold">
+                Tài liệu <strong>"{document.title}"</strong> của bạn đã bị ẩn đối với cộng đồng do vi phạm chính sách nội dung của hệ thống. Bạn có thể gửi kháng nghị trực tiếp cho Ban quản trị để được xem xét gỡ khóa và hoàn trả điểm phạt đã trừ.
+              </p>
+              <div className="pt-2">
+                <Button
+                  onClick={() => setIsBannedModalOpen(true)}
+                  className="w-full h-11 bg-red-600 hover:bg-red-700 text-white rounded-2xl text-xs font-black flex items-center justify-center gap-1.5 cursor-pointer shadow-lg shadow-red-600/10"
+                >
+                  Gửi yêu cầu Kháng nghị qua Email
+                </Button>
+              </div>
+            </div>
+          </Card>
+          <BannedUserModal
+            isOpen={isBannedModalOpen}
+            onClose={() => setIsBannedModalOpen(false)}
+            userEmail={currentUser?.email || ""}
+            userName={currentUser?.fullName || ""}
+            moderatedByEmail={document.moderatedByEmail}
+            moderationNote={document.moderationNote}
+            documentTitle={document.title}
+            documentId={document.documentId}
+          />
+        </section>
+      );
+    } else {
+      return (
+        <section className="w-full px-8 py-10">
+          <Card className="rounded-3xl border border-border bg-card shadow-sm">
+            <CardContent className="p-8 text-center">
+              <p className="text-lg font-bold text-card-foreground">
+                Tài liệu không tồn tại hoặc đã bị gỡ bỏ
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground font-semibold">
+                Tài liệu bạn đang cố gắng truy cập không khả dụng hoặc đã bị gỡ bỏ do vi phạm quy tắc cộng đồng.
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+      );
+    }
   }
 
   // Nếu BE chưa recompute averageRating/ratingCount nhưng đã trả myRating,
@@ -718,7 +778,7 @@ const subjectCode =
   academicSubject?.subjectCode ??
   `Subject ${document.subjectId}`;
 
-const isOwner = Number(currentUser?.userId) === Number(document.ownerId);
+// isOwner is already declared at the top of the function
 
   return (
    <section className="w-full px-6 py-4">

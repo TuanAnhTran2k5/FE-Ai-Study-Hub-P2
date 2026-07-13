@@ -55,3 +55,16 @@ export const resolveReportCase = async (
   );
   return response.data.result;
 };
+
+export const refundAppealCase = async (
+  caseId: number,
+  adminId: number,
+  note: string
+): Promise<ReportCaseAdminResponse> => {
+  const response = await api.post<APIResponse<ReportCaseAdminResponse>>(
+    `/admin/report-cases/${caseId}/appeal-refund`,
+    { adminId, note }
+  );
+  return response.data.result;
+};
+
