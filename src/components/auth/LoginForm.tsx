@@ -31,7 +31,7 @@ import {
 type LoginErrors = Partial<Record<keyof LoginFormValues, string>>;
 
 function saveAuthSession(user: User) {
-  localStorage.setItem("accessToken", user.accessToken);
+  localStorage.setItem("accessToken", user.accessToken || "");
   localStorage.setItem("authUserId", String(user.userId));
 }
 

@@ -1,5 +1,4 @@
 import HeroSection from "../components/home/HeroSection";
-import TopSubjectsSection from "@/components/home/TopSubjectsSection";
 import { useSelector } from "react-redux";
 import type { UserResponse } from "@/types/user.type";
 import { ROUTE } from "@/models/routePath";

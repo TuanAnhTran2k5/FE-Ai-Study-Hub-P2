@@ -405,6 +405,9 @@ function DocumentDetailPage() {
     onSuccess: () => {
       toast.success("Document deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-moderation-summary"] });
       setIsDeleteOpen(false);
       navigate("/app/mydocuments");
     },

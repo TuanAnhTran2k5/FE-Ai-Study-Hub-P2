@@ -9,13 +9,13 @@ function AIChatPage() {
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<number[]>([]);
   const [isHistoryCollapsed, setIsHistoryCollapsed] = useState(false);
   const [pendingPrompt, setPendingPrompt] = useState("");
+  const [isDocumentDialogOpen, setIsDocumentDialogOpen] = useState(false);
+  
   const handleNewChat = () => {
     setActiveSessionId(null);
     setSelectedDocumentIds([]);
     setPendingPrompt("");
   };
-
-
 
   const handleSelectSession = (sessionId: number, documentIds: number[]) => {
     setActiveSessionId(sessionId);
@@ -47,6 +47,7 @@ function AIChatPage() {
           pendingPrompt={pendingPrompt}
           onPendingPromptConsumed={() => setPendingPrompt("")}
           onSessionCreated={setActiveSessionId}
+          onAddDocumentClick={() => setIsDocumentDialogOpen(true)}
         />
       </div>
 
@@ -56,6 +57,8 @@ function AIChatPage() {
           selectedDocumentIds={selectedDocumentIds}
           onSelectedDocumentIdsChange={setSelectedDocumentIds}
           onPromptClick={setPendingPrompt}
+          isDialogOpen={isDocumentDialogOpen}
+          onDialogOpenChange={setIsDocumentDialogOpen}
         />
       </div>
     </div>

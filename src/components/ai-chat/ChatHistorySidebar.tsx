@@ -1,13 +1,16 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Check,
   ChevronLeft,
   ChevronRight,
   History,
   Maximize2,
   MessageSquare,
+  Pencil,
   PlusCircle,
   Trash2,
+  X,
 } from "lucide-react";
 import { toast } from "react-toastify";
 
@@ -16,6 +19,7 @@ import ChatHistoryDialog from "@/components/ai-chat/ChatHistoryDialog";
 import {
   deleteRagChatSession,
   getRagChatSessions,
+  updateRagSessionTitle,
 } from "@/services/ragService";
 import type { RagChatSessionResponse } from "@/types/rag.type";
 
@@ -38,6 +42,8 @@ function ChatHistorySidebar({
 }: ChatHistorySidebarProps) {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingSessionId, setEditingSessionId] = useState<number | null>(null);
+  const [newTitle, setNewTitle] = useState("");
 
   const { data: sessions = [], isLoading } = useQuery({
     queryKey: ["ragChatSessions"],
@@ -78,14 +84,44 @@ function ChatHistorySidebar({
     },
   });
 
+  const renameMutation = useMutation({
+    mutationFn: ({ sessionId, title }: { sessionId: number; title: string }) =>
+      updateRagSessionTitle(sessionId, { sessionTitle: title }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ragChatSessions"] });
+      setEditingSessionId(null);
+      setNewTitle("");
+      toast.success("Chat renamed successfully.");
+    },
+    onError: (error: any) => {
+      const serverMessage = error.response?.data?.message;
+      toast.error(serverMessage || "Cannot rename chat.");
+    },
+  });
+
   const handleDeleteSession = (sessionId: number) => {
     deleteMutation.mutate(sessionId);
+  };
+
+  const handleStartRename = (sessionId: number, currentTitle: string) => {
+    setEditingSessionId(sessionId);
+    setNewTitle(currentTitle || "");
+  };
+
+  const handleRenameSubmit = (sessionId: number) => {
+    const title = newTitle.trim();
+    if (!title) {
+      toast.warn("Title cannot be empty");
+      return;
+    }
+    renameMutation.mutate({ sessionId, title });
   };
 
 
 
   const renderSessionItem = (session: RagChatSessionResponse) => {
     const isActive = activeSessionId === session.sessionId;
+    const isEditing = editingSessionId === session.sessionId;
 
     return (
       <div
@@ -96,46 +132,97 @@ function ChatHistorySidebar({
             : "text-card-foreground hover:bg-primary/5"
         }`}
       >
-        <button
-          type="button"
-          onClick={() =>
-            onSelectSession(session.sessionId, session.documentIds ?? [])
-          }
-          className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2.5 text-left cursor-pointer"
-        >
-          <MessageSquare
-            className={`size-4 shrink-0 ${
-              isActive ? "text-primary" : "text-muted-foreground"
-            }`}
-          />
-
-          {!isCollapsed && (
-            <div className="min-w-0 flex-1">
-              <p
-                className={`truncate text-sm font-semibold ${
-                  isActive ? "text-primary" : "text-card-foreground"
+        {isEditing ? (
+          <div className="flex min-w-0 flex-1 items-center gap-2 px-3 py-2">
+            <input
+              type="text"
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  handleRenameSubmit(session.sessionId);
+                } else if (e.key === "Escape") {
+                  setEditingSessionId(null);
+                }
+              }}
+              autoFocus
+              className="h-8 min-w-0 flex-1 rounded-xl border border-primary/30 bg-background/50 px-2.5 text-xs font-semibold text-card-foreground outline-none focus:border-primary/60"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              disabled={renameMutation.isPending}
+              onClick={() => handleRenameSubmit(session.sessionId)}
+              className="size-7 rounded-lg text-emerald-500 hover:bg-emerald-500/10 cursor-pointer"
+            >
+              <Check className="size-3.5" />
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => setEditingSessionId(null)}
+              className="size-7 rounded-lg text-muted-foreground hover:bg-muted-foreground/10 cursor-pointer"
+            >
+              <X className="size-3.5" />
+            </Button>
+          </div>
+        ) : (
+          <>
+            <button
+              type="button"
+              onClick={() =>
+                onSelectSession(session.sessionId, session.documentIds ?? [])
+              }
+              className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2.5 text-left cursor-pointer"
+            >
+              <MessageSquare
+                className={`size-4 shrink-0 ${
+                  isActive ? "text-primary" : "text-muted-foreground"
                 }`}
-              >
-                {session.sessionTitle || "Untitled chat"}
-              </p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">
-                {new Date(session.updatedAt).toLocaleDateString()}
-              </p>
-            </div>
-          )}
-        </button>
+              />
 
-        {!isCollapsed && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            disabled={deleteMutation.isPending}
-            onClick={() => handleDeleteSession(session.sessionId)}
-            className="mr-1.5 size-7 shrink-0 opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100 cursor-pointer"
-          >
-            <Trash2 className="size-3.5" />
-          </Button>
+              {!isCollapsed && (
+                <div className="min-w-0 flex-1">
+                  <p
+                    className={`truncate text-sm font-semibold ${
+                      isActive ? "text-primary" : "text-card-foreground"
+                    }`}
+                  >
+                    {session.sessionTitle || "Untitled chat"}
+                  </p>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">
+                    {new Date(session.updatedAt).toLocaleDateString()}
+                  </p>
+                </div>
+              )}
+            </button>
+
+            {!isCollapsed && (
+              <div className="mr-1.5 flex shrink-0 items-center gap-0.5">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleStartRename(session.sessionId, session.sessionTitle)}
+                  className="size-7 opacity-0 transition-opacity hover:bg-primary/10 hover:text-primary group-hover:opacity-100 cursor-pointer"
+                >
+                  <Pencil className="size-3.5" />
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  disabled={deleteMutation.isPending}
+                  onClick={() => handleDeleteSession(session.sessionId)}
+                  className="size-7 opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100 cursor-pointer"
+                >
+                  <Trash2 className="size-3.5" />
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     );

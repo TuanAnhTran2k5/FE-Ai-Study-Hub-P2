@@ -15,9 +15,6 @@ function formatDate(date?: string | null) {
   return new Date(date).toLocaleDateString("vi-VN");
 }
 
-function getRoleLabel(user: UserResponse) {
-  return user.displayRole || (user.role === "AD" ? "Admin" : "User");
-}
 
 function getStatusLabel(user: UserResponse) {
   return user.displayStatus || user.status;
@@ -62,9 +59,7 @@ function ProfileOverviewCard({ user }: ProfileOverviewCardProps) {
                 {getRankName(user)}
               </Badge>
 
-              <Badge variant="outline" className="rounded-full px-3 py-1">
-                Role: {getRoleLabel(user)}
-              </Badge>
+
 
               <Badge
                 variant="outline"

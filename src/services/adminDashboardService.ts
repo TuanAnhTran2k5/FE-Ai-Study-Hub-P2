@@ -97,3 +97,16 @@ export const unbanUser = async (userId: number): Promise<AdminUserResponse> => {
   );
   return response.data.result;
 };
+
+// Cập nhật vai trò người dùng (US <-> AD) - Chỉ dành cho System Admin
+export const updateUserRole = async (
+  userId: number,
+  role: "US" | "AD"
+): Promise<AdminUserResponse> => {
+  const response = await api.post<APIResponse<AdminUserResponse>>(
+    `/admin/users/${userId}/role`,
+    { role }
+  );
+  return response.data.result;
+};
+

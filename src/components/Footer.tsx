@@ -1,7 +1,10 @@
 import { NAVIGATE_KEY } from "@/configs/router";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer className="border-t border-border bg-gradient-to-r from-footer-start via-footer-middle to-footer-end text-footer-foreground">
       <div className="mx-auto px-10 p-2">
@@ -31,8 +34,9 @@ function Footer() {
                   to={item.path}
                   className="relative text-footer-link transition-all duration-300 hover:-translate-y-0.5 hover:text-footer-link-hover after:absolute after:left-1/2 after:-bottom-1 after:h-[2px] after:w-0 after:-translate-x-1/2 after:rounded-full after:bg-footer-link-hover after:transition-all after:duration-300 hover:after:w-full"
                 >
-                  {item.name}
+                  {t(item.nameKey)}
                 </Link>
+
 
                 {index < NAVIGATE_KEY.length - 1 && (
                   <span className="text-footer-dot">•</span>

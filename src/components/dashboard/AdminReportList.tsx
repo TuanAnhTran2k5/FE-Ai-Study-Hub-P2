@@ -64,6 +64,10 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
       setSelectedCase(null);
       setAdminNote("");
       queryClient.invalidateQueries({ queryKey: ["admin-pending-reports"] });
+      queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-moderation-summary"] });
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.message || t("admin.resolveFailed", "Failed to resolve report case"));
@@ -78,6 +82,10 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
       setShowRefundModal(false);
       setRefundNote("");
       queryClient.invalidateQueries({ queryKey: ["admin-history-reports"] });
+      queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-moderation-summary"] });
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.message || t("admin.refundFailed", "Không thể thực hiện hoàn trả điểm phạt"));

@@ -396,6 +396,13 @@
     "pleaseProvideReason": "Please provide a reason for banning.",
     "nodes": "Active",
     "healthy": "Healthy",
-    "noSubjectData": "No distribution data available."
+    "noSubjectData": "No distribution data available.",
+    "changeRoleAction": "Change Role",
+    "changeRoleTitle": "Change User Role",
+    "changeRoleConfirmPrompt": "Are you sure you want to change this student's role from {{from}} to {{to}}?",
+    "confirmChangeRole": "Confirm Change",
+    "changeRoleSuccess": "User role updated successfully!",
+    "changeRoleFailed": "Failed to update user role.",
+    "userRole": "Role"
   }
 }

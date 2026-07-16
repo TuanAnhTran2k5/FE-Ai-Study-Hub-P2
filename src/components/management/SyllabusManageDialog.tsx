@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import {
   FileText,
@@ -50,6 +50,8 @@ export default function SyllabusManageDialog({
   subject,
 }: SyllabusManageDialogProps) {
   if (!subject) return null;
+
+  const queryClient = useQueryClient();
 
   // States
   const [activeTab, setActiveTab] = useState<"editor" | "history" | "pdf">("editor");
@@ -126,6 +128,8 @@ export default function SyllabusManageDialog({
       toast.success(SUCCESS_MESSAGE.CREATE_SUBJECT_SUCCESS);
       refetchSyllabus();
       refetchHistory();
+      queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || ERROR_CODE.CREATE_SUBJECT_FAILED);
@@ -140,6 +144,8 @@ export default function SyllabusManageDialog({
       toast.success(SUCCESS_MESSAGE.UPDATE_SUBJECT_SUCCESS);
       refetchSyllabus();
       refetchHistory();
+      queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || ERROR_CODE.UPDATE_SUBJECT_FAILED);
@@ -153,6 +159,8 @@ export default function SyllabusManageDialog({
       toast.success(`Rolled back successfully to version ${data.embeddingVersion}!`);
       refetchSyllabus();
       refetchHistory();
+      queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to rollback version");
@@ -166,6 +174,8 @@ export default function SyllabusManageDialog({
       toast.success("Syllabus deleted successfully!");
       setIsDeleting(false);
       refetchSyllabus();
+      queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || ERROR_CODE.DELETE_SUBJECT_FAILED);
