@@ -20,6 +20,8 @@ interface ContextSidebarProps {
   selectedDocumentIds: number[];
   onSelectedDocumentIdsChange: (documentIds: number[]) => void;
   onPromptClick: (prompt: string) => void;
+  isDialogOpen?: boolean;
+  onDialogOpenChange?: (open: boolean) => void;
 }
 
 function formatFileSize(size: number) {
@@ -43,8 +45,13 @@ function ContextSidebar({
   selectedDocumentIds,
   onSelectedDocumentIdsChange,
   onPromptClick,
+  isDialogOpen: propIsDialogOpen,
+  onDialogOpenChange: propOnDialogOpenChange,
 }: ContextSidebarProps) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLocalDialogOpen, setIsLocalDialogOpen] = useState(false);
+  const isDialogOpen = propIsDialogOpen !== undefined ? propIsDialogOpen : isLocalDialogOpen;
+  const setIsDialogOpen = propOnDialogOpenChange !== undefined ? propOnDialogOpenChange : setIsLocalDialogOpen;
+  
   const [keyword, setKeyword] = useState("");
 
   const {

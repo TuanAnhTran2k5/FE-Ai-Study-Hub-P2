@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, Loader2, Send, Sparkles } from "lucide-react";
+import { ArrowUp, FileText, Loader2, Mic, Plus, Sparkles } from "lucide-react";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 
@@ -28,6 +28,7 @@ interface ChatAreaProps {
   pendingPrompt: string;
   onPendingPromptConsumed: () => void;
   onSessionCreated: (sessionId: number) => void;
+  onAddDocumentClick?: () => void;
 }
 
 interface ChatMessage {
@@ -53,6 +54,7 @@ function ChatArea({
   pendingPrompt,
   onPendingPromptConsumed,
   onSessionCreated,
+  onAddDocumentClick,
 }: ChatAreaProps) {
   const queryClient = useQueryClient();
   const currentUser = useSelector((state: RootState) => state.user);
@@ -64,6 +66,17 @@ function ChatArea({
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const currentSessionIdRef = useRef<number | null>(activeSessionId);
+  const isCreatingSession = useRef(false);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // Tự động co giãn chiều cao của Textarea theo nội dung nhập vào
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      const nextHeight = Math.min(textareaRef.current.scrollHeight, 200);
+      textareaRef.current.style.height = `${nextHeight}px`;
+    }
+  }, [question]);
 
   const hasActiveSession = activeSessionId !== null;
 
@@ -162,7 +175,9 @@ function ChatArea({
 
   useEffect(() => {
     setQuestion("");
-    setOptimisticMessages([]);
+    if (!isCreatingSession.current) {
+      setOptimisticMessages([]);
+    }
     currentSessionIdRef.current = activeSessionId;
   }, [activeSessionId]);
 
@@ -191,6 +206,7 @@ function ChatArea({
     // Đẩy tin nhắn của User lên giao diện ngay lập tức
     setOptimisticMessages((prev) => [...prev, optimisticUserMessage]);
 
+    isCreatingSession.current = true;
     // Trì hoãn cuộc gọi API 1 chút để React hoàn tất render tin nhắn của user trước, triệt tiêu cảm giác khựng UI
     setTimeout(async () => {
       try {
@@ -215,8 +231,6 @@ function ChatArea({
           question: trimmedQuestion,
           documentIds: selectedDocumentIds,
         });
-
-        setOptimisticMessages([]);
       } catch (error: any) {
         setOptimisticMessages((prev) =>
           prev.filter((message) => message.id !== optimisticUserMessage.id),
@@ -224,6 +238,9 @@ function ChatArea({
 
         const serverMessage = error.response?.data?.message;
         toast.error(serverMessage || ERROR_CODE.SERVER_ERROR);
+      } finally {
+        isCreatingSession.current = false;
+        setOptimisticMessages([]);
       }
     }, 50);
   };
@@ -247,15 +264,18 @@ function ChatArea({
     sendMessage(question);
   };
 
-  const handleEnterSend = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter" && !isSending) {
-      handleSendMessage();
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      if (!isSending && question.trim()) {
+        handleSendMessage();
+      }
     }
   };
 
   return (
     <div className="flex h-full flex-1 flex-col overflow-hidden rounded-3xl border border-border/40 bg-card/60 shadow-xl backdrop-blur-sm">
-      <div className="flex-1 overflow-y-auto px-6 py-6">
+      <div className="flex-1 overflow-y-auto px-6 py-6 scrollbar-thin">
         {isLoadingMessages && messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 text-muted-foreground">
             <div className="flex size-12 items-center justify-center rounded-2xl bg-primary/10">
@@ -379,44 +399,109 @@ function ChatArea({
         )}
       </div>
 
-      <div className="shrink-0 border-t border-border/40 px-6 pb-6 pt-4">
+      <div className="shrink-0 border-t border-border/40 px-4 pb-4 pt-2.5">
         <div className="mx-auto max-w-3xl">
-          <div className="flex items-end gap-3 rounded-2xl border border-border/60 bg-card/80 p-3 shadow-lg backdrop-blur-sm transition-all focus-within:border-primary/50 focus-within:shadow-primary/10">
-            <input
-              type="text"
+          <div
+            className={`flex border border-border/60 bg-secondary/25 shadow-lg transition-all duration-200 focus-within:border-primary/50 focus-within:bg-secondary/40 focus-within:shadow-primary/5 ${
+              question.trim() !== ""
+                ? "flex-col gap-2 rounded-[20px] p-3"
+                : "flex-row items-center gap-2.5 rounded-full px-3.5 py-1"
+            }`}
+          >
+            {/* Nút cộng bên trái khi THU GỌN (Pill - chưa nhập chữ) */}
+            {question.trim() === "" && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={onAddDocumentClick}
+                className="size-8 shrink-0 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary cursor-pointer"
+                title="Attach study documents"
+              >
+                <Plus className="size-4" />
+              </Button>
+            )}
+
+            {/* Ô nhập liệu Textarea duy nhất - Đảm bảo GIỮ FOCUS tuyệt đối khi đổi trạng thái */}
+            <textarea
+              ref={textareaRef}
               value={question}
               onChange={(event) => setQuestion(event.target.value)}
-              onKeyDown={handleEnterSend}
+              onKeyDown={handleKeyDown}
               placeholder="Ask anything about your study materials..."
               disabled={isSending}
-              className="min-h-[2.5rem] flex-1 border-none bg-transparent px-2 py-1.5 text-sm text-card-foreground outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed"
+              rows={1}
+              className={`resize-none border-none bg-transparent py-0.5 text-sm text-card-foreground outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed scrollbar-thin ${
+                question.trim() !== ""
+                  ? "w-full"
+                  : "min-h-[2rem] flex-1 py-1.5 px-1"
+              }`}
             />
 
-            <Button
-              type="button"
-              size="icon"
-              disabled={isSending || !question.trim()}
-              onClick={handleSendMessage}
-              className="size-10 shrink-0 rounded-xl bg-primary shadow-md shadow-primary/20 transition-all hover:bg-primary/90 hover:shadow-primary/30 disabled:opacity-40 cursor-pointer"
-            >
-              <Send className="size-4 text-white" />
-            </Button>
-          </div>
+            {/* Cụm nút bên phải khi THU GỌN (Pill - chưa nhập chữ) */}
+            {question.trim() === "" && (
+              <div className="flex items-center gap-1.5 shrink-0">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="size-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary cursor-pointer"
+                  title="Voice input"
+                >
+                  <Mic className="size-4" />
+                </Button>
 
-          <div className="mt-2.5 flex items-center justify-between px-1">
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <FileText className="size-3.5" />
+                <Button
+                  type="button"
+                  disabled
+                  className="size-8 rounded-full bg-muted-foreground/15 text-muted-foreground/35 cursor-not-allowed flex items-center justify-center"
+                  title="Send message"
+                >
+                  <ArrowUp className="size-4" />
+                </Button>
+              </div>
+            )}
 
-              <span>
-                {selectedDocumentIds.length > 0
-                  ? `${selectedDocumentIds.length} context doc(s) selected`
-                  : "No context docs — general AI mode"}
-              </span>
-            </div>
+            {/* Thanh công cụ phía dưới khi MỞ RỘNG (Card - đã nhập chữ) */}
+            {question.trim() !== "" && (
+              <div className="mt-1 flex items-center justify-between pt-1 animate-in fade-in slide-in-from-top-1 duration-150">
+                {/* Nút đính kèm tài liệu */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={onAddDocumentClick}
+                  className="size-8.5 rounded-full bg-card/60 text-muted-foreground hover:bg-primary/10 hover:text-primary cursor-pointer"
+                  title="Attach study documents"
+                >
+                  <Plus className="size-4.5" />
+                </Button>
 
-            <span className="hidden text-[10px] text-muted-foreground md:block">
-              Enter to send
-            </span>
+                <div className="flex items-center gap-2">
+                  {/* Nút Mic giọng nói */}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-8.5 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary cursor-pointer"
+                    title="Voice input"
+                  >
+                    <Mic className="size-4.5" />
+                  </Button>
+
+                  {/* Nút gửi mũi tên hướng lên hoạt động */}
+                  <Button
+                    type="button"
+                    disabled={isSending}
+                    onClick={handleSendMessage}
+                    className="size-8.5 rounded-full bg-foreground text-background hover:bg-foreground/90 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-md"
+                    title="Send message"
+                  >
+                    <ArrowUp className="size-4.5" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

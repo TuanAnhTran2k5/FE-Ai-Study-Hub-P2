@@ -8,7 +8,7 @@ const initialState: UserResponse | null = null;
 // User Slice: quản lý thông tin người dùng trong Redux
 export const userSlice = createSlice({
   name: "user",
-  initialState,
+  initialState: initialState as UserResponse | null,
 
   reducers: {
     // Lưu toàn bộ thông tin user vào Redux sau khi login
@@ -17,12 +17,13 @@ export const userSlice = createSlice({
     // Cập nhật profile sau khi gọi API thành công
     // Giữ lại accessToken để không bị mất phiên đăng nhập
     updateProfile: (state, action) => {
-      if (!state) return action.payload;
+      const currentState = state as UserResponse | null;
+      if (!currentState) return action.payload;
 
       return {
-        ...state,
+        ...currentState,
         ...action.payload,
-        accessToken: state.accessToken,
+        accessToken: currentState.accessToken,
       };
     },
 

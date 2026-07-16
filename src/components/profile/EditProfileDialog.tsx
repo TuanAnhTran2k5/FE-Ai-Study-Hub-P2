@@ -48,6 +48,10 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
       dispatch(updateProfile(data));
       queryClient.setQueryData(["my-profile"], data);
       queryClient.invalidateQueries({ queryKey: ["my-profile"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-users-list"] });
+      queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["document"] });
       toast.success(SUCCESS_MESSAGE.PROFILE_UPDATED);
       setOpen(false);
     },

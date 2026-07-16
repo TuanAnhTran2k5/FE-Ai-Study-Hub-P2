@@ -9,6 +9,7 @@ import type {
   RagSessionAskRequest,
   RagSessionAskResponse,
   RagUpdateSessionDocumentsRequest,
+  RagUpdateSessionTitleRequest,
 } from "@/types/rag.type";
 export const getRagChatSessions = async (): Promise<
   RagChatSessionResponse[]
@@ -124,6 +125,18 @@ export const getSuggestedPrompts = async (
     {
       documentIds,
     },
+  );
+
+  return response.data.result;
+};
+
+export const updateRagSessionTitle = async (
+  sessionId: number,
+  data: RagUpdateSessionTitleRequest,
+): Promise<RagChatSessionResponse> => {
+  const response = await api.put<APIResponse<RagChatSessionResponse>>(
+    `/user/rag/chat/sessions/${sessionId}/title`,
+    data,
   );
 
   return response.data.result;

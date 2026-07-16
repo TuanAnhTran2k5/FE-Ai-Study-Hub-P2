@@ -396,6 +396,13 @@
     "pleaseProvideReason": "Vui lòng nhập lý do khóa tài khoản.",
     "nodes": "Đang chạy",
     "healthy": "Khả dụng",
-    "noSubjectData": "Chưa có dữ liệu phân bổ."
+    "noSubjectData": "Chưa có dữ liệu phân bổ.",
+    "changeRoleAction": "Đổi vai trò",
+    "changeRoleTitle": "Đổi vai trò người dùng",
+    "changeRoleConfirmPrompt": "Bạn có chắc chắn muốn thay đổi vai trò của học viên này từ {{from}} sang {{to}}?",
+    "confirmChangeRole": "Xác nhận Đổi",
+    "changeRoleSuccess": "Cập nhật vai trò người dùng thành công!",
+    "changeRoleFailed": "Cập nhật vai trò người dùng thất bại.",
+    "userRole": "Vai trò"
   }
 }

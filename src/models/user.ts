@@ -15,5 +15,5 @@ export interface User {
 
   status: "PENDING" | "ACTIVE" | "BANNED";
 
-  accessToken: string;
+  accessToken?: string;
 }

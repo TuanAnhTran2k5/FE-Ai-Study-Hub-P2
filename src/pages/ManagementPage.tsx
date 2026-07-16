@@ -139,6 +139,8 @@ function ManagementPage() {
     mutationFn: createSemester,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-semesters"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
       toast.success(SUCCESS_MESSAGE.CREATE_SEMESTER_SUCCESS);
       setIsSemesterDialogOpen(false);
     },
@@ -152,6 +154,8 @@ function ManagementPage() {
       updateSemester(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-semesters"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
       toast.success(SUCCESS_MESSAGE.UPDATE_SEMESTER_SUCCESS);
       setIsSemesterDialogOpen(false);
     },
@@ -164,6 +168,8 @@ function ManagementPage() {
     mutationFn: deleteSemester,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-semesters"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
       toast.success(SUCCESS_MESSAGE.DELETE_SEMESTER_SUCCESS);
       setDeleteConfirm(null);
     },
@@ -177,6 +183,7 @@ function ManagementPage() {
     mutationFn: createComboSubject,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
       toast.success(SUCCESS_MESSAGE.CREATE_COMBO_SUCCESS);
       setIsComboDialogOpen(false);
     },
@@ -190,6 +197,7 @@ function ManagementPage() {
       updateComboSubject(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
       toast.success(SUCCESS_MESSAGE.UPDATE_COMBO_SUCCESS);
       setIsComboDialogOpen(false);
       setIsSubjectDialogOpen(false);
@@ -205,6 +213,7 @@ function ManagementPage() {
     mutationFn: deleteComboSubject,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
       toast.success(SUCCESS_MESSAGE.DELETE_COMBO_SUCCESS);
       setDeleteConfirm(null);
     },

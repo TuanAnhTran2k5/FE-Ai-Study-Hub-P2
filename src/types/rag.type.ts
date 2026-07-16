@@ -71,3 +71,7 @@ export interface RagDeleteResponse {
   storageRemaining?: number;
   storageUsagePercent?: number;
 }
+
+export interface RagUpdateSessionTitleRequest {
+  sessionTitle: string;
+}

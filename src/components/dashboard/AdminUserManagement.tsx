@@ -15,12 +15,24 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { toast } from "react-toastify";
-import { getUsersForAdmin, banUser, unbanUser, getUserDetailForAdmin } from "@/services/adminDashboardService";
+import { getUsersForAdmin, banUser, unbanUser, getUserDetailForAdmin, updateUserRole } from "@/services/adminDashboardService";
 import type { AdminUserResponse } from "@/types/adminDashboard.type";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/redux/store";
+import type { User as AuthUser } from "@/models/user";
+
 
 export default function AdminUserManagement({ currentUserId }: { currentUserId?: number }) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+
+  // Lấy thông tin user hiện tại từ Redux để kiểm tra phân quyền System Admin
+  const currentUser = useSelector(
+    (state: RootState) => state.user as AuthUser | null
+  );
+  const isSystemAdmin =
+    currentUser?.email?.toLowerCase() ===
+    import.meta.env.VITE_SYSTEM_ADMIN_EMAIL?.toLowerCase();
 
   // Search, filter & page states
   const [search, setSearch] = useState("");
@@ -35,6 +47,11 @@ export default function AdminUserManagement({ currentUserId }: { currentUserId?:
   const [targetUser, setTargetUser] = useState<AdminUserResponse | null>(null);
   const [banReason, setBanReason] = useState("");
   const [actionType, setActionType] = useState<"BAN" | "UNBAN" | null>(null);
+
+  // Role change action states
+  const [roleTargetUser, setRoleTargetUser] = useState<AdminUserResponse | null>(null);
+  const [newRole, setNewRole] = useState<"US" | "AD" | null>(null);
+
   // Fetch users list
   const { data, isLoading } = useQuery({
     queryKey: ["admin-users-list", search, status, page, size],
@@ -63,6 +80,8 @@ export default function AdminUserManagement({ currentUserId }: { currentUserId?:
         queryClient.invalidateQueries({ queryKey: ["admin-user-detail", detailUserId] });
       }
       queryClient.invalidateQueries({ queryKey: ["admin-users-list"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-moderation-summary"] });
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.message || t("admin.banFailed", "Failed to ban user"));
@@ -79,11 +98,34 @@ export default function AdminUserManagement({ currentUserId }: { currentUserId?:
         queryClient.invalidateQueries({ queryKey: ["admin-user-detail", detailUserId] });
       }
       queryClient.invalidateQueries({ queryKey: ["admin-users-list"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-moderation-summary"] });
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.message || t("admin.unbanFailed", "Failed to unban user"));
     }
   });
+
+  // Update user role mutation
+  const updateRoleMutation = useMutation({
+    mutationFn: () => updateUserRole(roleTargetUser!.userId, newRole!),
+    onSuccess: () => {
+      toast.success(t("admin.changeRoleSuccess", "User role updated successfully"));
+      setRoleTargetUser(null);
+      setNewRole(null);
+      if (detailUserId === roleTargetUser?.userId) {
+        queryClient.invalidateQueries({ queryKey: ["admin-user-detail", detailUserId] });
+      }
+      queryClient.invalidateQueries({ queryKey: ["admin-users-list"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-dashboard-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-moderation-summary"] });
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || t("admin.changeRoleFailed", "Failed to update user role"));
+    }
+  });
+
+
 
   const handleOpenAction = (user: AdminUserResponse, type: "BAN" | "UNBAN") => {
     setTargetUser(user);
@@ -242,7 +284,13 @@ export default function AdminUserManagement({ currentUserId }: { currentUserId?:
                                   {t("admin.youBadge", "You")}
                                 </span>
                               )}
+                              {u.role === "AD" && (
+                                <span className="text-[9px] font-black uppercase tracking-wider text-indigo-500 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/15">
+                                  ADMIN
+                                </span>
+                              )}
                             </div>
+
                             <p className="text-[10px] text-slate-500 dark:text-muted-foreground/80 font-semibold flex items-center gap-1 mt-0.5">
                               <Mail className="h-3 w-3" />
                               {u.email}
@@ -272,6 +320,10 @@ export default function AdminUserManagement({ currentUserId }: { currentUserId?:
                           {u.userId === currentUserId ? (
                             <span className="text-[10px] text-muted-foreground italic font-semibold pr-3 select-none">
                               {t("admin.currentUserLabel", "Current Session")}
+                            </span>
+                          ) : u.role === "AD" && !isSystemAdmin ? (
+                            <span className="text-[10px] text-muted-foreground italic font-semibold pr-3 select-none">
+                              {t("admin.adminAccountLabel", "Admin Account")}
                             </span>
                           ) : u.status === "BANNED" ? (
                             <Button
@@ -468,23 +520,43 @@ export default function AdminUserManagement({ currentUserId }: { currentUserId?:
           <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4 pt-3 border-t border-border/40">
             {userDetail && userDetail.userId !== currentUserId && (
               <>
-                {userDetail.status === "BANNED" ? (
+                {/* Chỉ cho phép Ban/Unban tài khoản Admin khác nếu người đang thao tác là System Admin */}
+                {!(userDetail.role === "AD" && !isSystemAdmin) && (
+                  <>
+                    {userDetail.status === "BANNED" ? (
+                      <Button
+                        onClick={() => handleOpenAction(userDetail, "UNBAN")}
+                        disabled={unbanMutation.isPending}
+                        className="w-full sm:w-auto font-black text-xs px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white flex items-center justify-center gap-1.5 rounded-2xl cursor-pointer"
+                      >
+                        <UserCheck className="h-3.5 w-3.5" />
+                        {t("admin.unbanAction", "Unban Account")}
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => handleOpenAction(userDetail, "BAN")}
+                        disabled={banMutation.isPending}
+                        className="w-full sm:w-auto font-black text-xs px-4 py-2 bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-1.5 rounded-2xl cursor-pointer"
+                      >
+                        <UserX className="h-3.5 w-3.5" />
+                        {t("admin.banAction", "Ban Account")}
+                      </Button>
+                    )}
+                  </>
+                )}
+
+                {/* Nút Đổi Vai Trò (Promote/Demote) - Chỉ hiển thị cho System Admin */}
+                {isSystemAdmin && (
                   <Button
-                    onClick={() => handleOpenAction(userDetail, "UNBAN")}
-                    disabled={unbanMutation.isPending}
-                    className="w-full sm:w-auto font-black text-xs px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white flex items-center justify-center gap-1.5 rounded-2xl cursor-pointer"
+                    onClick={() => {
+                      setRoleTargetUser(userDetail);
+                      setNewRole(userDetail.role === "AD" ? "US" : "AD");
+                    }}
+                    disabled={updateRoleMutation.isPending}
+                    className="w-full sm:w-auto font-black text-xs px-4 py-2 bg-indigo-600 hover:bg-indigo-700 hover:text-white border border-indigo-600/25 text-white flex items-center justify-center gap-1.5 rounded-2xl cursor-pointer"
                   >
-                    <UserCheck className="h-3.5 w-3.5" />
-                    {t("admin.unbanAction", "Unban Account")}
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={() => handleOpenAction(userDetail, "BAN")}
-                    disabled={banMutation.isPending}
-                    className="w-full sm:w-auto font-black text-xs px-4 py-2 bg-red-600 hover:bg-red-700 text-white flex items-center justify-center gap-1.5 rounded-2xl cursor-pointer"
-                  >
-                    <UserX className="h-3.5 w-3.5" />
-                    {t("admin.banAction", "Ban Account")}
+                    <Shield className="h-3.5 w-3.5" />
+                    {t("admin.changeRoleAction", "Change Role")}
                   </Button>
                 )}
               </>
@@ -571,6 +643,63 @@ export default function AdminUserManagement({ currentUserId }: { currentUserId?:
           )}
         </DialogContent>
       </Dialog>
+
+      {/* CONFIRMATION DIALOG FOR ROLE CHANGE */}
+      <Dialog open={!!roleTargetUser} onOpenChange={(open) => !open && setRoleTargetUser(null)}>
+        <DialogContent className="rounded-3xl border border-slate-400/80 dark:border-border/80 bg-card/98 backdrop-blur-xl w-[92vw] max-w-md p-6 shadow-2xl overflow-hidden text-left z-[60]">
+          {roleTargetUser && newRole && (
+            <>
+              <DialogHeader className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-11 items-center justify-center rounded-2xl shrink-0 border bg-indigo-500/10 border-indigo-500/20 text-indigo-500">
+                    <Shield className="h-5.5 w-5.5" />
+                  </div>
+                  <div className="min-w-0 text-left">
+                    <span className="text-[9px] uppercase font-black tracking-wider text-slate-500 dark:text-muted-foreground">
+                      {t("admin.changeRoleTitle", "Change User Role")}
+                    </span>
+                    <DialogTitle className="text-sm font-black text-card-foreground mt-0.5 truncate max-w-xs">
+                      {roleTargetUser.fullName}
+                    </DialogTitle>
+                  </div>
+                </div>
+              </DialogHeader>
+
+              <div className="py-4 my-2">
+                <p className="text-xs text-slate-600 dark:text-muted-foreground/90 font-semibold leading-relaxed">
+                  {t("admin.changeRoleConfirmPrompt", {
+                    from: roleTargetUser.role === "AD" ? "ADMIN" : "USER",
+                    to: newRole === "AD" ? "ADMIN" : "USER"
+                  })}
+                </p>
+              </div>
+
+              <DialogFooter className="flex flex-col sm:flex-row gap-2">
+                <Button 
+                  onClick={() => updateRoleMutation.mutate()}
+                  disabled={updateRoleMutation.isPending}
+                  className="w-full sm:w-auto font-black text-xs px-4 py-2 flex items-center justify-center gap-1.5 rounded-2xl text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer"
+                >
+                  {t("admin.confirmChangeRole", "Confirm Change")}
+                </Button>
+                
+                <Button 
+                  variant="secondary" 
+                  onClick={() => {
+                    setRoleTargetUser(null);
+                    setNewRole(null);
+                  }}
+                  disabled={updateRoleMutation.isPending}
+                  className="w-full sm:w-auto font-bold text-xs px-4 py-2 border border-border bg-secondary hover:bg-secondary-foreground/10 text-card-foreground rounded-2xl cursor-pointer"
+                >
+                  {t("common.cancel", "Cancel")}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
