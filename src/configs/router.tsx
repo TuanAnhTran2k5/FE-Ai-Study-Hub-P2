@@ -154,6 +154,6 @@ export const NAVIGATE_KEY = [
   },
   {
     nameKey: "nav.community",
-    path: ROUTE.COMMUNITY,
+    path: `/${ROUTE.COMMUNITY}`,
   },
 ];
