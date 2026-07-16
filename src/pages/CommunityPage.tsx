@@ -37,6 +37,9 @@ const selectContentClassName =
 
 const selectItemClassName = "cursor-pointer truncate rounded-xl py-2.5";
 
+const communityDocumentGridClassName =
+  "mx-auto max-w-[1600px] grid-cols-[repeat(auto-fill,382px)] justify-start";
+
 function CommunityPage() {
   const navigate = useNavigate();
 
@@ -353,6 +356,7 @@ function CommunityPage() {
           <DocumentGrid
             documents={guestTopRatedDocuments}
             onView={(document) => handleViewDocument(document.documentId)}
+            gridClassName={communityDocumentGridClassName}
           />
         </div>
       </div>
@@ -480,6 +484,7 @@ function CommunityPage() {
         <DocumentGrid
           documents={filteredDocuments}
           onView={(document) => handleViewDocument(document.documentId)}
+          gridClassName={communityDocumentGridClassName}
         />
       </div>
     </div>

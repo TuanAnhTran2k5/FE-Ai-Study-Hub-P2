@@ -4,9 +4,10 @@ import DocumentCard from "./DocumentCard";
 interface DocumentGridProps {
   documents: DocumentResponse[];
   onView?: (document: DocumentResponse) => void;
+  gridClassName?: string;
 }
 
-function DocumentGrid({ documents, onView }: DocumentGridProps) {
+function DocumentGrid({ documents, onView, gridClassName }: DocumentGridProps) {
   if (documents.length === 0) {
     return (
       <div className="rounded-3xl border border-border bg-card p-10 text-center shadow-sm">
@@ -21,7 +22,12 @@ function DocumentGrid({ documents, onView }: DocumentGridProps) {
   }
 
   return (
-    <div className="grid justify-start gap-6 [grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),360px))]">
+    <div
+      className={`grid w-full gap-6 ${
+        gridClassName ??
+        "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+      }`}
+    >
       {documents.map((document) => (
         <DocumentCard
           key={document.documentId}
