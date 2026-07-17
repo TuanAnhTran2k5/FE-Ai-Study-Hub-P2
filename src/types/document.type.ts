@@ -4,6 +4,7 @@ import {
   UploadStatus,
   VisibilityStatus,
 } from "@/models/document.enum";
+import type { UserRank } from "@/types/user.type";
 
 export interface DocumentResponse {
   documentId: number;
@@ -11,6 +12,10 @@ export interface DocumentResponse {
   ownerId: number;
   ownerName?: string;
   ownerAvatar?: string | null;
+  ownerTotalScore?: number | null;
+  ownerCurrentRank?: UserRank | null;
+  ownerDocumentCount?: number | null;
+  ownerDownloadCount?: number | null;
 
   originalUploaderId?: number;
   originalUploaderName?: string;
@@ -134,7 +139,7 @@ export interface DocumentDownloadResponse {
   ownerTotalScore: number;
   publicOwnerName: string;
   downloadedAt: string;
-  ownerCurrentRank?: unknown;
+  ownerCurrentRank?: UserRank | null;
   ownerNextRank?: string | null;
   ownerProgressPercent?: number | null;
 }

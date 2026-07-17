@@ -4,10 +4,20 @@ import DocumentCard from "./DocumentCard";
 interface DocumentGridProps {
   documents: DocumentResponse[];
   onView?: (document: DocumentResponse) => void;
+  onRemove?: (document: DocumentResponse) => void;
+  isRemoving?: boolean;
+  getBookmarkedAt?: (document: DocumentResponse) => string | undefined;
   gridClassName?: string;
 }
 
-function DocumentGrid({ documents, onView, gridClassName }: DocumentGridProps) {
+function DocumentGrid({
+  documents,
+  onView,
+  onRemove,
+  isRemoving,
+  getBookmarkedAt,
+  gridClassName,
+}: DocumentGridProps) {
   if (documents.length === 0) {
     return (
       <div className="rounded-3xl border border-border bg-card p-10 text-center shadow-sm">
@@ -33,6 +43,9 @@ function DocumentGrid({ documents, onView, gridClassName }: DocumentGridProps) {
           key={document.documentId}
           document={document}
           onView={onView}
+          onRemove={onRemove}
+          isRemoving={isRemoving}
+          bookmarkedAt={getBookmarkedAt?.(document)}
         />
       ))}
     </div>
