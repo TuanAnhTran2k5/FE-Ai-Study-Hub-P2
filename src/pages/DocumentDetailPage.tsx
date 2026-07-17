@@ -866,7 +866,11 @@ const subjectCode =
         </Card>
 
         <DocumentDetailSidebar
-          document={{ ...document, ratingCount }}
+          document={{
+            ...document,
+            ratingCount,
+            semesterNo: document.semesterNo ?? academicSubject?.semesterNo,
+          }}
           averageRating={averageRating}
           isOwner={isOwner}
           isBookmarked={isBookmarked}

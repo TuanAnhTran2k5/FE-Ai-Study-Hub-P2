@@ -69,7 +69,7 @@ export default function AdminDashboard({ user, documents }: AdminDashboardProps)
             </p>
             <Button 
               onClick={() => setViewMode("SYSTEM")}
-              className="h-8 rounded-xl font-black text-[11px] px-3.5 bg-sky-50 hover:bg-sky-600 text-white flex items-center gap-1.5 cursor-pointer"
+              className="h-8 rounded-xl font-black text-[11px] px-3.5 bg-card border border-sky-500/30 text-sky-600 dark:text-sky-400 hover:bg-sky-500/10 flex items-center gap-1.5 cursor-pointer"
             >
               <RefreshCw className="h-3 w-3 animate-spin-slow" />
               {t("admin.switchToSystem", "Switch to System Dashboard")}

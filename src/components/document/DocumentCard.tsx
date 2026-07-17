@@ -1,22 +1,34 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import AvatarFrame from "@/components/avatarFrame/AvatarFrame";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { VisibilityStatus } from "@/models/document.enum";
 import type { DocumentResponse } from "@/types/document.type";
 import {
   Bookmark,
+  CalendarClock,
   Download,
   Eye,
   FileText,
   Globe,
   Lock,
+  Medal,
   Star,
-  UserRound,
+  Trash2,
+  Trophy,
 } from "lucide-react";
 
 interface DocumentCardProps {
   document: DocumentResponse;
   onView?: (document: DocumentResponse) => void;
+  onRemove?: (document: DocumentResponse) => void;
+  isRemoving?: boolean;
+  bookmarkedAt?: string;
 }
 
 function formatFileSize(bytes?: number) {
@@ -82,7 +94,21 @@ function RatingStars({ value }: { value?: number | null }) {
   );
 }
 
-function DocumentCard({ document, onView }: DocumentCardProps) {
+function getOwnerScore(document: DocumentResponse) {
+  return (
+    document.ownerTotalScore ??
+    document.ownerCurrentRank?.rank.minScore ??
+    0
+  );
+}
+
+function DocumentCard({
+  document,
+  onView,
+  onRemove,
+  isRemoving,
+  bookmarkedAt,
+}: DocumentCardProps) {
 
   return (
     <Card className="group flex h-full min-w-0 overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
@@ -140,17 +166,70 @@ function DocumentCard({ document, onView }: DocumentCardProps) {
           <div className="mt-5 border-t border-border pt-4">
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-secondary text-primary">
-                  {document.ownerAvatar ? (
-                    <img
-                      src={document.ownerAvatar}
-                      alt={document.ownerName ?? "Owner"}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <UserRound className="h-5 w-5" />
-                  )}
-                </div>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className="shrink-0 cursor-pointer rounded-full outline-none ring-offset-background transition hover:scale-105 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                      aria-label={`View information for ${document.ownerName ?? `User ${document.ownerId}`}`}
+                    >
+                      <AvatarFrame
+                        score={getOwnerScore(document)}
+                        avatarUrl={document.ownerAvatar}
+                        fullName={document.ownerName ?? `User ${document.ownerId}`}
+                        size="sm"
+                      />
+                    </button>
+                  </PopoverTrigger>
+
+                  <PopoverContent align="start" className="w-64 rounded-2xl p-4">
+                    <div className="flex items-center gap-3">
+                      <AvatarFrame
+                        score={getOwnerScore(document)}
+                        avatarUrl={document.ownerAvatar}
+                        fullName={document.ownerName ?? `User ${document.ownerId}`}
+                        size="md"
+                      />
+                      <div className="min-w-0">
+                        <p className="truncate font-bold text-card-foreground">
+                          {document.ownerName ?? `User ${document.ownerId}`}
+                        </p>
+                        <p className="text-sm text-muted-foreground">Uploader</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-2 gap-2 border-t border-border pt-4">
+                      <div className="rounded-xl bg-secondary p-3">
+                        <Medal className="h-4 w-4 text-primary" />
+                        <p className="mt-2 text-xs text-muted-foreground">Score</p>
+                        <p className="font-black text-card-foreground">
+                          {document.ownerTotalScore?.toLocaleString() ?? "N/A"}
+                        </p>
+                      </div>
+                      <div className="rounded-xl bg-secondary p-3">
+                        <Trophy className="h-4 w-4 text-primary" />
+                        <p className="mt-2 text-xs text-muted-foreground">Current rank</p>
+                        <p className="truncate font-black text-card-foreground">
+                          {document.ownerCurrentRank?.rank.rankName ?? "N/A"}
+                        </p>
+                      </div>
+                      <div className="rounded-xl bg-secondary p-3">
+                        <FileText className="h-4 w-4 text-primary" />
+                        <p className="mt-2 text-xs text-muted-foreground">Documents</p>
+                        <p className="font-black text-card-foreground">
+                          {document.ownerDocumentCount?.toLocaleString() ?? "N/A"}
+                        </p>
+                      </div>
+                      <div className="rounded-xl bg-secondary p-3">
+                        <Download className="h-4 w-4 text-primary" />
+                        <p className="mt-2 text-xs text-muted-foreground">Downloads</p>
+                        <p className="font-black text-card-foreground">
+                          {document.ownerDownloadCount?.toLocaleString() ?? "N/A"}
+                        </p>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
 
                 <div className="min-w-0">
                   <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground sm:tracking-[0.25em]">
@@ -187,15 +266,41 @@ function DocumentCard({ document, onView }: DocumentCardProps) {
             <span>{formatFileSize(document.fileSize)}</span>
           </div>
 
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-5 h-12 w-full cursor-pointer rounded-2xl border border-primary/30 bg-secondary text-base font-bold text-secondary-foreground shadow-sm transition hover:bg-primary-bg-hover hover:text-primary"
-            onClick={() => onView?.(document)}
-          >
-            <Eye className="mr-2 h-4 w-4" />
-            View Document
-          </Button>
+          {bookmarkedAt && (
+            <div className="mt-4 flex items-center gap-2 rounded-2xl bg-secondary px-4 py-3 text-sm font-semibold text-muted-foreground">
+              <CalendarClock className="h-4 w-4 shrink-0 text-primary" />
+              <span className="truncate">
+                Bookmarked at {new Date(bookmarkedAt).toLocaleString("vi-VN")}
+              </span>
+            </div>
+          )}
+
+          <div className={onRemove ? "mt-5 grid grid-cols-2 gap-3" : "mt-5"}>
+            <Button
+              type="button"
+              variant="outline"
+              className={`h-12 min-w-0 cursor-pointer rounded-2xl border border-primary/30 bg-secondary px-3 font-bold text-secondary-foreground shadow-sm transition hover:bg-primary-bg-hover hover:text-primary ${
+                onRemove ? "text-sm" : "w-full text-base"
+              }`}
+              onClick={() => onView?.(document)}
+            >
+              <Eye className="mr-2 h-4 w-4 shrink-0" />
+              <span className="truncate">View Document</span>
+            </Button>
+
+            {onRemove && (
+              <Button
+                type="button"
+                variant="outline"
+                disabled={isRemoving}
+                className="h-12 min-w-0 cursor-pointer rounded-2xl border border-destructive/30 px-3 text-sm font-bold text-destructive shadow-sm transition hover:bg-destructive hover:text-white"
+                onClick={() => onRemove(document)}
+              >
+                <Trash2 className="mr-2 h-4 w-4 shrink-0" />
+                <span className="truncate">Remove</span>
+              </Button>
+            )}
+          </div>
         </CardContent>
       </div>
     </Card>

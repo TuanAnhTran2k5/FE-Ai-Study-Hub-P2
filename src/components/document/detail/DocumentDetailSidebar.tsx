@@ -194,8 +194,7 @@ function DocumentDetailSidebar({
             <InfoRow
               label="Semester"
               value={
-                document.semesterNo? `Semester ${document.semesterNo}`
-                  : "N/A"
+                document.semesterNo ?? "N/A"
               }
             />
 
