@@ -296,7 +296,7 @@ function ContextSidebar({
               </p>
             )}
 
-            <div className="max-h-[400px] space-y-2 overflow-y-auto pr-1">
+            <div className="max-h-[400px] space-y-2 overflow-y-auto pr-1.5 scrollbar-thin">
               {filteredDocuments.map((doc) => {
                 const isAdded = selectedDocumentIds.includes(doc.documentId);
                 const isMaxSelected =
@@ -305,26 +305,34 @@ function ContextSidebar({
                 return (
                   <div
                     key={doc.documentId}
-                    className={`flex items-center gap-3 rounded-2xl border p-3 transition-all cursor-pointer ${
+                    className={`grid grid-cols-[40px_1fr_80px] items-center gap-3 rounded-2xl border p-3 transition-all cursor-pointer w-full max-w-full overflow-hidden ${
                       isAdded
                         ? "border-primary/30 bg-primary/5"
                         : "border-border/50 hover:border-border hover:bg-muted/30"
                     }`}
                   >
                     <div
-                      className={`flex size-10 shrink-0 items-center justify-center rounded-xl ${getFileColor(
+                      className={`flex size-10 items-center justify-center rounded-xl ${getFileColor(
                         doc.fileType,
                       )}`}
                     >
                       <FileText className="size-5" />
                     </div>
 
-                    <div className="min-w-0 flex-1 overflow-hidden pr-2">
-                      <p className="truncate text-sm font-bold text-card-foreground" title={doc.title}>
+                    <div className="min-w-0 overflow-hidden pr-2">
+                      <p
+                        className="truncate text-sm font-bold text-card-foreground"
+                        title={doc.title}
+                        style={{ textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}
+                      >
                         {doc.title}
                       </p>
 
-                      <p className="truncate text-xs text-muted-foreground" title={doc.fileName}>
+                      <p
+                        className="truncate text-xs text-muted-foreground"
+                        title={doc.fileName}
+                        style={{ textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" }}
+                      >
                         {doc.fileName}
                       </p>
 
@@ -348,7 +356,7 @@ function ContextSidebar({
                       size="sm"
                       disabled={isAdded || isMaxSelected}
                       onClick={() => handleAddContext(doc.documentId)}
-                      className={`h-8 shrink-0 rounded-full px-4 text-xs font-bold cursor-pointer ${
+                      className={`h-8 rounded-full px-4 text-xs font-bold cursor-pointer justify-self-end w-full ${
                         isAdded
                           ? "bg-primary/10 text-primary hover:bg-primary/10"
                           : ""
