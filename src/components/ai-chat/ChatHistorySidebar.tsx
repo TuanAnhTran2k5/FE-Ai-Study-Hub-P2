@@ -279,7 +279,7 @@ function ChatHistorySidebar({
           {!isCollapsed && <div className="mt-3 h-px bg-border/50" />}
         </div>
 
-        <div className="flex-1 space-y-1 overflow-y-auto px-2 pb-2">
+        <div className="flex-1 space-y-1 overflow-y-auto px-2 pb-2 pr-1.5 scrollbar-thin">
           {isLoading ? (
             <div className="flex h-full items-center justify-center">
               <p className="text-xs text-muted-foreground">Loading...</p>

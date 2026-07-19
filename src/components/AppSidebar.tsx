@@ -1,6 +1,7 @@
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
@@ -13,8 +14,10 @@ import { ROUTE } from "@/models/routePath";
 import type { User as AuthUser } from "@/models/user";
 import type { RootState } from "@/redux/store";
 import { getUnreadNotificationCount } from "@/services/notificationService";
+import { logout } from "@/redux/features/userSlice";
+import { authLogout } from "@/services/authService";
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   LayoutDashboard,
   FileText,
@@ -26,9 +29,10 @@ import {
   User,
   Settings,
   BookOpen,
+  LogOut,
 } from "lucide-react";
-import { useSelector } from "react-redux";
-import { Link, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 const menuItems = [
@@ -94,6 +98,9 @@ const menuItems = [
 function AppSidebar() {
   const { t } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
   const currentUser = useSelector(
     (state: RootState) => state.user as AuthUser | null,
@@ -106,6 +113,35 @@ function AppSidebar() {
     queryFn: getUnreadNotificationCount,
     enabled: !!currentUserId,
   });
+
+  const clearAuthAndRedirect = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("authUserId");
+    queryClient.clear();
+    dispatch(logout());
+    navigate(ROUTE.HOME);
+  };
+
+  const logoutMutation = useMutation<boolean, Error, { token: string }>({
+    mutationFn: authLogout,
+    onSuccess: () => {
+      clearAuthAndRedirect();
+    },
+    onError: () => {
+      clearAuthAndRedirect();
+    },
+  });
+
+  const handleLogout = () => {
+    const accessToken = localStorage.getItem("accessToken");
+    if (!accessToken) {
+      clearAuthAndRedirect();
+      return;
+    }
+    logoutMutation.mutate({
+      token: accessToken,
+    });
+  };
 
   return (
     <Sidebar
@@ -164,6 +200,26 @@ function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter className="bg-sidebar px-4 py-3 border-t border-sidebar-border group-data-[collapsible=icon]:px-0">
+        <SidebarMenu>
+          <SidebarMenuItem className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
+            <SidebarMenuButton asChild>
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={logoutMutation.isPending}
+                className="relative flex h-11 w-full items-center gap-3 rounded-2xl px-4 text-[15px] font-semibold text-red-500 transition-all duration-300 hover:!bg-red-500/10 hover:!text-red-500 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer group-data-[collapsible=icon]:size-13 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
+              >
+                <LogOut className="size-6 shrink-0" />
+                <span className="truncate group-data-[collapsible=icon]:hidden">
+                  {logoutMutation.isPending ? "Logging out..." : "Log out"}
+                </span>
+              </button>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }

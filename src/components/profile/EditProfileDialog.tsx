@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Camera, Edit, Loader2, Save, X } from "lucide-react";
+import { Camera, Edit, Loader2, Save, X, Lock } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { updateProfile } from "@/redux/features/userSlice";
 import { updateUserProfile } from "@/services/userService";
+import { ChangePasswordFlow } from "./ChangePasswordFlow";
 import type { UpdateProfileRequest, UserResponse } from "@/types/user.type";
 
 interface EditProfileDialogProps {
@@ -35,11 +36,20 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
     user.avatarUrl,
   );
 
+  const [view, setView] = useState<"profile" | "change-password">("profile");
+
   useEffect(() => {
     setFullName(user.fullName || "");
     setPreviewAvatar(user.avatarUrl);
     setAvatarFile(null);
   }, [user.fullName, user.avatarUrl]);
+
+  // Reset view khi đóng modal
+  useEffect(() => {
+    if (!open) {
+      setView("profile");
+    }
+  }, [open]);
 
   const updateMutation = useMutation({
     mutationFn: updateUserProfile,
@@ -146,92 +156,112 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
       <DialogContent className="rounded-3xl border-border bg-card sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-2xl font-black text-card-foreground">
-            Edit Profile
+            {view === "profile" ? "Edit Profile" : "Change Password"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-5">
-          <div className="flex justify-center">
-            <div className="relative">
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="h-28 w-28 cursor-pointer overflow-hidden rounded-full border-4 border-primary/30 bg-secondary transition-opacity hover:opacity-90"
-              >
-                {previewAvatar ? (
-                  <img
-                    src={previewAvatar}
-                    alt={fullName}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-3xl font-black text-primary">
-                    {fullName.charAt(0).toUpperCase() || "U"}
-                  </div>
-                )}
+        {view === "profile" ? (
+          <div className="space-y-5">
+            <div className="flex justify-center">
+              <div className="relative">
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="h-28 w-28 cursor-pointer overflow-hidden rounded-full border-4 border-primary/30 bg-secondary transition-opacity hover:opacity-90"
+                >
+                  {previewAvatar ? (
+                    <img
+                      src={previewAvatar}
+                      alt={fullName}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-3xl font-black text-primary">
+                      {fullName.charAt(0).toUpperCase() || "U"}
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute bottom-1 right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow transition-transform hover:scale-105"
+                >
+                  <Camera className="h-4 w-4" />
+                </button>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*,.heic,.heif,.avif,.ico"
+                  className="hidden"
+                  onChange={handleChooseAvatar}
+                />
               </div>
+            </div>
 
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="absolute bottom-1 right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-foreground shadow transition-transform hover:scale-105"
-              >
-                <Camera className="h-4 w-4" />
-              </button>
+            <div>
+              <label className="mb-2 block text-sm font-bold text-card-foreground">
+                Full name
+              </label>
 
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*,.heic,.heif,.avif,.ico"
-                className="hidden"
-                onChange={handleChooseAvatar}
+              <Input
+                value={fullName}
+                onChange={(event) => setFullName(event.target.value)}
+                placeholder="Enter your full name"
+                className="h-11 rounded-xl"
               />
+
+              <p className="mt-2 text-xs text-muted-foreground">
+                Full name must be between 5 and 50 characters.
+              </p>
+            </div>
+
+            <div className="pt-1">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setView("change-password")}
+                className="h-11 w-full cursor-pointer rounded-xl font-bold border-primary/20 text-primary hover:bg-primary/5"
+              >
+                <Lock className="mr-2 h-4 w-4" />
+                Change Password
+              </Button>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                className="cursor-pointer rounded-xl font-bold"
+                disabled={updateMutation.isPending}
+              >
+                <X className="mr-2 h-4 w-4" />
+                Cancel
+              </Button>
+
+              <Button
+                type="button"
+                onClick={handleSubmit}
+                className="cursor-pointer rounded-xl font-bold"
+                disabled={updateMutation.isPending}
+              >
+                {updateMutation.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2 h-4 w-4" />
+                )}
+                Save
+              </Button>
             </div>
           </div>
-
-          <div>
-            <label className="mb-2 block text-sm font-bold text-card-foreground">
-              Full name
-            </label>
-
-            <Input
-              value={fullName}
-              onChange={(event) => setFullName(event.target.value)}
-              placeholder="Enter your full name"
-              className="h-11 rounded-xl"
-            />
-
-            <p className="mt-2 text-xs text-muted-foreground">
-              Full name must be between 5 and 50 characters.
-            </p>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCancel}
-              className="cursor-pointer rounded-xl font-bold"
-              disabled={updateMutation.isPending}
-            >
-              <X className="mr-2 h-4 w-4" />
-              Cancel
-            </Button>
-
-            <Button
-              type="button"
-              onClick={handleSubmit}
-              className="cursor-pointer rounded-xl font-bold"
-              disabled={updateMutation.isPending}
-            >
-              {updateMutation.isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="mr-2 h-4 w-4" />
-              )}
-              Save
-            </Button>
-          </div>
-        </div>
+        ) : (
+          <ChangePasswordFlow
+            email={user.email}
+            onSuccess={() => setView("profile")}
+            onCancel={() => setView("profile")}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
