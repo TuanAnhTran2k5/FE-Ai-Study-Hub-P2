@@ -61,7 +61,7 @@ function HeroSection() {
             </Button>
           </div>
 
-          <div className="grid max-w-xl grid-cols-3 gap-4 pt-2">
+          <div className="grid max-w-xl grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
             {heroStats.map(({ icon: Icon, value, label }) => (
               <div
                 key={label}

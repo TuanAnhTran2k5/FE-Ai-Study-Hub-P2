@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, MoreVertical, Trash2 } from "lucide-react";
 import { useSelector } from "react-redux";
@@ -23,6 +23,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   deleteNotification,
   getMyNotifications,
@@ -55,6 +62,13 @@ function NotificationPage() {
   const [activeFilter, setActiveFilter] =
     useState<NotificationFilterType>("ALL");
   const [isDeleteAllConfirmOpen, setIsDeleteAllConfirmOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+
+  // Reset pagination to page 1 when activeFilter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeFilter]);
 
   // NOTE FILTER: Chuyen tab UI thanh query param cho backend.
   const queryParams = {
@@ -84,6 +98,16 @@ function NotificationPage() {
     queryFn: () => getMyNotifications({ page: 0, size: 1000 }),
     enabled: !!currentUserId,
   });
+
+  const totalPages = Math.ceil(notifications.length / itemsPerPage);
+  const activePage = Math.max(1, Math.min(currentPage, totalPages || 1));
+
+  const paginatedNotifications = useMemo(() => {
+    return notifications.slice(
+      (activePage - 1) * itemsPerPage,
+      activePage * itemsPerPage,
+    );
+  }, [notifications, activePage]);
 
   // NOTE UI DATA: Tong hop so luong hien trong tab va summary ben phai.
   const summary = useMemo(() => {
@@ -244,7 +268,7 @@ function NotificationPage() {
                 </div>
               )}
 
-              {notifications.map((notification) => (
+              {paginatedNotifications.map((notification) => (
                 // NOTE ROW: Click vào row sẽ mark read; menu 3 chấm dùng event.stopPropagation để không bị mark read ngoài ý muốn.
                 <button
                   key={notification.notificationId}
@@ -299,6 +323,83 @@ function NotificationPage() {
                   </DropdownMenu>
                 </button>
               ))}
+
+              {/* Pagination Section */}
+              {notifications.length > 0 && (
+                <div className="flex flex-col items-center justify-between gap-4 border-t border-border/40 p-5 sm:flex-row">
+                  <div className="text-sm text-muted-foreground">
+                    Showing <span className="font-bold text-card-foreground">{paginatedNotifications.length}</span> of{" "}
+                    <span className="font-bold text-card-foreground">{notifications.length}</span> notifications
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={activePage === 1}
+                      onClick={() => setCurrentPage(activePage - 1)}
+                      className="h-10 rounded-xl px-4 font-bold"
+                    >
+                      Previous
+                    </Button>
+
+                    <div className="hidden sm:flex items-center gap-1.5">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                        <Button
+                          key={page}
+                          variant={activePage === page ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentPage(page)}
+                          className={`h-10 w-10 rounded-xl font-bold ${
+                            activePage === page
+                              ? "bg-primary text-primary-foreground"
+                              : ""
+                          }`}
+                        >
+                          {page}
+                        </Button>
+                      ))}
+                    </div>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={activePage === totalPages}
+                      onClick={() => setCurrentPage(activePage + 1)}
+                      className="h-10 rounded-xl px-4 font-bold"
+                    >
+                      Next
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Go to page:</span>
+                    <Select
+                      value={String(activePage)}
+                      onValueChange={(val) => setCurrentPage(Number(val))}
+                    >
+                      <SelectTrigger className="h-10 w-28 rounded-xl border border-border bg-card px-3 text-sm shadow-none">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent
+                        position="popper"
+                        sideOffset={4}
+                        className="z-[80] rounded-xl border border-border bg-popover shadow-xl"
+                      >
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                          <SelectItem
+                            key={page}
+                            value={String(page)}
+                            className="cursor-pointer rounded-lg text-sm"
+                          >
+                            Page {page}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
