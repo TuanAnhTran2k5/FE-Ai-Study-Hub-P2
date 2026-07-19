@@ -17,9 +17,6 @@ export interface LeaderboardResponse {
   avatarUrl: string | null;
   totalScore: number;
   rankName: string;
-  rankIcon: string | null;
-  rankColor: string | null;
-  rankTextColor: string | null;
 }
 
 export interface GlobalLeaderboardResponse {
@@ -43,10 +40,6 @@ export interface RankResponse {
   maxScore: number;
   storageBonus: number;
   displayPriority: string;
-  iconUrl: string | null;
-  color: string | null;
-  badgeColor: string | null;
-  textColor: string | null;
 }
 
 export interface BadgeResponse {

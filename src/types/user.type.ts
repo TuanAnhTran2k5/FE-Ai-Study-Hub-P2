@@ -10,10 +10,6 @@ export interface RankInfo {
   maxScore: number;
   storageBonus: number;
   displayPriority: string;
-  iconUrl?: string | null;
-  color?: string | null;
-  badgeColor?: string | null;
-  textColor?: string | null;
 }
 
 export interface UserRank {

@@ -9,6 +9,7 @@ import {
   ChevronDown,
   ChevronUp,
   FileText,
+  RotateCcw,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,9 @@ interface ComboAccordionProps {
   onDeleteClick: (id: number, identifier: string) => void;
   onEditSubjectClick: (subject: any, combo: ComboSubjectResponse) => void;
   onDeleteSubjectClick: (subject: any, combo: ComboSubjectResponse) => void;
+  onRestoreSubjectClick: (id: number) => void;
   onAddSubjectClick: (combo: ComboSubjectResponse) => void;
+  onRestoreClick: (id: number) => void;
   onManageSyllabusClick: (subject: any) => void;
 }
 
@@ -48,7 +51,9 @@ export default function ComboAccordion({
   onDeleteClick,
   onEditSubjectClick,
   onDeleteSubjectClick,
+  onRestoreSubjectClick,
   onAddSubjectClick,
+  onRestoreClick,
   onManageSyllabusClick,
 }: ComboAccordionProps) {
   const [expandedComboId, setExpandedComboId] = useState<number | null>(null);
@@ -94,10 +99,15 @@ export default function ComboAccordion({
         <div className="space-y-4">
           {combos.map((combo) => {
             const isExpanded = expandedComboId === combo.comboId;
+            const activeSubjectCount = combo.subjects.filter(
+              (subject) => !subject.isDeleted,
+            ).length;
             return (
               <div
                 key={combo.comboId}
-                className="overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300"
+                className={`overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 ${
+                  combo.isDeleted ? "opacity-50" : ""
+                }`}
               >
                 <div
                   onClick={() =>
@@ -114,7 +124,7 @@ export default function ComboAccordion({
                         {combo.comboName}
                       </h4>
                       <Badge variant="secondary" className="rounded-full">
-                        {combo.subjects.length} Subjects
+                        {activeSubjectCount} Subjects
                       </Badge>
                     </div>
                   </div>
@@ -123,24 +133,42 @@ export default function ComboAccordion({
                     className="flex items-center gap-3"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onEditClick(combo)}
-                      className="cursor-pointer rounded-xl hover:bg-primary/10 hover:text-primary"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() =>
-                        onDeleteClick(combo.comboId, combo.comboName)
-                      }
-                      className="cursor-pointer rounded-xl hover:bg-destructive/10 hover:text-destructive"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    {combo.isDeleted ? (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        title="Restore combo"
+                        onClick={() => onRestoreClick(combo.comboId)}
+                        className="cursor-pointer rounded-xl text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-500"
+                      >
+                        <RotateCcw className="h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Edit combo"
+                          onClick={() => onEditClick(combo)}
+                          className="cursor-pointer rounded-xl hover:bg-primary/10 hover:text-primary"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          title="Delete combo"
+                          onClick={() =>
+                            onDeleteClick(combo.comboId, combo.comboName)
+                          }
+                          className="cursor-pointer rounded-xl hover:bg-destructive/10 hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </>
+                    )}
+
                     <Button
                       variant="ghost"
                       size="icon"
@@ -211,7 +239,14 @@ export default function ComboAccordion({
                           </TableHeader>
                           <TableBody>
                             {combo.subjects.map((subj) => (
-                              <TableRow key={subj.subjectId}>
+                              <TableRow
+                                key={subj.subjectId}
+                                className={
+                                  subj.isDeleted
+                                    ? "bg-muted/20 opacity-50"
+                                    : undefined
+                                }
+                              >
                                 <TableCell className="font-bold text-primary">
                                   {subj.subjectCode}
                                 </TableCell>
@@ -248,26 +283,44 @@ export default function ComboAccordion({
                                 </TableCell>
                                 <TableCell className="text-right">
                                   <div className="flex justify-end gap-1">
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={() =>
-                                        onEditSubjectClick(subj, combo)
-                                      }
-                                      className="cursor-pointer h-7 w-7 rounded-md hover:bg-primary/10 hover:text-primary"
-                                    >
-                                      <Edit2 className="h-3.5 w-3.5" />
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={() =>
-                                        onDeleteSubjectClick(subj, combo)
-                                      }
-                                      className="cursor-pointer h-7 w-7 rounded-md hover:bg-destructive/10 hover:text-destructive"
-                                    >
-                                      <Trash2 className="h-3.5 w-3.5" />
-                                    </Button>
+                                    {subj.isDeleted ? (
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        title="Restore subject"
+                                        onClick={() =>
+                                          onRestoreSubjectClick(subj.subjectId)
+                                        }
+                                        className="cursor-pointer h-7 w-7 rounded-md text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-500"
+                                      >
+                                        <RotateCcw className="h-3.5 w-3.5" />
+                                      </Button>
+                                    ) : (
+                                      <>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          title="Edit subject"
+                                          onClick={() =>
+                                            onEditSubjectClick(subj, combo)
+                                          }
+                                          className="cursor-pointer h-7 w-7 rounded-md hover:bg-primary/10 hover:text-primary"
+                                        >
+                                          <Edit2 className="h-3.5 w-3.5" />
+                                        </Button>
+                                        <Button
+                                          variant="ghost"
+                                          size="icon"
+                                          title="Delete subject"
+                                          onClick={() =>
+                                            onDeleteSubjectClick(subj, combo)
+                                          }
+                                          className="cursor-pointer h-7 w-7 rounded-md hover:bg-destructive/10 hover:text-destructive"
+                                        >
+                                          <Trash2 className="h-3.5 w-3.5" />
+                                        </Button>
+                                      </>
+                                    )}
                                   </div>
                                 </TableCell>
                               </TableRow>

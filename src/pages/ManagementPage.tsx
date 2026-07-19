@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { BookOpen, Layers, BookMarked } from "lucide-react";
+import { BookOpen, Layers, BookMarked, RotateCcw } from "lucide-react";
 
 import { ROUTE } from "@/models/routePath";
 import type { User as AuthUser } from "@/models/user";
@@ -19,6 +19,7 @@ import DeleteConfirmDialog from "@/components/management/DeleteConfirmDialog";
 import SubjectDialog from "@/components/management/SubjectDialog";
 import SyllabusManageDialog from "@/components/management/SyllabusManageDialog";
 import SubjectTable from "@/components/management/SubjectTable";
+import DeletedSubjectTable from "@/components/management/DeletedSubjectTable";
 
 // Import API Services
 import {
@@ -34,6 +35,8 @@ import {
   createSubject,
   updateSubject,
   deleteSubject,
+  restoreComboSubject,
+  restoreSubject,
 } from "@/services/adminCurriculumService";
 
 // Import Types & Constants
@@ -69,9 +72,13 @@ function ManagementPage() {
   }
 
   // 2. State điều hướng Tabs & Tìm kiếm
-  const [activeTab, setActiveTab] = useState<"semesters" | "combos" | "subjects">("semesters");
+  const [activeTab, setActiveTab] = useState<
+    "semesters" | "combos" | "subjects" | "deleted-subjects"
+  >("semesters");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [subjectSearchKeyword, setSubjectSearchKeyword] = useState("");
+  const [deletedSubjectSearchKeyword, setDeletedSubjectSearchKeyword] =
+    useState("");
 
   // 3. State điều khiển Semester Dialog
   const [isSemesterDialogOpen, setIsSemesterDialogOpen] = useState(false);
@@ -126,9 +133,34 @@ function ManagementPage() {
 
   // Get All Subjects (Core & Combo)
   const { data: subjects = [], isLoading: isLoadingSubjects } = useQuery({
-    queryKey: ["admin-subjects", subjectSearchKeyword],
-    queryFn: () => getAllSubjects(subjectSearchKeyword),
+    queryKey: ["admin-subjects"],
+    queryFn: () => getAllSubjects(),
   });
+
+  const normalizedSubjectSearch = subjectSearchKeyword.trim().toLowerCase();
+  const normalizedDeletedSubjectSearch = deletedSubjectSearchKeyword
+    .trim()
+    .toLowerCase();
+
+  const activeSubjects = subjects.filter(
+    (subject) =>
+      !subject.isDeleted &&
+      (!normalizedSubjectSearch ||
+        subject.subjectCode.toLowerCase().includes(normalizedSubjectSearch) ||
+        subject.subjectName.toLowerCase().includes(normalizedSubjectSearch)),
+  );
+
+  const deletedSubjects = subjects.filter(
+    (subject) =>
+      subject.isDeleted &&
+      (!normalizedDeletedSubjectSearch ||
+        subject.subjectCode
+          .toLowerCase()
+          .includes(normalizedDeletedSubjectSearch) ||
+        subject.subjectName
+          .toLowerCase()
+          .includes(normalizedDeletedSubjectSearch)),
+  );
 
   // ==========================================
   // MUTATIONS (React Query)
@@ -222,6 +254,21 @@ function ManagementPage() {
     },
   });
 
+  const restoreComboMutation = useMutation({
+  mutationFn: restoreComboSubject,
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
+
+    toast.success("Combo restored successfully!");
+  },
+  onError: (error: any) => {
+    toast.error(
+      error.response?.data?.message || "Failed to restore combo",
+    );
+  },
+});
+
   // 3. Subject CRUD Mutations (Tab All Subjects)
   const createSubjectMutation = useMutation({
     mutationFn: createSubject,
@@ -257,11 +304,27 @@ function ManagementPage() {
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
       toast.success("Subject deleted successfully!");
       setDeleteConfirm(null);
+      setSubjectDeleteConfirm(null);
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Failed to delete subject");
     },
   });
+
+  const restoreSubjectMutation = useMutation({
+  mutationFn: restoreSubject,
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
+
+    toast.success("Subject restored successfully!");
+  },
+  onError: (error: any) => {
+    toast.error(
+      error.response?.data?.message || "Failed to restore subject",
+    );
+  },
+});
 
   // ==========================================
   // SAVING / DELETING ACTION DISPATCHERS
@@ -334,31 +397,9 @@ function ManagementPage() {
 
   const handleSubjectDelete = () => {
     if (!subjectDeleteConfirm) return;
-    const { combo, subject } = subjectDeleteConfirm;
+    deleteSubjectMutation.mutate(subjectDeleteConfirm.subject.subjectId);
 
     // Lọc bỏ subject được xóa
-    const filteredSubjects = combo.subjects.filter(
-      (sub) =>
-        !(
-          (sub.subjectId && sub.subjectId === subject.subjectId) ||
-          sub.subjectCode === subject.subjectCode
-        )
-    );
-
-    updateComboMutation.mutate({
-      id: combo.comboId,
-      data: {
-        comboCode: combo.comboCode,
-        comboName: combo.comboName,
-        subjects: filteredSubjects.map((sub) => ({
-          subjectCode: sub.subjectCode,
-          subjectName: sub.subjectName,
-          description: sub.description || "",
-          subjectType: sub.subjectType,
-          semesterId: sub.semesterId,
-        })),
-      },
-    });
   };
 
   const handleSingleSubjectSubmit = (data: SubjectRequest) => {
@@ -436,7 +477,7 @@ function ManagementPage() {
           <BookMarked className="h-4 w-4" />
           Combo Subjects
           <span className="ml-1.5 px-2 py-0.5 text-[10px] font-black rounded-full bg-secondary text-secondary-foreground border border-border">
-            {combos.length}
+            {combos.filter((combo) => !combo.isDeleted).length}
           </span>
         </button>
 
@@ -451,7 +492,22 @@ function ManagementPage() {
           <BookOpen className="h-4 w-4" />
           All Subjects
           <span className="ml-1.5 px-2 py-0.5 text-[10px] font-black rounded-full bg-secondary text-secondary-foreground border border-border">
-            {subjects.length}
+            {subjects.filter((subject) => !subject.isDeleted).length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("deleted-subjects")}
+          className={`flex cursor-pointer items-center gap-2 px-6 py-3.5 text-sm font-bold border-b-2 transition-all duration-300 ${
+            activeTab === "deleted-subjects"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-card-foreground"
+          }`}
+        >
+          <RotateCcw className="h-4 w-4" />
+          Deleted History
+          <span className="ml-1.5 px-2 py-0.5 text-[10px] font-black rounded-full bg-secondary text-secondary-foreground border border-border">
+            {subjects.filter((subject) => subject.isDeleted).length}
           </span>
         </button>
       </div>
@@ -499,6 +555,12 @@ function ManagementPage() {
               onDeleteSubjectClick={(subject, combo) => {
                 setSubjectDeleteConfirm({ subject, combo });
               }}
+              onRestoreSubjectClick={(id) => {
+                restoreSubjectMutation.mutate(id);
+              }}
+              onRestoreClick={(id) => {
+                restoreComboMutation.mutate(id);
+              }}
               onAddSubjectClick={(combo) => {
                 setEditingSubject({ subject: null, combo });
                 setIsSubjectDialogOpen(true);
@@ -508,9 +570,9 @@ function ManagementPage() {
                 setIsSyllabusDialogOpen(true);
               }}
             />
-          ) : (
+          ) : activeTab === "subjects" ? (
             <SubjectTable
-              subjects={subjects}
+              subjects={activeSubjects}
               isLoading={isLoadingSubjects}
               searchKeyword={subjectSearchKeyword}
               onSearchChange={setSubjectSearchKeyword}
@@ -525,10 +587,24 @@ function ManagementPage() {
               onDeleteClick={(id, identifier) => {
                 setDeleteConfirm({ id, type: "subject", identifier });
               }}
+              onRestoreClick={(id) => {
+                restoreSubjectMutation.mutate(id);
+              }}
               onManageSyllabusClick={(subject) => {
                 setSelectedSyllabusSubject(subject);
                 setIsSyllabusDialogOpen(true);
               }}
+            />
+          ) : (
+            <DeletedSubjectTable
+              subjects={deletedSubjects}
+              isLoading={isLoadingSubjects}
+              searchKeyword={deletedSubjectSearchKeyword}
+              onSearchChange={setDeletedSubjectSearchKeyword}
+              onRestoreClick={(id) => {
+                restoreSubjectMutation.mutate(id);
+              }}
+              isRestoring={restoreSubjectMutation.isPending}
             />
           )}
         </CardContent>

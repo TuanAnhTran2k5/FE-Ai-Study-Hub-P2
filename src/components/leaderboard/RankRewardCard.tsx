@@ -24,8 +24,8 @@ function RankRewardCard({ rank }: RankRewardCardProps) {
   const isUnlimitedRank = rank.maxScore >= 2147483647;
 
   const scoreLabel = isUnlimitedRank
-    ? `${rank.minScore > 0 ? rank.minScore - 1 : 0}+`
-    : `${rank.minScore} - ${rank.maxScore}`;
+  ? `${rank.minScore}+`
+  : `${rank.minScore} - ${rank.maxScore}`;
 
   const frameScore = isUnlimitedRank ? rank.minScore : rank.maxScore;
 
@@ -48,11 +48,11 @@ function RankRewardCard({ rank }: RankRewardCardProps) {
       <div className="relative">
         <div className="mb-5 flex items-start justify-between">
           <AvatarFrame
-            score={frameScore}
-            avatarUrl={rank.iconUrl ?? "/img/LOGO.png"}
-            fullName={rank.rankName}
-            size="lg"
-          />
+              score={frameScore}
+              avatarUrl="/img/LOGO.png"
+              fullName={rank.rankName}
+              size="lg"
+            />
 
           <div className="rounded-2xl bg-cyan-400/10 p-3 text-cyan-400">
             {icon}

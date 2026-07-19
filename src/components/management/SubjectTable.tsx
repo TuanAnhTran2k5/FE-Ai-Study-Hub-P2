@@ -1,4 +1,4 @@
-import { Plus, Edit2, Trash2, Search, BookOpen, Loader2, FileText } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, BookOpen, Loader2, FileText, RotateCcw, } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ interface SubjectTableProps {
   onAddClick: () => void;
   onEditClick: (subject: SubjectResponse) => void;
   onDeleteClick: (id: number, identifier: string) => void;
+  onRestoreClick: (id: number) => void;
   onManageSyllabusClick: (subject: SubjectResponse) => void;
 }
 
@@ -32,6 +33,7 @@ export default function SubjectTable({
   onAddClick,
   onEditClick,
   onDeleteClick,
+  onRestoreClick,
   onManageSyllabusClick,
 }: SubjectTableProps) {
   // Sắp xếp danh sách môn học theo Học kỳ (semesterId) tăng dần
@@ -55,7 +57,7 @@ export default function SubjectTable({
             variant="outline"
             className="h-11 px-3 rounded-xl border border-border font-bold text-xs bg-secondary/10 flex items-center justify-center shrink-0"
           >
-            Total: {subjects.length}
+            Total: {subjects.filter((subject) => !subject.isDeleted).length}
           </Badge>
         </div>
 
@@ -97,7 +99,10 @@ export default function SubjectTable({
             </TableHeader>
             <TableBody>
               {sortedSubjects.map((subj) => (
-                <TableRow key={subj.subjectId}>
+                <TableRow
+                  key={subj.subjectId}
+                  className={subj.isDeleted ? "bg-muted/20 opacity-50" : undefined}
+                >
                   <TableCell className="font-bold text-primary">
                     {subj.subjectCode}
                   </TableCell>
@@ -134,25 +139,42 @@ export default function SubjectTable({
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onEditClick(subj)}
-                        className="cursor-pointer rounded-xl hover:bg-primary/10 hover:text-primary"
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() =>
-                          onDeleteClick(subj.subjectId, subj.subjectCode)
-                        }
-                        className="cursor-pointer rounded-xl hover:bg-destructive/10 hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+  {subj.isDeleted ? (
+    <Button
+      variant="ghost"
+      size="icon"
+      title="Restore subject"
+      onClick={() => onRestoreClick(subj.subjectId)}
+      className="cursor-pointer rounded-xl text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-500"
+    >
+      <RotateCcw className="h-4 w-4" />
+    </Button>
+  ) : (
+    <>
+      <Button
+        variant="ghost"
+        size="icon"
+        title="Edit subject"
+        onClick={() => onEditClick(subj)}
+        className="cursor-pointer rounded-xl hover:bg-primary/10 hover:text-primary"
+      >
+        <Edit2 className="h-4 w-4" />
+      </Button>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        title="Delete subject"
+        onClick={() =>
+          onDeleteClick(subj.subjectId, subj.subjectCode)
+        }
+        className="cursor-pointer rounded-xl hover:bg-destructive/10 hover:text-destructive"
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
+    </>
+  )}
+</div>
                   </TableCell>
                 </TableRow>
               ))}

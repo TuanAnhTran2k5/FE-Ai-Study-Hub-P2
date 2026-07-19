@@ -111,6 +111,16 @@ export const deleteComboSubject = async (
   return response.data.result;
 };
 
+export const restoreComboSubject = async (
+  id: number,
+): Promise<ComboSubjectResponse> => {
+  const response = await api.put<APIResponse<ComboSubjectResponse>>(
+    `/admin/curriculum/combos/restore/${id}`,
+  );
+
+  return response.data.result;
+};
+
 // ==========================================
 // SUBJECT SERVICES
 // ==========================================
@@ -155,5 +165,15 @@ export const deleteSubject = async (id: number): Promise<DeleteResponse> => {
   const response = await api.delete<APIResponse<DeleteResponse>>(
     `/admin/curriculum/subjects/${id}`
   );
+  return response.data.result;
+};
+
+export const restoreSubject = async (
+  id: number,
+): Promise<SubjectResponse> => {
+  const response = await api.put<APIResponse<SubjectResponse>>(
+    `/admin/curriculum/subjects/restore/${id}`,
+  );
+
   return response.data.result;
 };
