@@ -13,6 +13,7 @@ import {
   type ResendOtpResponse,
   type ResetPasswordRequest,
   type VerifyOtpRequest,
+  type VerifyTokenRequest,
 } from "@/types/auth";
 
 //hàm gọi API
@@ -87,5 +88,23 @@ export const googleLogin = async (data: GoogleLoginRequest): Promise<User> => {
     data,
   );
 
+  return response.data.result;
+};
+
+export const verifyToken = async (data: VerifyTokenRequest): Promise<User> => {
+  const response = await api.post<APIResponse<User>>(
+    "/auth/verify-token",
+    data,
+  );
+  return response.data.result;
+};
+
+export const verifyForgotPasswordOtp = async (
+  data: VerifyOtpRequest,
+): Promise<boolean> => {
+  const response = await api.post<APIResponse<boolean>>(
+    "/auth/forgot-password/verify-otp",
+    data,
+  );
   return response.data.result;
 };

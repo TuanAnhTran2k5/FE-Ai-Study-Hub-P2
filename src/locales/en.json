@@ -37,6 +37,7 @@
     "sending": "Sending...",
     "resending": "Resending...",
     "signingIn": "Signing in...",
+    "verifyingToken": "Verifying account...",
     "orContinueWith": "or continue with",
     "continueWithGoogle": "Continue with Google",
     "createAccount": "Create Account",

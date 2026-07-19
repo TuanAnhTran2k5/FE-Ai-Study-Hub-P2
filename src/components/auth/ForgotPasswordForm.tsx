@@ -17,7 +17,7 @@ import { useMutation } from "@tanstack/react-query";
 import { ArrowRight, Mail } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
 type ForgotPasswordErrors = Partial<
@@ -28,8 +28,11 @@ function ForgotPasswordForm() {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
+  const location = useLocation();
+  const initialEmail = location.state?.email || "";
+
   const [formValues, setFormValues] = useState<ForgotPasswordFormValues>({
-    email: "",
+    email: initialEmail,
   });
 
   const [errors, setErrors] = useState<ForgotPasswordErrors>({});
@@ -54,8 +57,9 @@ function ForgotPasswordForm() {
       );
     },
 
-    onError: (error) => {
-      toast.error(error.message || ERROR_CODE.SERVER_ERROR);
+    onError: (error: any) => {
+      const serverMessage = error.response?.data?.message || error.message;
+      toast.error(serverMessage || ERROR_CODE.SERVER_ERROR);
     },
   });
 

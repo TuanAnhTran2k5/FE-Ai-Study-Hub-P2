@@ -63,3 +63,7 @@ export interface LogoutRequest {
 export interface GoogleLoginRequest {
   token: string;
 }
+
+export interface VerifyTokenRequest {
+  token: string;
+}

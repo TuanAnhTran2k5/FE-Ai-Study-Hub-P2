@@ -43,7 +43,9 @@ function LoginForm() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<LoginErrors>({});
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(
+    !!localStorage.getItem("rememberEmail")
+  );
   const [emailValue, setEmailValue] = useState(
     localStorage.getItem("rememberEmail") || "",
   );
@@ -296,18 +298,19 @@ function LoginForm() {
         )}
 
         <div className="flex items-center justify-between">
-          <label className="flex items-center gap-2 text-sm text-foreground">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground select-none">
             <input
               type="checkbox"
               checked={rememberMe}
               onChange={(event) => setRememberMe(event.target.checked)}
-              className="size-4 rounded border-border"
+              className="size-4 cursor-pointer rounded border-border accent-primary"
             />
             {t("auth.rememberMe")}
           </label>
 
           <Link
             to={`/${ROUTE.AUTH}/${ROUTE.FORGOT_PASSWORD}`}
+            state={{ email: emailValue }}
             className="text-sm font-medium text-link hover:text-link-hover hover:underline"
           >
             {t("auth.forgotPasswordLink")}

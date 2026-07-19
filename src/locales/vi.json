@@ -37,6 +37,7 @@
     "sending": "Đang gửi...",
     "resending": "Đang gửi lại...",
     "signingIn": "Đang đăng nhập...",
+    "verifyingToken": "Xác thực tài khoản...",
     "orContinueWith": "hoặc tiếp tục với",
     "continueWithGoogle": "Tiếp tục với Google",
     "createAccount": "Tạo tài khoản",
