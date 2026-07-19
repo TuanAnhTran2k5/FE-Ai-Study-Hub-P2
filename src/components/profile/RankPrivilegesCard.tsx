@@ -121,7 +121,7 @@ export default function RankPrivilegesCard({ currentRank, rankProgress }: RankPr
             className="flex size-12 items-center justify-center rounded-2xl border transition-all"
             style={{ 
               borderColor: rankStyle.color,
-              backgroundColor: rank.badgeColor ?? 'rgba(var(--primary), 0.1)',
+              backgroundColor: rankStyle.badgeColor,
               color: rankStyle.color
             }}
           >

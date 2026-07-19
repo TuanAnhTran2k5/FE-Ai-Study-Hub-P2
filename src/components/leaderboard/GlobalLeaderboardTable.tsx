@@ -5,6 +5,7 @@ import AvatarFrame from "@/components/avatarFrame/AvatarFrame";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import type { LeaderboardResponse } from "@/types/leaderboard.type";
+import { getRankStyle } from "@/components/dashboard/rankIconHelper";
 
 interface GlobalLeaderboardTableProps {
   users: LeaderboardResponse[];
@@ -57,56 +58,63 @@ function GlobalLeaderboardTable({
       )}
 
       {!isLoading &&
-        users.map((user) => (
-          <div
-            key={user.userId}
-            className="grid gap-4 border-b border-border px-6 py-5 last:border-b-0 hover:bg-secondary/40 md:grid-cols-[100px_2fr_1fr_1fr] md:items-center"
+    
+  users.map((user) => {
+    const rankStyle = getRankStyle(user.rankName);
+
+    return (
+      <div
+        key={user.userId}
+        className="grid gap-4 border-b border-border px-6 py-5 last:border-b-0 hover:bg-secondary/40 md:grid-cols-[100px_2fr_1fr_1fr] md:items-center"
+      >
+        <div className="flex items-center gap-2 font-black text-card-foreground">
+          {user.rank <= 3 ? (
+            <Medal
+              className={`h-7 w-7 ${
+                user.rank === 1
+                  ? "text-yellow-400"
+                  : user.rank === 2
+                    ? "text-slate-400"
+                    : "text-orange-400"
+              }`}
+            />
+          ) : null}
+
+          <span>#{user.rank}</span>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <AvatarFrame
+            score={user.totalScore}
+            avatarUrl={user.avatarUrl}
+            fullName={user.fullName}
+            size="sm"
+          />
+
+          <p className="font-bold text-card-foreground">
+            {user.fullName}
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 font-bold text-card-foreground">
+          <PointCoin size={22} />
+          {formatNumber(user.totalScore)}
+        </div>
+
+        <div>
+          <span
+            className="rounded-full px-4 py-1.5 text-sm font-bold"
+            style={{
+              backgroundColor: rankStyle.badgeColor,
+              color: rankStyle.color,
+            }}
           >
-            <div className="flex items-center gap-2 font-black text-card-foreground">
-              {user.rank <= 3 ? (
-                <Medal
-                  className={`h-7 w-7 ${
-                    user.rank === 1
-                      ? "text-yellow-400"
-                      : user.rank === 2
-                        ? "text-slate-400"
-                        : "text-orange-400"
-                  }`}
-                />
-              ) : null}
-
-              <span>#{user.rank}</span>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <AvatarFrame
-                score={user.totalScore}
-                avatarUrl={user.avatarUrl}
-                fullName={user.fullName}
-                size="sm"
-              />
-
-              <p className="font-bold text-card-foreground">{user.fullName}</p>
-            </div>
-
-            <div className="flex items-center gap-2 font-bold text-card-foreground">
-              <PointCoin size={22} />
-              {formatNumber(user.totalScore)}
-            </div>
-
-            <div>
-              <span
-                className="rounded-full px-4 py-1.5 text-sm font-bold"
-                style={{
-                  backgroundColor: user.rankColor ?? undefined,
-                  color: user.rankTextColor ?? undefined,
-                }}
-              >
-                {user.rankName}
-              </span>
-            </div>
-          </div>
-        ))}
+            {user.rankName}
+          </span>
+        </div>
+      </div>
+    );
+  })}
 
       <div className="flex items-center justify-between border-t border-border px-6 py-4">
         <Button

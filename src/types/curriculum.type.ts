@@ -31,6 +31,7 @@ export interface SubjectResponse {
   comboId: number | null;
   comboCode: string | null;
   comboName: string | null;
+  isDeleted: boolean;
 }
 
 export interface ComboSubjectRequest {
@@ -44,6 +45,7 @@ export interface ComboSubjectResponse {
   comboCode: string;
   comboName: string;
   subjects: SubjectResponse[];
+  isDeleted: boolean;
 }
 
 export interface DeleteResponse {
