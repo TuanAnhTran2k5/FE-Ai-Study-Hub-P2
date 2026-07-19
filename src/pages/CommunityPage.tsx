@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 import { useSelector } from "react-redux";
@@ -27,6 +27,10 @@ import type { SubjectResponse } from "@/types/academic.type";
 
 function normalizeSearchText(value?: string | null) {
   return (value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
@@ -63,6 +67,21 @@ function CommunityPage() {
   const [guestSubjectKeyword, setGuestSubjectKeyword] = useState("");
   const [isGuestSubjectDropdownOpen, setIsGuestSubjectDropdownOpen] =
     useState(false);
+  const [selectedGuestSubject, setSelectedGuestSubject] =
+    useState<SubjectResponse | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+  const [guestPage, setGuestPage] = useState(1);
+
+  // Reset pagination to page 1 when filters or search keywords change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters, communitySearchKeyword]);
+
+  // Reset guest pagination to page 1 when search keyword changes
+  useEffect(() => {
+    setGuestPage(1);
+  }, [guestSubjectKeyword]);
 
   const accessToken = localStorage.getItem("accessToken");
   const authUserId =
@@ -161,28 +180,66 @@ function CommunityPage() {
     });
   }, [hydratedDocuments, filters, communitySearchKeyword]);
 
+  const totalPages = Math.ceil(filteredDocuments.length / itemsPerPage);
+  const activePage = Math.max(1, Math.min(currentPage, totalPages || 1));
+
+  const paginatedDocuments = useMemo(() => {
+    return filteredDocuments.slice(
+      (activePage - 1) * itemsPerPage,
+      activePage * itemsPerPage,
+    );
+  }, [filteredDocuments, activePage]);
+
+
+
   const guestTopRatedDocuments = useMemo(() => {
+    if (selectedGuestSubject) {
+      return hydratedDocuments
+        .filter((document) => document.subjectId === selectedGuestSubject.subjectId)
+        .sort((firstDocument, secondDocument) => {
+          return (
+            (secondDocument.averageRating ?? 0) -
+            (firstDocument.averageRating ?? 0)
+          );
+        });
+    }
+
     const normalizedSubjectKeyword = normalizeSearchText(guestSubjectKeyword);
+    if (!normalizedSubjectKeyword) {
+      return hydratedDocuments.sort((firstDocument, secondDocument) => {
+        return (
+          (secondDocument.averageRating ?? 0) -
+          (firstDocument.averageRating ?? 0)
+        );
+      });
+    }
+
+    const words = normalizedSubjectKeyword.split(/\s+/).filter(Boolean);
 
     return hydratedDocuments
       .filter((document) => {
-        if (!normalizedSubjectKeyword) {
-          return true;
-        }
+        return words.every((word) => {
+          const subjectCode = (document.subjectCode ?? "").toLowerCase();
+          const comboCode = (document.comboCode ?? "").toLowerCase();
+          const subjectName = (document.subjectName ?? "").toLowerCase();
+          const comboName = (document.comboName ?? "").toLowerCase();
 
-        const subjectText = [
-          document.subjectCode,
-          document.subjectName,
-          document.comboCode,
-          document.comboName,
-        ]
-          .filter(Boolean)
-          .join(" ")
-          .toString();
+          if (subjectCode.startsWith(word)) return true;
+          if (comboCode.startsWith(word)) return true;
 
-        return normalizeSearchText(subjectText).includes(
-          normalizedSubjectKeyword,
-        );
+          const nameWords = subjectName.split(/\s+/).filter(Boolean);
+          if (nameWords.some((nw) => nw.startsWith(word))) return true;
+
+          const comboNameWords = comboName.split(/\s+/).filter(Boolean);
+          if (comboNameWords.some((cnw) => cnw.startsWith(word))) return true;
+
+          if (/^\d+$/.test(word)) {
+            if (subjectCode.includes(word)) return true;
+            if (comboCode.includes(word)) return true;
+          }
+
+          return false;
+        });
       })
       .sort((firstDocument, secondDocument) => {
         return (
@@ -190,7 +247,17 @@ function CommunityPage() {
           (firstDocument.averageRating ?? 0)
         );
       });
-  }, [hydratedDocuments, guestSubjectKeyword]);
+  }, [hydratedDocuments, guestSubjectKeyword, selectedGuestSubject]);
+
+  const totalGuestPages = Math.ceil(guestTopRatedDocuments.length / itemsPerPage);
+  const activeGuestPage = Math.max(1, Math.min(guestPage, totalGuestPages || 1));
+
+  const paginatedGuestDocuments = useMemo(() => {
+    return guestTopRatedDocuments.slice(
+      (activeGuestPage - 1) * itemsPerPage,
+      activeGuestPage * itemsPerPage,
+    );
+  }, [guestTopRatedDocuments, activeGuestPage]);
 
   const guestSubjectSuggestions = useMemo(() => {
     const normalizedInput = normalizeSearchText(guestSubjectInput);
@@ -199,18 +266,32 @@ function CommunityPage() {
       return [];
     }
 
+    const words = normalizedInput.split(/\s+/).filter(Boolean);
+
     return academicSubjects
       .filter((subject) => {
-        const subjectText = [
-          subject.subjectCode,
-          subject.subjectName,
-          subject.comboCode,
-          subject.comboName,
-        ]
-          .filter(Boolean)
-          .join(" ");
+        return words.every((word) => {
+          const subjectCode = (subject.subjectCode ?? "").toLowerCase();
+          const comboCode = (subject.comboCode ?? "").toLowerCase();
+          const subjectName = (subject.subjectName ?? "").toLowerCase();
+          const comboName = (subject.comboName ?? "").toLowerCase();
 
-        return normalizeSearchText(subjectText).includes(normalizedInput);
+          if (subjectCode.startsWith(word)) return true;
+          if (comboCode.startsWith(word)) return true;
+
+          const nameWords = subjectName.split(/\s+/).filter(Boolean);
+          if (nameWords.some((nw) => nw.startsWith(word))) return true;
+
+          const comboNameWords = comboName.split(/\s+/).filter(Boolean);
+          if (comboNameWords.some((cnw) => cnw.startsWith(word))) return true;
+
+          if (/^\d+$/.test(word)) {
+            if (subjectCode.includes(word)) return true;
+            if (comboCode.includes(word)) return true;
+          }
+
+          return false;
+        });
       })
       .slice(0, 8);
   }, [academicSubjects, guestSubjectInput]);
@@ -293,8 +374,11 @@ function CommunityPage() {
                 value={guestSubjectInput}
                 onFocus={() => setIsGuestSubjectDropdownOpen(true)}
                 onChange={(event) => {
-                  setGuestSubjectInput(event.target.value);
+                  const nextValue = event.target.value;
+                  setGuestSubjectInput(nextValue);
+                  setGuestSubjectKeyword(nextValue);
                   setIsGuestSubjectDropdownOpen(true);
+                  setSelectedGuestSubject(null);
                 }}
                 onKeyDown={(event) => {
                   if (event.key === "Enter") {
@@ -318,6 +402,7 @@ function CommunityPage() {
                           onClick={() => {
                             setGuestSubjectInput(subjectLabel);
                             setGuestSubjectKeyword(subjectLabel);
+                            setSelectedGuestSubject(subject);
                             setIsGuestSubjectDropdownOpen(false);
                           }}
                         >
@@ -348,16 +433,97 @@ function CommunityPage() {
           <div className="mb-5 text-sm text-muted-foreground">
             Showing{" "}
             <span className="font-bold text-card-foreground">
+              {paginatedGuestDocuments.length}
+            </span>{" "}
+            of{" "}
+            <span className="font-bold text-card-foreground">
               {guestTopRatedDocuments.length}
             </span>{" "}
             public documents
           </div>
 
           <DocumentGrid
-            documents={guestTopRatedDocuments}
+            documents={paginatedGuestDocuments}
             onView={(document) => handleViewDocument(document.documentId)}
             gridClassName={communityDocumentGridClassName}
           />
+
+          {/* Guest Pagination Section */}
+          {guestTopRatedDocuments.length > 0 && (
+            <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-border/40 pt-6 sm:flex-row">
+              <div className="text-sm text-muted-foreground">
+                Showing <span className="font-bold text-card-foreground">{paginatedGuestDocuments.length}</span> of{" "}
+                <span className="font-bold text-card-foreground">{guestTopRatedDocuments.length}</span> documents
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={activeGuestPage === 1}
+                  onClick={() => setGuestPage(activeGuestPage - 1)}
+                  className="h-10 rounded-xl px-4 font-bold"
+                >
+                  Previous
+                </Button>
+
+                <div className="hidden sm:flex items-center gap-1.5">
+                  {Array.from({ length: totalGuestPages }, (_, i) => i + 1).map((page) => (
+                    <Button
+                      key={page}
+                      variant={activeGuestPage === page ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setGuestPage(page)}
+                      className={`h-10 w-10 rounded-xl font-bold ${
+                        activeGuestPage === page
+                          ? "bg-primary text-primary-foreground"
+                          : ""
+                      }`}
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={activeGuestPage === totalGuestPages}
+                  onClick={() => setGuestPage(activeGuestPage + 1)}
+                  className="h-10 rounded-xl px-4 font-bold"
+                >
+                  Next
+                </Button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Go to page:</span>
+                <Select
+                  value={String(activeGuestPage)}
+                  onValueChange={(val) => setGuestPage(Number(val))}
+                >
+                  <SelectTrigger className="h-10 w-28 rounded-xl border border-border bg-card px-3 text-sm shadow-none">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent
+                    position="popper"
+                    sideOffset={4}
+                    className="z-[80] rounded-xl border border-border bg-popover shadow-xl"
+                  >
+                    {Array.from({ length: totalGuestPages }, (_, i) => i + 1).map((page) => (
+                      <SelectItem
+                        key={page}
+                        value={String(page)}
+                        className="cursor-pointer rounded-lg text-sm"
+                      >
+                        Page {page}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -475,6 +641,10 @@ function CommunityPage() {
         <div className="mb-6 text-sm text-muted-foreground">
           Showing{" "}
           <span className="font-bold text-card-foreground">
+            {paginatedDocuments.length}
+          </span>{" "}
+          of{" "}
+          <span className="font-bold text-card-foreground">
             {filteredDocuments.length}
           </span>{" "}
           documents
@@ -482,10 +652,87 @@ function CommunityPage() {
 
         {/* NOTE RENDER: DocumentGrid chi render card. Du lieu da search/filter/hydrate o CommunityPage. */}
         <DocumentGrid
-          documents={filteredDocuments}
+          documents={paginatedDocuments}
           onView={(document) => handleViewDocument(document.documentId)}
           gridClassName={communityDocumentGridClassName}
         />
+
+        {/* Pagination Section */}
+        {filteredDocuments.length > 0 && (
+          <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-border/40 pt-6 sm:flex-row">
+            <div className="text-sm text-muted-foreground">
+              Showing <span className="font-bold text-card-foreground">{paginatedDocuments.length}</span> of{" "}
+              <span className="font-bold text-card-foreground">{filteredDocuments.length}</span> documents
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={activePage === 1}
+                onClick={() => setCurrentPage(activePage - 1)}
+                className="h-10 rounded-xl px-4 font-bold"
+              >
+                Previous
+              </Button>
+
+              <div className="hidden sm:flex items-center gap-1.5">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <Button
+                    key={page}
+                    variant={activePage === page ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCurrentPage(page)}
+                    className={`h-10 w-10 rounded-xl font-bold ${
+                      activePage === page
+                        ? "bg-primary text-primary-foreground"
+                        : ""
+                    }`}
+                  >
+                    {page}
+                  </Button>
+                ))}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={activePage === totalPages}
+                onClick={() => setCurrentPage(activePage + 1)}
+                className="h-10 rounded-xl px-4 font-bold"
+              >
+                Next
+              </Button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Go to page:</span>
+              <Select
+                value={String(activePage)}
+                onValueChange={(val) => setCurrentPage(Number(val))}
+              >
+                <SelectTrigger className="h-10 w-28 rounded-xl border border-border bg-card px-3 text-sm shadow-none">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent
+                  position="popper"
+                  sideOffset={4}
+                  className="z-[80] rounded-xl border border-border bg-popover shadow-xl"
+                >
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                    <SelectItem
+                      key={page}
+                      value={String(page)}
+                      className="cursor-pointer rounded-lg text-sm"
+                    >
+                      Page {page}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
