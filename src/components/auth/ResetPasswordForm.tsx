@@ -50,8 +50,9 @@ function ResetPasswordForm() {
       navigate(`/${ROUTE.AUTH}/${ROUTE.LOGIN}`);
     },
 
-    onError: (error) => {
-      toast.error(error.message || ERROR_CODE.SERVER_ERROR);
+    onError: (error: any) => {
+      const serverMessage = error.response?.data?.message || error.message;
+      toast.error(serverMessage || ERROR_CODE.SERVER_ERROR);
     },
   });
 

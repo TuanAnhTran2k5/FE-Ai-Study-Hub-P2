@@ -1,9 +1,19 @@
 import Header from "@/components/Header";
 import AppSidebar from "@/components/AppSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/redux/store";
+import { ROUTE } from "@/models/routePath";
 
 function UserLayout() {
+  const currentUser = useSelector((state: RootState) => state.user);
+  const token = localStorage.getItem("accessToken");
+
+  if (!token || !currentUser) {
+    return <Navigate to={ROUTE.HOME} replace />;
+  }
+
   return (
     <SidebarProvider>
       <main className="flex h-screen w-full flex-col overflow-hidden bg-background">

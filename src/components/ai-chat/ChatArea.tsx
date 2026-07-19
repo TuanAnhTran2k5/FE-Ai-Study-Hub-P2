@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowUp, FileText, Loader2, Mic, Plus, Sparkles } from "lucide-react";
+import { ArrowUp, FileText, Loader2, Plus, Sparkles } from "lucide-react";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 
@@ -402,27 +402,29 @@ function ChatArea({
       <div className="shrink-0 border-t border-border/40 px-4 pb-4 pt-2.5">
         <div className="mx-auto max-w-3xl">
           <div
-            className={`flex border border-border/60 bg-secondary/25 shadow-lg transition-all duration-200 focus-within:border-primary/50 focus-within:bg-secondary/40 focus-within:shadow-primary/5 ${
+            className={`relative flex border border-border/60 bg-secondary/25 shadow-lg transition-all duration-300 focus-within:border-primary/50 focus-within:bg-secondary/40 focus-within:shadow-primary/5 ${
               question.trim() !== ""
-                ? "flex-col gap-2 rounded-[20px] p-3"
-                : "flex-row items-center gap-2.5 rounded-full px-3.5 py-1"
+                ? "flex-col rounded-[20px] p-3 pb-12"
+                : "flex-row items-center rounded-full py-1 pl-10 pr-12"
             }`}
           >
-            {/* Nút cộng bên trái khi THU GỌN (Pill - chưa nhập chữ) */}
-            {question.trim() === "" && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={onAddDocumentClick}
-                className="size-8 shrink-0 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary cursor-pointer"
-                title="Attach study documents"
-              >
-                <Plus className="size-4" />
-              </Button>
-            )}
+            {/* Nút cộng bên trái - Luôn cố định trong DOM và trượt vị trí mượt mà */}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={onAddDocumentClick}
+              className={`absolute size-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary cursor-pointer transition-all duration-300 ${
+                question.trim() !== ""
+                  ? "left-3 bottom-2 translate-y-0"
+                  : "left-1.5 top-1/2 -translate-y-1/2"
+              }`}
+              title="Attach study documents"
+            >
+              <Plus className="size-4" />
+            </Button>
 
-            {/* Ô nhập liệu Textarea duy nhất - Đảm bảo GIỮ FOCUS tuyệt đối khi đổi trạng thái */}
+            {/* Ô nhập liệu Textarea duy nhất - Giữ nguyên DOM để tránh mất focus */}
             <textarea
               ref={textareaRef}
               value={question}
@@ -431,77 +433,23 @@ function ChatArea({
               placeholder="Ask anything about your study materials..."
               disabled={isSending}
               rows={1}
-              className={`resize-none border-none bg-transparent py-0.5 text-sm text-card-foreground outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed scrollbar-thin ${
-                question.trim() !== ""
-                  ? "w-full"
-                  : "min-h-[2rem] flex-1 py-1.5 px-1"
-              }`}
+              className="w-full resize-none border-none bg-transparent py-1.5 text-sm text-card-foreground outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed scrollbar-thin transition-all duration-300"
             />
 
-            {/* Cụm nút bên phải khi THU GỌN (Pill - chưa nhập chữ) */}
-            {question.trim() === "" && (
-              <div className="flex items-center gap-1.5 shrink-0">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-8 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary cursor-pointer"
-                  title="Voice input"
-                >
-                  <Mic className="size-4" />
-                </Button>
-
-                <Button
-                  type="button"
-                  disabled
-                  className="size-8 rounded-full bg-muted-foreground/15 text-muted-foreground/35 cursor-not-allowed flex items-center justify-center"
-                  title="Send message"
-                >
-                  <ArrowUp className="size-4" />
-                </Button>
-              </div>
-            )}
-
-            {/* Thanh công cụ phía dưới khi MỞ RỘNG (Card - đã nhập chữ) */}
-            {question.trim() !== "" && (
-              <div className="mt-1 flex items-center justify-between pt-1 animate-in fade-in slide-in-from-top-1 duration-150">
-                {/* Nút đính kèm tài liệu */}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={onAddDocumentClick}
-                  className="size-8.5 rounded-full bg-card/60 text-muted-foreground hover:bg-primary/10 hover:text-primary cursor-pointer"
-                  title="Attach study documents"
-                >
-                  <Plus className="size-4.5" />
-                </Button>
-
-                <div className="flex items-center gap-2">
-                  {/* Nút Mic giọng nói */}
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="size-8.5 rounded-full text-muted-foreground hover:bg-primary/10 hover:text-primary cursor-pointer"
-                    title="Voice input"
-                  >
-                    <Mic className="size-4.5" />
-                  </Button>
-
-                  {/* Nút gửi mũi tên hướng lên hoạt động */}
-                  <Button
-                    type="button"
-                    disabled={isSending}
-                    onClick={handleSendMessage}
-                    className="size-8.5 rounded-full bg-foreground text-background hover:bg-foreground/90 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-md"
-                    title="Send message"
-                  >
-                    <ArrowUp className="size-4.5" />
-                  </Button>
-                </div>
-              </div>
-            )}
+            {/* Nút gửi mũi tên hướng lên - Luôn cố định trong DOM và trượt vị trí mượt mà */}
+            <Button
+              type="button"
+              disabled={isSending || question.trim() === ""}
+              onClick={handleSendMessage}
+              className={`absolute size-8 rounded-full flex items-center justify-center transition-all duration-300 ${
+                question.trim() !== ""
+                  ? "right-3 bottom-2 translate-y-0 bg-foreground text-background hover:bg-foreground/90 cursor-pointer shadow-md"
+                  : "right-1.5 top-1/2 -translate-y-1/2 bg-muted-foreground/15 text-muted-foreground/35 cursor-not-allowed"
+              }`}
+              title="Send message"
+            >
+              <ArrowUp className="size-4" />
+            </Button>
           </div>
         </div>
       </div>
