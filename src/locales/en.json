@@ -153,6 +153,79 @@
         "users": "Users",
         "aiChats": "AI Chats"
       }
+    },
+    "features": {
+      "title": "What We Offer",
+      "storage": {
+        "title": "Smart Document Storage",
+        "description": "Securely store and organize your notes, textbooks, and papers in a searchable cloud environment."
+      },
+      "ai": {
+        "title": "AI Study Assistant",
+        "description": "Chat with your docs. Get instant answers, summaries, and personalized explanations for any concept."
+      },
+      "community": {
+        "title": "Community Knowledge Hub",
+        "description": "Join a global community of learners. Share resources, collaborate, and access verified study materials."
+      },
+      "rewards": {
+        "title": "Reputation & Rewards",
+        "description": "Earn points for contributing. Level up from Student to Elite Scholar and unlock exclusive premium features."
+      }
+    },
+    "pathway": {
+      "title": "Your Path to Excellence",
+      "step1": {
+        "title": "Upload Document",
+        "desc": "Notes or PDFs"
+      },
+      "step2": {
+        "title": "Store on Cloud",
+        "desc": "Access anywhere"
+      },
+      "step3": {
+        "title": "Share with Community",
+        "desc": "Help others learn"
+      },
+      "step4": {
+        "title": "Learn with AI",
+        "desc": "Get smart insights"
+      },
+      "step5": {
+        "title": "Earn Reputation",
+        "desc": "Gain points"
+      },
+      "step6": {
+        "title": "Unlock Rewards",
+        "desc": "Premium access"
+      }
+    },
+    "topRated": {
+      "title": "Top-Rated Documents",
+      "description": "Discover and learn from the highest-rated study materials in our community.",
+      "exploreButton": "Explore Top-Rated Documents"
+    },
+    "teaser": {
+      "title": "Interact with your Documents Like Never Before",
+      "description": "AI only answers based on the documents you choose. Our assistant is specifically trained on your uploaded materials to provide high-accuracy academic support.",
+      "bullet1": "Summarize Document into key bullet points.",
+      "bullet3": "Explain Concept in simple, easy-to-understand terms.",
+      "mockDocs": {
+        "doc1": "Java OOP.pdf",
+        "doc2": "Database Notes.pdf",
+        "doc3": "Software Testing.pdf"
+      },
+      "chat": {
+        "status": "Online & Analyzing Documents",
+        "greeting": "Hello! I've indexed your \"Java OOP.pdf\" and others. How can I help you today?",
+        "userMessage": "Summarize Document",
+        "summaryTitle": "Summary of Object-Oriented Programming",
+        "sum1": "Encapsulation: Bundling data and methods",
+        "sum2": "Inheritance: Hierarchy of classes",
+        "sum3": "Polymorphism: Single interface, multiple forms",
+        "conceptBtn": "Explain Concept",
+        "inputPlaceholder": "Ask anything about your docs..."
+      }
     }
   },
   "nav": {

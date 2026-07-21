@@ -153,6 +153,79 @@
         "users": "Người dùng",
         "aiChats": "AI Chat"
       }
+    },
+    "features": {
+      "title": "Chúng tôi mang lại gì",
+      "storage": {
+        "title": "Lưu trữ tài liệu thông minh",
+        "description": "Lưu trữ và tổ chức ghi chú, giáo trình và tài liệu của bạn một cách an toàn trên đám mây."
+      },
+      "ai": {
+        "title": "Trợ lý học tập AI",
+        "description": "Trò chuyện với tài liệu. Nhận câu trả lời, tóm tắt và giải thích cá nhân hóa cho mọi khái niệm ngay lập tức."
+      },
+      "community": {
+        "title": "Cộng đồng chia sẻ tri thức",
+        "description": "Tham gia cộng đồng người học toàn cầu. Chia sẻ tài liệu, hợp tác và tiếp cận nguồn học liệu uy tín."
+      },
+      "rewards": {
+        "title": "Điểm uy tín & Phần thưởng",
+        "description": "Tích điểm khi đóng góp. Thăng cấp từ Học viên lên Học giả ưu tú và mở khóa các tính năng đặc quyền."
+      }
+    },
+    "pathway": {
+      "title": "Lộ trình hướng tới sự xuất sắc",
+      "step1": {
+        "title": "Tải lên tài liệu",
+        "desc": "Ghi chú hoặc tài liệu PDF"
+      },
+      "step2": {
+        "title": "Lưu trữ đám mây",
+        "desc": "Truy cập mọi nơi"
+      },
+      "step3": {
+        "title": "Chia sẻ cộng đồng",
+        "desc": "Giúp người khác học tập"
+      },
+      "step4": {
+        "title": "Học cùng AI",
+        "desc": "Nhận phân tích thông minh"
+      },
+      "step5": {
+        "title": "Tích điểm uy tín",
+        "desc": "Nhận điểm thưởng"
+      },
+      "step6": {
+        "title": "Mở khóa phần thưởng",
+        "desc": "Quyền truy cập cao cấp"
+      }
+    },
+    "topRated": {
+      "title": "Tài liệu nổi bật",
+      "description": "Khám phá các tài liệu được đánh giá cao nhất từ cộng đồng người học",
+      "exploreButton": "Khám phá tài liệu nổi bật"
+    },
+    "teaser": {
+      "title": "Tương tác với tài liệu của bạn chưa từng có",
+      "description": "AI chỉ trả lời dựa trên những tài liệu bạn chọn. Trợ lý của chúng tôi được huấn luyện đặc biệt trên các tài liệu bạn đã tải lên để cung cấp hỗ trợ học tập chính xác nhất.",
+      "bullet1": "Tóm tắt tài liệu thành các ý chính cốt lõi.",
+      "bullet3": "Giải thích khái niệm bằng từ ngữ đơn giản, dễ hiểu.",
+      "mockDocs": {
+        "doc1": "Java OOP.pdf",
+        "doc2": "Database Notes.pdf",
+        "doc3": "Software Testing.pdf"
+      },
+      "chat": {
+        "status": "Đang trực tuyến & Phân tích tài liệu",
+        "greeting": "Xin chào! Tôi đã chỉ mục tài liệu \"Java OOP.pdf\" và các tài liệu khác của bạn. Hôm nay tôi có thể giúp gì cho bạn?",
+        "userMessage": "Tóm tắt tài liệu",
+        "summaryTitle": "Tóm tắt về Lập trình hướng đối tượng (OOP)",
+        "sum1": "Đóng gói (Encapsulation): Nhóm thuộc tính và phương thức",
+        "sum2": "Kế thừa (Inheritance): Phân cấp các lớp học",
+        "sum3": "Đa hình (Polymorphism): Một giao diện, nhiều biểu hiện",
+        "conceptBtn": "Giải thích khái niệm",
+        "inputPlaceholder": "Hỏi bất cứ điều gì về tài liệu của bạn..."
+      }
     }
   },
   "nav": {
