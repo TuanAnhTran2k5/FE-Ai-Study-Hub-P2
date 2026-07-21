@@ -478,5 +478,21 @@
     "changeRoleSuccess": "Cập nhật vai trò người dùng thành công!",
     "changeRoleFailed": "Cập nhật vai trò người dùng thất bại.",
     "userRole": "Vai trò"
+  },
+  "community": {
+    "guest": {
+      "topRatedTitle": "Tài liệu nổi bật",
+      "topRatedDesc": "Tìm kiếm theo môn học để khám phá những tài liệu công khai được đánh giá cao.",
+      "searchPlaceholder": "Tìm kiếm theo mã môn hoặc tên môn học...",
+      "searchButton": "Tìm kiếm",
+      "showing": "Đang hiển thị",
+      "of": "trên tổng số",
+      "publicDocs": "tài liệu công khai",
+      "docs": "tài liệu",
+      "previous": "Trang trước",
+      "next": "Trang sau",
+      "goToPage": "Đi tới trang:",
+      "page": "Trang"
+    }
   }
 }

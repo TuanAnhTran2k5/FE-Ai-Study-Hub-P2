@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 
-import { ERROR_CODE } from "@/constants/errorCode";
 import { getUsersForAdmin, banUser, unbanUser, updateUserRole } from "@/services/adminDashboardService";
 import type { AdminUserResponse } from "@/types/adminDashboard.type";
 import type { RootState } from "@/redux/store";
@@ -193,9 +192,8 @@ export default function AdminUserManagement({ currentUserId }: { currentUserId?:
             <>
               <DialogHeader className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className={`flex size-11 items-center justify-center rounded-2xl shrink-0 border ${
-                    actionType === "BAN" ? "bg-red-500/10 border-red-500/20 text-red-500" : "bg-teal-500/10 border-teal-500/20 text-teal-500"
-                  }`}>
+                  <div className={`flex size-11 items-center justify-center rounded-2xl shrink-0 border ${actionType === "BAN" ? "bg-red-500/10 border-red-500/20 text-red-500" : "bg-teal-500/10 border-teal-500/20 text-teal-500"
+                    }`}>
                     {actionType === "BAN" ? <Ban className="h-5.5 w-5.5" /> : <UserCheck className="h-5.5 w-5.5" />}
                   </div>
                   <div className="min-w-0 text-left">
@@ -211,7 +209,7 @@ export default function AdminUserManagement({ currentUserId }: { currentUserId?:
 
               <div className="py-4 space-y-4 my-2">
                 <p className="text-xs text-slate-600 dark:text-muted-foreground/90 font-semibold leading-relaxed">
-                  {actionType === "BAN" 
+                  {actionType === "BAN"
                     ? t("admin.banConfirmPrompt", "Are you sure you want to suspend this user? They will not be able to log in, upload documents, or chat with AI.") 
                     : t("admin.unbanConfirmPrompt", "Are you sure you want to reactivate this student's account? They will regain full access to all features.")}
                 </p>
@@ -236,9 +234,8 @@ export default function AdminUserManagement({ currentUserId }: { currentUserId?:
                 <Button 
                   onClick={handleConfirmAction}
                   disabled={banMutation.isPending || unbanMutation.isPending}
-                  className={`w-full sm:w-auto font-black text-xs px-4 py-2 flex items-center justify-center gap-1.5 rounded-2xl text-white ${
-                    actionType === "BAN" ? "bg-red-600 hover:bg-red-700" : "bg-teal-600 hover:bg-teal-700"
-                  }`}
+                  className={`w-full sm:w-auto font-black text-xs px-4 py-2 flex items-center justify-center gap-1.5 rounded-2xl text-white ${actionType === "BAN" ? "bg-red-600 hover:bg-red-700" : "bg-teal-600 hover:bg-teal-700"
+                    }`}
                 >
                   {actionType === "BAN" ? t("admin.confirmBan", "Confirm Ban") : t("admin.confirmUnban", "Confirm Unban")}
                 </Button>
