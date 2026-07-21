@@ -82,6 +82,7 @@ export function ChangePasswordFlow({ email, onSuccess, onCancel }: ChangePasswor
         otpCode: otpCode.trim(),
         password: newPassword,
         confirmPassword: confirmPassword,
+        passwordMatching: newPassword === confirmPassword,
       }),
     onSuccess: () => {
       toast.success(t("success.resetPassword", "Password reset successfully!"));

@@ -405,5 +405,21 @@
     "changeRoleSuccess": "User role updated successfully!",
     "changeRoleFailed": "Failed to update user role.",
     "userRole": "Role"
+  },
+  "community": {
+    "guest": {
+      "topRatedTitle": "Top Rated Documents",
+      "topRatedDesc": "Search by subject to explore highly rated public documents.",
+      "searchPlaceholder": "Search by subject code or subject name...",
+      "searchButton": "Search",
+      "showing": "Showing",
+      "of": "of",
+      "publicDocs": "public documents",
+      "docs": "documents",
+      "previous": "Previous",
+      "next": "Next",
+      "goToPage": "Go to page:",
+      "page": "Page"
+    }
   }
 }
