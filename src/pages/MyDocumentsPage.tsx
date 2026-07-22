@@ -11,6 +11,13 @@ import DocumentSearch from "@/components/document/DocumentSearch";
 import DocumentUploadForm from "@/components/document/DocumentUploadForm";
 import { Button } from "@/components/ui/button";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -89,6 +96,8 @@ function getDocumentsErrorMessage(error: any) {
 }
 
 function MyDocumentsPage() {
+  const itemsPerPage = 8;
+  const [currentPage, setCurrentPage] = useState(1);
   const [keyword, setKeyword] = useState("");
   const [subjectCode, setSubjectCode] = useState("ALL");
   const [semesterNo, setSemesterNo] = useState("ALL");
@@ -267,6 +276,17 @@ function MyDocumentsPage() {
     });
   }, [enrichedDocuments, keyword, subjectCode, semesterNo, visibilityStatus]);
 
+  const totalPages = Math.ceil(filteredDocuments.length / itemsPerPage);
+  const activePage = Math.max(1, Math.min(currentPage, totalPages || 1));
+  const paginatedDocuments = useMemo(
+    () =>
+      filteredDocuments.slice(
+        (activePage - 1) * itemsPerPage,
+        activePage * itemsPerPage,
+      ),
+    [activePage, filteredDocuments],
+  );
+
   const handleViewDocument = (documentId: number) => {
     navigate(`/app/mydocuments/${documentId}`);
   };
@@ -419,10 +439,22 @@ function MyDocumentsPage() {
         visibilityStatus={visibilityStatus}
         subjects={subjects}
         semesters={semesterOptions}
-        onKeywordChange={setKeyword}
-        onSubjectChange={setSubjectCode}
-        onSemesterChange={setSemesterNo}
-        onVisibilityChange={setVisibilityStatus}
+        onKeywordChange={(value) => {
+          setKeyword(value);
+          setCurrentPage(1);
+        }}
+        onSubjectChange={(value) => {
+          setSubjectCode(value);
+          setCurrentPage(1);
+        }}
+        onSemesterChange={(value) => {
+          setSemesterNo(value);
+          setCurrentPage(1);
+        }}
+        onVisibilityChange={(value) => {
+          setVisibilityStatus(value);
+          setCurrentPage(1);
+        }}
       />
 
       {isDocumentsLoading ? (
@@ -452,10 +484,91 @@ function MyDocumentsPage() {
           </Button>
         </div>
       ) : (
-        <DocumentGrid
-          documents={filteredDocuments}
-          onView={(document) => handleViewDocument(document.documentId)}
-        />
+        <>
+          <DocumentGrid
+            documents={paginatedDocuments}
+            onView={(document) => handleViewDocument(document.documentId)}
+          />
+
+          {filteredDocuments.length > 0 && (
+            <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-border/40 pt-6 sm:flex-row">
+              <div className="text-sm text-muted-foreground">
+                Showing{" "}
+                <span className="font-bold text-card-foreground">
+                  {paginatedDocuments.length}
+                </span>{" "}
+                of{" "}
+                <span className="font-bold text-card-foreground">
+                  {filteredDocuments.length}
+                </span>{" "}
+                documents
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={activePage === 1}
+                  onClick={() => setCurrentPage(activePage - 1)}
+                  className="h-10 rounded-xl px-4 font-bold"
+                >
+                  Previous
+                </Button>
+
+                <div className="hidden items-center gap-1.5 sm:flex">
+                  {Array.from(
+                    { length: totalPages },
+                    (_, index) => index + 1,
+                  ).map((page) => (
+                    <Button
+                      key={page}
+                      variant={activePage === page ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                      className="h-10 w-10 rounded-xl font-bold"
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={activePage === totalPages}
+                  onClick={() => setCurrentPage(activePage + 1)}
+                  className="h-10 rounded-xl px-4 font-bold"
+                >
+                  Next
+                </Button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  Go to page:
+                </span>
+                <Select
+                  value={String(activePage)}
+                  onValueChange={(value) => setCurrentPage(Number(value))}
+                >
+                  <SelectTrigger className="h-10 w-28 rounded-xl border border-border bg-card px-3 text-sm shadow-none">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from(
+                      { length: totalPages },
+                      (_, index) => index + 1,
+                    ).map((page) => (
+                      <SelectItem key={page} value={String(page)}>
+                        Page {page}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>

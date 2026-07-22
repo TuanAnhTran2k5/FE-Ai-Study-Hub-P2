@@ -19,7 +19,7 @@ import DeleteConfirmDialog from "@/components/management/DeleteConfirmDialog";
 import SubjectDialog from "@/components/management/SubjectDialog";
 import SyllabusManageDialog from "@/components/management/SyllabusManageDialog";
 import SubjectTable from "@/components/management/SubjectTable";
-import DeletedSubjectTable from "@/components/management/DeletedSubjectTable";
+import DeletedHistoryTable from "@/components/management/DeletedHistoryTable";
 
 // Import API Services
 import {
@@ -127,8 +127,8 @@ function ManagementPage() {
 
   // Get Combo Subjects
   const { data: combos = [], isLoading: isLoadingCombos } = useQuery({
-    queryKey: ["admin-combos", searchKeyword],
-    queryFn: () => getAllComboSubjects(searchKeyword),
+    queryKey: ["admin-combos"],
+    queryFn: () => getAllComboSubjects(),
   });
 
   // Get All Subjects (Core & Combo)
@@ -138,6 +138,7 @@ function ManagementPage() {
   });
 
   const normalizedSubjectSearch = subjectSearchKeyword.trim().toLowerCase();
+  const normalizedComboSearch = searchKeyword.trim().toLowerCase();
   const normalizedDeletedSubjectSearch = deletedSubjectSearchKeyword
     .trim()
     .toLowerCase();
@@ -158,6 +159,25 @@ function ManagementPage() {
           .toLowerCase()
           .includes(normalizedDeletedSubjectSearch) ||
         subject.subjectName
+          .toLowerCase()
+          .includes(normalizedDeletedSubjectSearch)),
+  );
+
+  const activeCombos = combos.filter(
+    (combo) =>
+      !combo.isDeleted &&
+      (!normalizedComboSearch ||
+        combo.comboCode.toLowerCase().includes(normalizedComboSearch) ||
+        combo.comboName.toLowerCase().includes(normalizedComboSearch)),
+  );
+  const deletedCombos = combos.filter(
+    (combo) =>
+      combo.isDeleted &&
+      (!normalizedDeletedSubjectSearch ||
+        combo.comboCode
+          .toLowerCase()
+          .includes(normalizedDeletedSubjectSearch) ||
+        combo.comboName
           .toLowerCase()
           .includes(normalizedDeletedSubjectSearch)),
   );
@@ -507,7 +527,8 @@ function ManagementPage() {
           <RotateCcw className="h-4 w-4" />
           Deleted History
           <span className="ml-1.5 px-2 py-0.5 text-[10px] font-black rounded-full bg-secondary text-secondary-foreground border border-border">
-            {subjects.filter((subject) => subject.isDeleted).length}
+            {subjects.filter((subject) => subject.isDeleted).length +
+              combos.filter((combo) => combo.isDeleted).length}
           </span>
         </button>
       </div>
@@ -533,7 +554,7 @@ function ManagementPage() {
             />
           ) : activeTab === "combos" ? (
             <ComboAccordion
-              combos={combos}
+              combos={activeCombos}
               isLoading={isLoadingCombos}
               searchKeyword={searchKeyword}
               onSearchChange={setSearchKeyword}
@@ -596,15 +617,22 @@ function ManagementPage() {
               }}
             />
           ) : (
-            <DeletedSubjectTable
+            <DeletedHistoryTable
+              combos={deletedCombos}
               subjects={deletedSubjects}
-              isLoading={isLoadingSubjects}
+              isLoading={isLoadingSubjects || isLoadingCombos}
               searchKeyword={deletedSubjectSearchKeyword}
               onSearchChange={setDeletedSubjectSearchKeyword}
-              onRestoreClick={(id) => {
+              onRestoreCombo={(id) => {
+                restoreComboMutation.mutate(id);
+              }}
+              onRestoreSubject={(id) => {
                 restoreSubjectMutation.mutate(id);
               }}
-              isRestoring={restoreSubjectMutation.isPending}
+              isRestoring={
+                restoreSubjectMutation.isPending ||
+                restoreComboMutation.isPending
+              }
             />
           )}
         </CardContent>

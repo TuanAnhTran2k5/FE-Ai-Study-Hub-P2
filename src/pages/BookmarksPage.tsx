@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
 import { Bookmark, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -19,12 +20,23 @@ import { ERROR_CODE } from "@/constants/errorCode";
 import { ROUTE } from "@/models/routePath";
 import type { SubjectResponse } from "@/types/academic.type";
 import type { DocumentResponse } from "@/types/document.type";
+import type { RootState } from "@/redux/store";
+import type { User } from "@/models/user";
 
 type BookmarkSort = "newest" | "oldest";
+type BookmarkOwnerFilter = "all" | "mine" | "others";
 
 function BookmarksPage() {
   const [keyword, setKeyword] = useState("");
   const [sortOrder, setSortOrder] = useState<BookmarkSort>("newest");
+  const [ownerFilter, setOwnerFilter] =
+    useState<BookmarkOwnerFilter>("all");
+
+  const currentUser = useSelector(
+    (state: RootState) => state.user as User | null,
+  );
+  const currentUserId =
+    currentUser?.userId ?? Number(localStorage.getItem("authUserId"));
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -96,11 +108,18 @@ function BookmarksPage() {
   const filteredBookmarks = useMemo(() => {
     const q = keyword.trim().toLowerCase();
 
-    const matchedBookmarks = q
-      ? bookmarks.filter((bookmark) =>
-          bookmark.document.title.toLowerCase().includes(q),
-        )
-      : bookmarks;
+    const matchedBookmarks = bookmarks.filter((bookmark) => {
+      const matchesKeyword =
+        !q || bookmark.document.title.toLowerCase().includes(q);
+      const isMine =
+        Number(bookmark.document.ownerId) === Number(currentUserId);
+      const matchesOwner =
+        ownerFilter === "all" ||
+        (ownerFilter === "mine" && isMine) ||
+        (ownerFilter === "others" && !isMine);
+
+      return matchesKeyword && matchesOwner;
+    });
 
     return [...matchedBookmarks].sort((firstBookmark, secondBookmark) => {
       const firstTime = new Date(firstBookmark.bookmarkedAt).getTime();
@@ -110,7 +129,7 @@ function BookmarksPage() {
         ? secondTime - firstTime
         : firstTime - secondTime;
     });
-  }, [bookmarks, keyword, sortOrder]);
+  }, [bookmarks, currentUserId, keyword, ownerFilter, sortOrder]);
 
   const filteredDocuments = useMemo(() => {
     return filteredBookmarks.map((bookmark) => {
@@ -196,7 +215,7 @@ function BookmarksPage() {
       </div>
 
       <div className="mb-8 rounded-3xl bg-card p-5 shadow-sm">
-        <div className="grid items-stretch gap-4 md:grid-cols-[minmax(0,1fr)_220px]">
+        <div className="grid items-stretch gap-4 md:grid-cols-[minmax(0,1fr)_220px_240px]">
           <div className="relative h-14">
             <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
 
@@ -219,6 +238,25 @@ function BookmarksPage() {
             <SelectContent>
               <SelectItem value="newest">Newest saved</SelectItem>
               <SelectItem value="oldest">Oldest saved</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={ownerFilter}
+            onValueChange={(value) =>
+              setOwnerFilter(value as BookmarkOwnerFilter)
+            }
+          >
+            <SelectTrigger className="!h-14 w-full rounded-2xl border border-border bg-card px-4 text-base text-card-foreground shadow-none focus:ring-2 focus:ring-ring">
+              <SelectValue placeholder="Document owner" />
+            </SelectTrigger>
+
+            <SelectContent>
+              <SelectItem value="all">All documents</SelectItem>
+              <SelectItem value="mine">My documents</SelectItem>
+              <SelectItem value="others">
+                Other people&apos;s documents
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
