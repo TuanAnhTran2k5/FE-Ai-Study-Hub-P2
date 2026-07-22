@@ -1,4 +1,5 @@
 import { Medal } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import PointCoin from "@/components/PointCoin";
 import AvatarFrame from "@/components/avatarFrame/AvatarFrame";
@@ -9,33 +10,37 @@ interface WeeklyLeaderboardTableProps {
   users: TopWeeklyUserResponse[];
 }
 
-function formatDate(value?: string) {
+function formatDate(value?: string, language?: string) {
   if (!value) return "N/A";
-  return new Date(value).toLocaleDateString("vi-VN");
+  const locale = language === "vi" ? "vi-VN" : "en-US";
+  return new Date(value).toLocaleDateString(locale);
 }
 
 function WeeklyLeaderboardTable({ users }: WeeklyLeaderboardTableProps) {
+  const { t, i18n } = useTranslation();
+  const currentLanguage = i18n.language || "vi";
+
   return (
     <Card className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
       <div className="border-b border-border px-6 py-5">
         <h2 className="text-2xl font-black text-card-foreground">
-          Weekly Top Contributors
+          {t("leaderboard.weeklyTitle", "Weekly Top Contributors")}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Ranking users by weekly score.
+          {t("leaderboard.weeklyDesc", "Ranking users by weekly score.")}
         </p>
       </div>
 
       <div className="hidden grid-cols-[80px_2fr_1fr_1fr] border-b border-border px-6 py-4 text-sm font-bold text-muted-foreground md:grid">
-        <span>Rank</span>
-        <span>User</span>
-        <span>Score</span>
-        <span>Week Start</span>
+        <span>{t("leaderboard.rankCol", "Rank")}</span>
+        <span>{t("leaderboard.userCol", "User")}</span>
+        <span>{t("leaderboard.scoreCol", "Score")}</span>
+        <span>{t("leaderboard.weekStartCol", "Week Start")}</span>
       </div>
 
       {users.length === 0 && (
         <div className="px-6 py-8 text-center text-muted-foreground">
-          No weekly data.
+          {t("leaderboard.emptyWeekly", "No weekly data.")}
         </div>
       )}
 
@@ -85,7 +90,7 @@ function WeeklyLeaderboardTable({ users }: WeeklyLeaderboardTableProps) {
             </div>
 
             <div className="text-card-foreground">
-              {formatDate(user.weekStart)}
+              {formatDate(user.weekStart, currentLanguage)}
             </div>
           </div>
         );

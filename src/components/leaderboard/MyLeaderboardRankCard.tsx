@@ -1,4 +1,5 @@
 import { Crown, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Card, CardContent } from "@/components/ui/card";
 import type { GlobalLeaderboardResponse } from "@/types/leaderboard.type";
@@ -8,6 +9,8 @@ interface MyLeaderboardRankCardProps {
 }
 
 function MyLeaderboardRankCard({ myRank }: MyLeaderboardRankCardProps) {
+  const { t } = useTranslation();
+
   return (
     <Card className="rounded-3xl border border-border bg-card shadow-sm lg:col-span-1">
       <CardContent className="p-6">
@@ -17,7 +20,7 @@ function MyLeaderboardRankCard({ myRank }: MyLeaderboardRankCardProps) {
           </div>
 
           <div>
-            <p className="text-sm font-bold text-primary">Your Global Rank</p>
+            <p className="text-sm font-bold text-primary">{t("leaderboard.myRank", "Your Global Rank")}</p>
 
             <h2 className="mt-1 text-3xl font-black text-card-foreground">
               #{myRank?.rank ?? "N/A"}
@@ -25,7 +28,7 @@ function MyLeaderboardRankCard({ myRank }: MyLeaderboardRankCardProps) {
 
             <p className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
               <Users className="h-4 w-4" />
-              Total users: {myRank?.totalUsers ?? 0}
+              {t("leaderboard.totalUsers", "Total Users")}: {myRank?.totalUsers ?? 0}
             </p>
           </div>
         </div>

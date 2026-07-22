@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import ChatHistoryDialog from "@/components/ai-chat/ChatHistoryDialog";
@@ -40,6 +41,7 @@ function ChatHistorySidebar({
   onDeletedActiveSession,
   onNewChat,
 }: ChatHistorySidebarProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingSessionId, setEditingSessionId] = useState<number | null>(null);
@@ -190,7 +192,7 @@ function ChatHistorySidebar({
                       isActive ? "text-primary" : "text-card-foreground"
                     }`}
                   >
-                    {session.sessionTitle || "Untitled chat"}
+                    {session.sessionTitle || t("aiChat.untitledChat", "Untitled chat")}
                   </p>
                   <p className="mt-0.5 text-[11px] text-muted-foreground">
                     {new Date(session.updatedAt).toLocaleDateString()}
@@ -243,7 +245,7 @@ function ChatHistorySidebar({
           >
             {!isCollapsed && (
               <p className="text-base font-black text-card-foreground">
-                Chat History
+                {t("aiChat.chatHistory", "Chat History")}
               </p>
             )}
 
@@ -271,7 +273,7 @@ function ChatHistorySidebar({
                 className="h-9 w-full rounded-2xl border border-primary/25 bg-primary/10 text-xs font-bold text-primary hover:bg-primary/20 cursor-pointer"
               >
                 <PlusCircle className="mr-1.5 size-3.5" />
-                New Chat
+                {t("aiChat.newChat", "New Chat")}
               </Button>
             </div>
           )}
@@ -282,7 +284,7 @@ function ChatHistorySidebar({
         <div className="flex-1 space-y-1 overflow-y-auto px-2 pb-2 pr-1.5 scrollbar-thin">
           {isLoading ? (
             <div className="flex h-full items-center justify-center">
-              <p className="text-xs text-muted-foreground">Loading...</p>
+              <p className="text-xs text-muted-foreground">{t("common.loading", "Loading...")}</p>
             </div>
           ) : latestSessions.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
@@ -290,7 +292,7 @@ function ChatHistorySidebar({
                 <History className="size-5 opacity-50" />
               </div>
               {!isCollapsed && (
-                <p className="text-xs font-medium">No chat history yet.</p>
+                <p className="text-xs font-medium">{t("aiChat.emptyHistory", "No chat history yet.")}</p>
               )}
             </div>
           ) : (
@@ -306,7 +308,7 @@ function ChatHistorySidebar({
               className="flex h-9 w-full items-center justify-center gap-2 rounded-2xl bg-primary/10 text-xs font-bold text-primary shadow-none hover:bg-primary/20 cursor-pointer"
             >
               <Maximize2 className="size-3.5" />
-              View All History
+              {t("aiChat.viewHistory", "View All History")}
             </Button>
           </div>
         )}

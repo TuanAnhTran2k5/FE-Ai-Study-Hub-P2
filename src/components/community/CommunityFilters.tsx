@@ -1,4 +1,5 @@
 import { Star } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 // NOTE TYPE: CommunityPage giu state filter; component nay chi render UI va bao nguoc thay doi.
 export interface FilterState {
@@ -18,6 +19,8 @@ export function CommunityFilters({
   filters,
   onFilterChange,
 }: CommunityFiltersProps) {
+  const { t } = useTranslation();
+
   const updateFilter = (key: keyof FilterState, value: string | number) => {
     onFilterChange({
       ...filters,
@@ -30,9 +33,9 @@ export function CommunityFilters({
     <section className="mb-6 rounded-3xl border border-border bg-card p-4 shadow-sm">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="text-sm font-black text-card-foreground">Rating</h3>
+          <h3 className="text-sm font-black text-card-foreground">{t("community.rating", "Rating")}</h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            Filter documents by average rating.
+            {t("community.ratingDesc", "Filter documents by average rating.")}
           </p>
         </div>
       </div>
@@ -44,7 +47,7 @@ export function CommunityFilters({
           { label: "3", value: 3 },
           { label: "2", value: 2 },
           { label: "1", value: 1 },
-          { label: "All", value: 0 },
+          { label: t("community.ratingAll", "All"), value: 0 },
         ].map((rating) => (
           <button
             key={rating.label}
@@ -63,7 +66,7 @@ export function CommunityFilters({
                 ))}
               </div>
             ) : (
-              <span>All</span>
+              <span>{t("community.ratingAll", "All")}</span>
             )}
           </button>
         ))}

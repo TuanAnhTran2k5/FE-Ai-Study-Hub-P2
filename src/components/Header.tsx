@@ -9,7 +9,7 @@ import { ROUTE } from "@/models/routePath";
 import type { RootState } from "@/redux/store";
 import { AvatarDropdown } from "./AvatarDropdown";
 import NotificationBell from "./NotificationBell";
-import ThemeToggle from "./ui/ThemeToggle";
+import GuestSettingsDialog from "./settings/GuestSettingsDialog";
 
 interface HeaderProps {
   sticky?: boolean;
@@ -72,7 +72,6 @@ function Header({ sticky = true }: HeaderProps) {
         ) : user ? (
           <>
             <NotificationBell />
-            <ThemeToggle />
             <AvatarDropdown user={user} />
           </>
         ) : (
@@ -91,7 +90,7 @@ function Header({ sticky = true }: HeaderProps) {
               {t("auth.register")}
             </Button>
 
-            <ThemeToggle />
+            <GuestSettingsDialog />
           </>
         )}
       </div>

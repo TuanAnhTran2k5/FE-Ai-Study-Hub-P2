@@ -1,4 +1,5 @@
 import { Crown, Shield, Sparkles, Trophy } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import AvatarFrame from "@/components/avatarFrame/AvatarFrame";
 import type { RankResponse } from "@/types/leaderboard.type";
@@ -21,6 +22,7 @@ function formatStorageBonus(bytes: number) {
 }
 
 function RankRewardCard({ rank }: RankRewardCardProps) {
+  const { t } = useTranslation();
   const isUnlimitedRank = rank.maxScore >= 2147483647;
 
   const scoreLabel = isUnlimitedRank
@@ -64,13 +66,13 @@ function RankRewardCard({ rank }: RankRewardCardProps) {
         </h3>
 
         <p className="mt-2 text-base font-bold text-cyan-400">
-          {scoreLabel} Points
+          {scoreLabel} {t("leaderboard.scoreCol", "Score")}
         </p>
 
         <div className="mt-5 rounded-2xl bg-secondary/80 p-4">
           <div className="flex items-center justify-between gap-4">
             <span className="text-sm text-muted-foreground">
-              Storage bonus
+              {t("leaderboard.storageBonus", "Storage bonus")}
             </span>
 
             <span className="text-sm font-black text-card-foreground">
@@ -79,10 +81,10 @@ function RankRewardCard({ rank }: RankRewardCardProps) {
           </div>
 
           <div className="mt-3 flex items-center justify-between gap-4">
-            <span className="text-sm text-muted-foreground">Priority</span>
+            <span className="text-sm text-muted-foreground">{t("leaderboard.priority", "Priority")}</span>
 
             <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
-              Level {rank.displayPriority}
+              {t("leaderboard.level", "Level")} {rank.displayPriority}
             </span>
           </div>
         </div>

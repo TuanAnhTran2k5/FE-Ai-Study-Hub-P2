@@ -1,4 +1,5 @@
 import { Database } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import type { UserResponse } from "@/types/user.type";
 
@@ -31,6 +32,7 @@ function formatPercent(value?: number | null) {
 }
 
 function ProfileStorageCard({ user }: ProfileStorageCardProps) {
+  const { t } = useTranslation();
   const storageUsed = user.storageUsed ?? 0;
   const storageLimit = user.storageLimit ?? 0;
   const storageRemaining =
@@ -51,18 +53,18 @@ function ProfileStorageCard({ user }: ProfileStorageCardProps) {
 
         <div>
           <p className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
-            Cloud Storage
+            {t("profile.cloudStorage", "Cloud Storage")}
           </p>
           <p className="text-xs text-muted-foreground">
-            Storage limit is provided by server rank policy.
+            {t("profile.storageDesc", "Storage limit is provided by server rank policy.")}
           </p>
         </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <StorageInfo label="Used" value={formatStorage(storageUsed)} highlight />
-        <StorageInfo label="Limit" value={formatStorage(storageLimit)} />
-        <StorageInfo label="Remaining" value={formatStorage(storageRemaining)} />
+        <StorageInfo label={t("profile.used", "Used")} value={formatStorage(storageUsed)} highlight />
+        <StorageInfo label={t("profile.limit", "Limit")} value={formatStorage(storageLimit)} />
+        <StorageInfo label={t("profile.remaining", "Remaining")} value={formatStorage(storageRemaining)} />
       </div>
 
       <div className="mt-5 h-3 overflow-hidden rounded-full bg-muted">
@@ -73,7 +75,7 @@ function ProfileStorageCard({ user }: ProfileStorageCardProps) {
       </div>
 
       <div className="mt-3 flex items-center justify-between text-sm text-muted-foreground">
-        <span>{formatPercent(storagePercent)} used</span>
+        <span>{formatPercent(storagePercent)} {t("profile.usedPercent", "used")}</span>
         <span>
           {formatStorage(storageUsed)} / {formatStorage(storageLimit)}
         </span>

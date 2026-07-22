@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +47,7 @@ export function AuthenticatedCommunity({
   academicSubjects,
   onViewDocument,
 }: AuthenticatedCommunityProps) {
+  const { t } = useTranslation();
   const [filters, setFilters] = useState<FilterState>({
     subject: "ALL",
     semester: "ALL",
@@ -148,11 +150,11 @@ export function AuthenticatedCommunity({
         <div className="mb-6 flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-black text-card-foreground">
-              Community Documents
+              {t("community.title", "Community Documents")}
             </h1>
 
             <p className="mt-2 text-muted-foreground">
-              Discover and learn from public documents shared by the community.
+              {t("community.description", "Discover and learn from public documents shared by the community.")}
             </p>
           </div>
         </div>
@@ -164,7 +166,7 @@ export function AuthenticatedCommunity({
 
               <Input
                 type="text"
-                placeholder="Search documents, subjects, or uploader..."
+                placeholder={t("myDocuments.searchPlaceholder", "Search documents, subjects, or uploader...")}
                 className="h-full rounded-2xl border-border bg-card pl-12 text-base text-card-foreground shadow-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
                 value={communitySearchInput}
                 onChange={(event) => {
@@ -188,11 +190,11 @@ export function AuthenticatedCommunity({
               }
             >
               <SelectTrigger className="!h-full w-full rounded-2xl border border-border bg-card px-4 text-base text-card-foreground shadow-none focus:ring-2 focus:ring-ring">
-                <SelectValue placeholder="All Subjects" />
+                <SelectValue placeholder={t("myDocuments.allSubjects", "All Subjects")} />
               </SelectTrigger>
               <SelectContent position="popper" sideOffset={8} className={selectContentClassName}>
                 <SelectItem value="ALL" className={selectItemClassName}>
-                  All Subjects
+                  {t("myDocuments.allSubjects", "All Subjects")}
                 </SelectItem>
                 {subjectOptions.map((subject) => (
                   <SelectItem
@@ -217,11 +219,11 @@ export function AuthenticatedCommunity({
               }
             >
               <SelectTrigger className="!h-full w-full rounded-2xl border border-border bg-card px-4 text-base text-card-foreground shadow-none focus:ring-2 focus:ring-ring">
-                <SelectValue placeholder="All Semesters" />
+                <SelectValue placeholder={t("myDocuments.allSemesters", "All Semesters")} />
               </SelectTrigger>
               <SelectContent position="popper" sideOffset={8} className={selectContentClassName}>
                 <SelectItem value="ALL" className={selectItemClassName}>
-                  All Semesters
+                  {t("myDocuments.allSemesters", "All Semesters")}
                 </SelectItem>
                 {semesterOptions.map((semester) => (
                   <SelectItem
@@ -229,7 +231,7 @@ export function AuthenticatedCommunity({
                     value={String(semester)}
                     className={selectItemClassName}
                   >
-                    Semester {semester}
+                    {t("settings.academic.semesterNum", { num: semester })}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -240,15 +242,7 @@ export function AuthenticatedCommunity({
         <CommunityFilters filters={filters} onFilterChange={setFilters} />
 
         <div className="mb-6 text-sm text-muted-foreground">
-          Showing{" "}
-          <span className="font-bold text-card-foreground">
-            {paginatedDocuments.length}
-          </span>{" "}
-          of{" "}
-          <span className="font-bold text-card-foreground">
-            {filteredDocuments.length}
-          </span>{" "}
-          documents
+          {t("community.showingDocs", { count: paginatedDocuments.length, total: filteredDocuments.length })}
         </div>
 
         <DocumentGrid
@@ -261,8 +255,7 @@ export function AuthenticatedCommunity({
         {filteredDocuments.length > 0 && (
           <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-border/40 pt-6 sm:flex-row">
             <div className="text-sm text-muted-foreground">
-              Showing <span className="font-bold text-card-foreground">{paginatedDocuments.length}</span> of{" "}
-              <span className="font-bold text-card-foreground">{filteredDocuments.length}</span> documents
+              {t("community.showingDocs", { count: paginatedDocuments.length, total: filteredDocuments.length })}
             </div>
 
             <div className="flex items-center gap-2">
@@ -273,7 +266,7 @@ export function AuthenticatedCommunity({
                 onClick={() => setCurrentPage(activePage - 1)}
                 className="h-10 rounded-xl px-4 font-bold"
               >
-                Previous
+                {t("community.guest.previous", "Previous")}
               </Button>
 
               <div className="hidden sm:flex items-center gap-1.5">
@@ -301,12 +294,12 @@ export function AuthenticatedCommunity({
                 onClick={() => setCurrentPage(activePage + 1)}
                 className="h-10 rounded-xl px-4 font-bold"
               >
-                Next
+                {t("community.guest.next", "Next")}
               </Button>
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Go to page:</span>
+              <span className="text-sm text-muted-foreground">{t("community.guest.goToPage", "Go to page:")}</span>
               <Select
                 value={String(activePage)}
                 onValueChange={(val) => setCurrentPage(Number(val))}
@@ -325,7 +318,7 @@ export function AuthenticatedCommunity({
                       value={String(page)}
                       className="cursor-pointer rounded-lg text-sm"
                     >
-                      Page {page}
+                      {t("community.guest.page", "Page")} {page}
                     </SelectItem>
                   ))}
                 </SelectContent>

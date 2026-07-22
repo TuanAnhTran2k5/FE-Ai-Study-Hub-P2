@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { Bookmark, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 import DocumentGrid from "@/components/document/DocumentGrid";
 import { Input } from "@/components/ui/input";
@@ -27,6 +28,7 @@ type BookmarkSort = "newest" | "oldest";
 type BookmarkOwnerFilter = "all" | "mine" | "others";
 
 function BookmarksPage() {
+  const { t } = useTranslation();
   const [keyword, setKeyword] = useState("");
   const [sortOrder, setSortOrder] = useState<BookmarkSort>("newest");
   const [ownerFilter, setOwnerFilter] =
@@ -167,7 +169,7 @@ function BookmarksPage() {
   if (isLoading) {
     return (
       <section className="w-full px-8 py-10">
-        <p className="text-muted-foreground">Loading bookmarks...</p>
+        <p className="text-muted-foreground">{t("bookmarks.loading", "Loading bookmarks...")}</p>
       </section>
     );
   }
@@ -177,10 +179,10 @@ function BookmarksPage() {
       <section className="w-full px-8 py-10">
         <div className="rounded-3xl border border-border bg-card p-8 text-center shadow-sm">
           <p className="text-lg font-bold text-card-foreground">
-            Failed to load bookmarks
+            {t("bookmarks.failed", "Failed to load bookmarks")}
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Please check BE API or server connection.
+            {t("bookmarks.failedDesc", "Please check BE API or server connection.")}
           </p>
         </div>
       </section>
@@ -192,25 +194,21 @@ function BookmarksPage() {
       <div className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary">
-            Bookmarks
+            {t("bookmarks.label", "Bookmarks")}
           </p>
 
           <h1 className="mt-2 flex items-center gap-3 text-4xl font-bold text-card-foreground">
             <Bookmark className="h-8 w-8 text-primary" />
-            Saved Documents
+            {t("bookmarks.title", "Saved Documents")}
           </h1>
 
           <p className="mt-3 max-w-2xl text-muted-foreground">
-            View and manage all study documents you have bookmarked.
+            {t("bookmarks.description", "View and manage all study documents you have bookmarked.")}
           </p>
         </div>
 
         <div className="text-sm text-muted-foreground">
-          Showing{" "}
-          <span className="font-bold text-card-foreground">
-            {filteredBookmarks.length}
-          </span>{" "}
-          bookmarked documents
+          {t("bookmarks.showingDocs", { count: filteredBookmarks.length })}
         </div>
       </div>
 
@@ -222,7 +220,7 @@ function BookmarksPage() {
             <Input
               value={keyword}
               onChange={(event) => setKeyword(event.target.value)}
-              placeholder="Search bookmarked documents..."
+              placeholder={t("bookmarks.searchPlaceholder", "Search bookmarked documents...")}
               className="h-full rounded-2xl border-border bg-card pl-12 text-base text-card-foreground shadow-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
@@ -232,12 +230,12 @@ function BookmarksPage() {
             onValueChange={(value) => setSortOrder(value as BookmarkSort)}
           >
             <SelectTrigger className="!h-14 w-full rounded-2xl border border-border bg-card px-4 text-base text-card-foreground shadow-none focus:ring-2 focus:ring-ring">
-              <SelectValue placeholder="Sort by" />
+              <SelectValue placeholder={t("bookmarks.sortBy", "Sort by")} />
             </SelectTrigger>
 
             <SelectContent>
-              <SelectItem value="newest">Newest saved</SelectItem>
-              <SelectItem value="oldest">Oldest saved</SelectItem>
+              <SelectItem value="newest">{t("bookmarks.newest", "Newest saved")}</SelectItem>
+              <SelectItem value="oldest">{t("bookmarks.oldest", "Oldest saved")}</SelectItem>
             </SelectContent>
           </Select>
 
@@ -248,14 +246,14 @@ function BookmarksPage() {
             }
           >
             <SelectTrigger className="!h-14 w-full rounded-2xl border border-border bg-card px-4 text-base text-card-foreground shadow-none focus:ring-2 focus:ring-ring">
-              <SelectValue placeholder="Document owner" />
+              <SelectValue placeholder={t("bookmarks.owner", "Document owner")} />
             </SelectTrigger>
 
             <SelectContent>
-              <SelectItem value="all">All documents</SelectItem>
-              <SelectItem value="mine">My documents</SelectItem>
+              <SelectItem value="all">{t("bookmarks.all", "All documents")}</SelectItem>
+              <SelectItem value="mine">{t("bookmarks.mine", "My documents")}</SelectItem>
               <SelectItem value="others">
-                Other people&apos;s documents
+                {t("bookmarks.others", "Other people's documents")}
               </SelectItem>
             </SelectContent>
           </Select>
@@ -277,11 +275,11 @@ function BookmarksPage() {
           <Bookmark className="mx-auto h-12 w-12 text-muted-foreground" />
 
           <h2 className="mt-4 text-xl font-bold text-card-foreground">
-            No bookmarked documents
+            {t("bookmarks.emptyTitle", "No bookmarked documents")}
           </h2>
 
           <p className="mt-2 text-sm text-muted-foreground">
-            Documents you bookmark will appear here.
+            {t("bookmarks.emptyDesc", "Documents you bookmark will appear here.")}
           </p>
         </div>
       )}

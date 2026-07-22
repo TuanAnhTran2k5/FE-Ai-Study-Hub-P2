@@ -1,4 +1,5 @@
 import { Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Input } from "@/components/ui/input";
 import {
@@ -41,6 +42,8 @@ function DocumentSearch({
   onSemesterChange,
   onVisibilityChange,
 }: DocumentSearchProps) {
+  const { t } = useTranslation();
+
   return (
     <section className="mb-8">
       <div className="rounded-3xl bg-card p-5 shadow-sm">
@@ -51,25 +54,25 @@ function DocumentSearch({
             <Input
               value={keyword}
               onChange={(e) => onKeywordChange(e.target.value)}
-              placeholder="Search documents, subjects, or uploader..."
+              placeholder={t("myDocuments.searchPlaceholder", "Search documents, subjects, or uploader...")}
               className="h-full rounded-2xl border-border bg-card pl-12 text-base text-card-foreground shadow-none placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
 
           <Select value={subjectCode} onValueChange={onSubjectChange}>
             <SelectTrigger className="!h-full w-full rounded-2xl border border-border bg-card px-4 text-base text-card-foreground shadow-none focus:ring-2 focus:ring-ring">
-              <SelectValue placeholder="All Subjects" />
+              <SelectValue placeholder={t("myDocuments.allSubjects", "All Subjects")} />
             </SelectTrigger>
 
             <SelectContent position="popper" sideOffset={8} className="max-h-72 rounded-2xl bg-popover text-popover-foreground">
               <SelectItem className="h-10 rounded-xl text-base" value="ALL">
-                All Subjects
+                {t("myDocuments.allSubjects", "All Subjects")}
               </SelectItem>
 
               {subjects.map((subject) => (
                 <SelectItem
-                  key={subject.subjectCode}
-                  value={subject.subjectCode}
+                   key={subject.subjectCode}
+                   value={subject.subjectCode}
                 >
                   {subject.subjectCode}
                 </SelectItem>
@@ -79,17 +82,17 @@ function DocumentSearch({
 
           <Select value={semesterNo} onValueChange={onSemesterChange}>
             <SelectTrigger className="!h-full w-full rounded-2xl border border-border bg-card px-4 text-base text-card-foreground shadow-none focus:ring-2 focus:ring-ring">
-              <SelectValue placeholder="All Semesters" />
+              <SelectValue placeholder={t("myDocuments.allSemesters", "All Semesters")} />
             </SelectTrigger>
 
             <SelectContent position="popper" sideOffset={8} className="max-h-72 rounded-2xl bg-popover text-popover-foreground">
               <SelectItem className="h-10 rounded-xl text-base" value="ALL">
-                All Semesters
+                {t("myDocuments.allSemesters", "All Semesters")}
               </SelectItem>
 
               {semesters.map((semester) => (
                 <SelectItem key={semester} value={String(semester)}>
-                  Semester {semester}
+                  {semester === "ALL" ? t("myDocuments.allSemesters", "All Semesters") : t("settings.academic.semesterNum", { num: semester })}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -97,13 +100,13 @@ function DocumentSearch({
 
           <Select value={visibilityStatus} onValueChange={onVisibilityChange}>
             <SelectTrigger className="!h-full w-full rounded-2xl border border-border bg-card px-4 text-base text-card-foreground shadow-none">
-              <SelectValue placeholder="Visibility" />
+              <SelectValue placeholder={t("myDocuments.visibility", "Visibility")} />
             </SelectTrigger>
 
             <SelectContent position="popper" sideOffset={8} className="rounded-2xl">
-              <SelectItem value="ALL">All Visibility</SelectItem>
-              <SelectItem value={VisibilityStatus.PUBLIC}>Public</SelectItem>
-              <SelectItem value={VisibilityStatus.PRIVATE}>Private</SelectItem>
+              <SelectItem value="ALL">{t("myDocuments.allVisibility", "All Visibility")}</SelectItem>
+              <SelectItem value={VisibilityStatus.PUBLIC}>{t("myDocuments.public", "Public")}</SelectItem>
+              <SelectItem value={VisibilityStatus.PRIVATE}>{t("myDocuments.private", "Private")}</SelectItem>
             </SelectContent>
           </Select>
         </div>

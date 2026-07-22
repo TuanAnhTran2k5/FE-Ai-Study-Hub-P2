@@ -1,4 +1,5 @@
 import { Medal } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import PointCoin from "@/components/PointCoin";
 import AvatarFrame from "@/components/avatarFrame/AvatarFrame";
@@ -27,33 +28,35 @@ function GlobalLeaderboardTable({
   totalPages,
   onPageChange,
 }: GlobalLeaderboardTableProps) {
+  const { t } = useTranslation();
+
   return (
     <Card className="mb-8 overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
       <div className="border-b border-border px-6 py-5">
         <h2 className="text-2xl font-black text-card-foreground">
-          Global Leaderboard
+          {t("leaderboard.globalTitle", "Global Leaderboard")}
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Total contribution ranking of all users.
+          {t("leaderboard.globalDesc", "Total contribution ranking of all users.")}
         </p>
       </div>
 
       <div className="hidden grid-cols-[100px_2fr_1fr_1fr] border-b border-border px-6 py-4 text-sm font-bold text-muted-foreground md:grid">
-        <span>Rank</span>
-        <span>User</span>
-        <span>Total Score</span>
-        <span>Rank Name</span>
+        <span>{t("leaderboard.rankCol", "Rank")}</span>
+        <span>{t("leaderboard.userCol", "User")}</span>
+        <span>{t("leaderboard.totalScoreCol", "Total Score")}</span>
+        <span>{t("leaderboard.rankNameCol", "Rank Name")}</span>
       </div>
 
       {isLoading && (
         <div className="px-6 py-8 text-center text-muted-foreground">
-          Loading leaderboard...
+          {t("leaderboard.loading", "Loading leaderboard...")}
         </div>
       )}
 
       {!isLoading && users.length === 0 && (
         <div className="px-6 py-8 text-center text-muted-foreground">
-          No leaderboard data.
+          {t("leaderboard.empty", "No leaderboard data.")}
         </div>
       )}
 
@@ -122,11 +125,11 @@ function GlobalLeaderboardTable({
           disabled={page <= 0}
           onClick={() => onPageChange(page - 1)}
         >
-          Previous
+          {t("community.guest.previous", "Previous")}
         </Button>
 
         <p className="text-sm text-muted-foreground">
-          Page {page + 1} / {totalPages || 1}
+          {t("community.guest.page", "Page")} {page + 1} / {totalPages || 1}
         </p>
 
         <Button
@@ -134,7 +137,7 @@ function GlobalLeaderboardTable({
           disabled={totalPages === 0 || page >= totalPages - 1}
           onClick={() => onPageChange(page + 1)}
         >
-          Next
+          {t("community.guest.next", "Next")}
         </Button>
       </div>
     </Card>
