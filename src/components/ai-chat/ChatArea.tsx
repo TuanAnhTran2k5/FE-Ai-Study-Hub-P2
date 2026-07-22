@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowUp, FileText, Loader2, Plus, Sparkles } from "lucide-react";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 
 import AvtAI from "/img/AvtAI.png";
 
@@ -56,6 +57,7 @@ function ChatArea({
   onSessionCreated,
   onAddDocumentClick,
 }: ChatAreaProps) {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const currentUser = useSelector((state: RootState) => state.user);
 
@@ -282,7 +284,7 @@ function ChatArea({
               <Loader2 className="size-6 animate-spin text-primary" />
             </div>
 
-            <p className="text-sm font-medium">Loading messages...</p>
+            <p className="text-sm font-medium">{t("aiChat.loadingMessages", "Loading messages...")}</p>
           </div>
         ) : messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center text-center">
@@ -291,18 +293,17 @@ function ChatArea({
             </div>
 
             <h3 className="text-xl font-black text-card-foreground">
-              AI Study Assistant
+              {t("aiChat.assistantTitle", "AI Study Assistant")}
             </h3>
 
             <p className="mt-2 max-w-xs text-sm leading-relaxed text-muted-foreground">
-              Choose documents from the sidebar, then ask AI to explain,
-              summarize, or quiz you on your materials.
+              {t("aiChat.assistantDesc", "Choose documents from the sidebar, then ask AI to explain, summarize, or quiz you on your materials.")}
             </p>
 
             {selectedDocumentIds.length > 0 && (
               <div className="mt-5 flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-xs font-bold text-primary">
                 <FileText className="size-3.5" />
-                {selectedDocumentIds.length} document(s) ready
+                {t("aiChat.docsReady", { defaultValue: "{{count}} document(s) ready", count: selectedDocumentIds.length })}
               </div>
             )}
           </div>
@@ -419,7 +420,7 @@ function ChatArea({
                   ? "left-3 bottom-2 translate-y-0"
                   : "left-1.5 top-1/2 -translate-y-1/2"
               }`}
-              title="Attach study documents"
+              title={t("aiChat.addDocs", "Attach study documents")}
             >
               <Plus className="size-4" />
             </Button>
@@ -430,7 +431,7 @@ function ChatArea({
               value={question}
               onChange={(event) => setQuestion(event.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Ask anything about your study materials..."
+              placeholder={t("aiChat.inputPlaceholder", "Ask anything about your study materials...")}
               disabled={isSending}
               rows={1}
               className="w-full resize-none border-none bg-transparent py-1.5 text-sm text-card-foreground outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed scrollbar-thin transition-all duration-300"
@@ -446,7 +447,7 @@ function ChatArea({
                   ? "right-3 bottom-2 translate-y-0 bg-foreground text-background hover:bg-foreground/90 cursor-pointer shadow-md"
                   : "right-1.5 top-1/2 -translate-y-1/2 bg-muted-foreground/15 text-muted-foreground/35 cursor-not-allowed"
               }`}
-              title="Send message"
+              title={t("aiChat.sendMessage", "Send message")}
             >
               <ArrowUp className="size-4" />
             </Button>

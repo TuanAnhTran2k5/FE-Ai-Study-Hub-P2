@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Plus,
   Edit2,
@@ -56,6 +57,7 @@ export default function ComboAccordion({
   onRestoreClick,
   onManageSyllabusClick,
 }: ComboAccordionProps) {
+  const { t } = useTranslation();
   const [expandedComboId, setExpandedComboId] = useState<number | null>(null);
 
   return (
@@ -64,7 +66,7 @@ export default function ComboAccordion({
         <div className="relative flex-1 max-w-md">
           <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search combo subjects by name..."
+            placeholder={t("curriculum.searchCombos", "Search combo subjects by name...")}
             value={searchKeyword}
             onChange={(e) => onSearchChange(e.target.value)}
             className="h-11 rounded-xl pl-10"
@@ -76,23 +78,23 @@ export default function ComboAccordion({
           className="cursor-pointer rounded-xl font-bold"
         >
           <Plus className="mr-2 h-4 w-4" />
-          Add Combo Subject
+          {t("curriculum.addCombo", "Add Combo Subject")}
         </Button>
       </div>
 
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="mt-2 text-sm">Loading combos data...</p>
+          <p className="mt-2 text-sm">{t("curriculum.loadingCombos", "Loading combos data...")}</p>
         </div>
       ) : combos.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border py-16 text-center">
           <BookMarked className="mx-auto h-12 w-12 text-muted-foreground" />
           <h4 className="mt-4 font-bold text-card-foreground">
-            No Combo Subjects Found
+            {t("curriculum.emptyCombosTitle", "No Combo Subjects Found")}
           </h4>
           <p className="mt-1 text-sm text-muted-foreground">
-            No results found matching your search.
+            {t("curriculum.emptyCombosDesc", "No results found matching your search.")}
           </p>
         </div>
       ) : (
@@ -124,7 +126,7 @@ export default function ComboAccordion({
                         {combo.comboName}
                       </h4>
                       <Badge variant="secondary" className="rounded-full">
-                        {activeSubjectCount} Subjects
+                        {activeSubjectCount} {t("curriculum.subjectsCount", "Subjects")}
                       </Badge>
                     </div>
                   </div>
@@ -137,7 +139,7 @@ export default function ComboAccordion({
                       <Button
                         variant="ghost"
                         size="icon"
-                        title="Restore combo"
+                        title={t("curriculum.tooltipRestoreCombo", "Restore combo")}
                         onClick={() => onRestoreClick(combo.comboId)}
                         className="cursor-pointer rounded-xl text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-500"
                       >
@@ -148,7 +150,7 @@ export default function ComboAccordion({
                         <Button
                           variant="ghost"
                           size="icon"
-                          title="Edit combo"
+                          title={t("curriculum.tooltipEditCombo", "Edit combo")}
                           onClick={() => onEditClick(combo)}
                           className="cursor-pointer rounded-xl hover:bg-primary/10 hover:text-primary"
                         >
@@ -158,7 +160,7 @@ export default function ComboAccordion({
                         <Button
                           variant="ghost"
                           size="icon"
-                          title="Delete combo"
+                          title={t("curriculum.tooltipDeleteCombo", "Delete combo")}
                           onClick={() =>
                             onDeleteClick(combo.comboId, combo.comboName)
                           }
@@ -191,7 +193,7 @@ export default function ComboAccordion({
                   <div className="border-t border-border bg-card/50 p-5 space-y-4">
                     <div className="flex items-center justify-between">
                       <h5 className="text-sm font-bold text-card-foreground">
-                        Subjects belonging to this Combo:
+                        {t("curriculum.comboBelongTitle", "Subjects belonging to this Combo:")}
                       </h5>
                       <Button
                         variant="outline"
@@ -200,14 +202,13 @@ export default function ComboAccordion({
                         className="cursor-pointer rounded-lg text-xs font-bold"
                       >
                         <Plus className="mr-1 h-3.5 w-3.5" />
-                        Quick Add Subject
+                        {t("curriculum.quickAddSubject", "Quick Add Subject")}
                       </Button>
                     </div>
 
                     {combo.subjects.length === 0 ? (
                       <p className="text-center text-sm text-muted-foreground py-6 border border-dashed border-border rounded-xl">
-                        No subjects in this combo. Please click "Quick Add
-                        Subject" to start.
+                        {t("curriculum.emptyComboSubjects", "No subjects in this combo. Please click \"Quick Add Subject\" to start.")}
                       </p>
                     ) : (
                       <div className="overflow-hidden rounded-xl border border-border bg-card">
@@ -215,25 +216,25 @@ export default function ComboAccordion({
                           <TableHeader className="bg-secondary/30">
                             <TableRow>
                               <TableHead className="w-[120px] font-bold">
-                                Subj Code
+                                {t("curriculum.colSubjCode", "Subj Code")}
                               </TableHead>
                               <TableHead className="font-bold">
-                                Subject Name
+                                {t("curriculum.colSubjectName", "Subject Name")}
                               </TableHead>
                               <TableHead className="w-[100px] font-bold">
-                                Type
+                                {t("curriculum.colType", "Type")}
                               </TableHead>
                               <TableHead className="w-[120px] font-bold">
-                                Semester
+                                {t("curriculum.colSemester", "Semester")}
                               </TableHead>
                               <TableHead className="font-bold">
-                                Description
+                                {t("curriculum.colDescription", "Description")}
                               </TableHead>
                               <TableHead className="w-[120px] font-bold">
-                                Syllabus
+                                {t("curriculum.colSyllabus", "Syllabus")}
                               </TableHead>
                               <TableHead className="w-[100px] text-right font-bold">
-                                Actions
+                                {t("curriculum.colActions", "Actions")}
                               </TableHead>
                             </TableRow>
                           </TableHeader>
@@ -278,7 +279,7 @@ export default function ComboAccordion({
                                     className="cursor-pointer h-7 rounded-lg text-xs font-bold gap-1 hover:bg-primary hover:text-primary-foreground border-primary/30"
                                   >
                                     <FileText className="h-3.5 w-3.5" />
-                                    Syllabus
+                                    {t("curriculum.btnSyllabus", "Syllabus")}
                                   </Button>
                                 </TableCell>
                                 <TableCell className="text-right">
@@ -287,7 +288,7 @@ export default function ComboAccordion({
                                       <Button
                                         variant="ghost"
                                         size="icon"
-                                        title="Restore subject"
+                                        title={t("curriculum.tooltipRestore", "Restore subject")}
                                         onClick={() =>
                                           onRestoreSubjectClick(subj.subjectId)
                                         }
@@ -300,7 +301,7 @@ export default function ComboAccordion({
                                         <Button
                                           variant="ghost"
                                           size="icon"
-                                          title="Edit subject"
+                                          title={t("curriculum.tooltipEdit", "Edit subject")}
                                           onClick={() =>
                                             onEditSubjectClick(subj, combo)
                                           }
@@ -311,7 +312,7 @@ export default function ComboAccordion({
                                         <Button
                                           variant="ghost"
                                           size="icon"
-                                          title="Delete subject"
+                                          title={t("curriculum.tooltipDelete", "Delete subject")}
                                           onClick={() =>
                                             onDeleteSubjectClick(subj, combo)
                                           }

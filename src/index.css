@@ -345,3 +345,132 @@
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background-color: rgba(255, 255, 255, 0.3);
 }
+
+/* Accent Colors Themes */
+
+/* Indigo */
+:root.theme-indigo {
+  --primary: rgb(79, 70, 229);
+  --primary-hover: rgb(99, 102, 241);
+  --primary-bg-hover: rgba(79, 70, 229, 0.1);
+  --ring: rgb(79, 70, 229);
+}
+.dark.theme-indigo {
+  --primary: rgb(129, 140, 248);
+  --primary-hover: rgb(165, 180, 252);
+  --primary-bg-hover: rgba(129, 140, 248, 0.15);
+  --ring: rgb(129, 140, 248);
+}
+
+/* Purple */
+:root.theme-purple {
+  --primary: rgb(147, 51, 234);
+  --primary-hover: rgb(168, 85, 247);
+  --primary-bg-hover: rgba(147, 51, 234, 0.1);
+  --ring: rgb(147, 51, 234);
+}
+.dark.theme-purple {
+  --primary: rgb(192, 132, 252);
+  --primary-hover: rgb(216, 180, 254);
+  --primary-bg-hover: rgba(192, 132, 252, 0.15);
+  --ring: rgb(192, 132, 252);
+}
+
+/* Emerald */
+:root.theme-emerald {
+  --primary: rgb(5, 150, 105);
+  --primary-hover: rgb(16, 185, 129);
+  --primary-bg-hover: rgba(5, 150, 105, 0.1);
+  --ring: rgb(5, 150, 105);
+}
+.dark.theme-emerald {
+  --primary: rgb(52, 211, 153);
+  --primary-hover: rgb(110, 231, 183);
+  --primary-bg-hover: rgba(52, 211, 153, 0.15);
+  --ring: rgb(52, 211, 153);
+}
+
+/* Orange */
+:root.theme-orange {
+  --primary: rgb(234, 88, 12);
+  --primary-hover: rgb(249, 115, 22);
+  --primary-bg-hover: rgba(234, 88, 12, 0.1);
+  --ring: rgb(234, 88, 12);
+}
+.dark.theme-orange {
+  --primary: rgb(251, 146, 60);
+  --primary-hover: rgb(253, 186, 116);
+  --primary-bg-hover: rgba(251, 146, 60, 0.15);
+  --ring: rgb(251, 146, 60);
+}
+
+/* Rose */
+:root.theme-rose {
+  --primary: rgb(225, 29, 72);
+  --primary-hover: rgb(244, 63, 94);
+  --primary-bg-hover: rgba(225, 29, 72, 0.1);
+  --ring: rgb(225, 29, 72);
+}
+.dark.theme-rose {
+  --primary: rgb(251, 113, 133);
+  --primary-hover: rgb(253, 164, 175);
+  --primary-bg-hover: rgba(251, 113, 133, 0.15);
+  --ring: rgb(251, 113, 133);
+}
+
+/* Teal */
+:root.theme-teal {
+  --primary: rgb(13, 148, 136);
+  --primary-hover: rgb(20, 184, 166);
+  --primary-bg-hover: rgba(13, 148, 136, 0.1);
+  --ring: rgb(13, 148, 136);
+}
+.dark.theme-teal {
+  --primary: rgb(45, 212, 191);
+  --primary-hover: rgb(94, 234, 212);
+  --primary-bg-hover: rgba(45, 212, 191, 0.15);
+  --ring: rgb(45, 212, 191);
+}
+
+/* Amber */
+:root.theme-amber {
+  --primary: rgb(217, 119, 6);
+  --primary-hover: rgb(245, 158, 11);
+  --primary-bg-hover: rgba(217, 119, 6, 0.1);
+  --ring: rgb(217, 119, 6);
+}
+.dark.theme-amber {
+  --primary: rgb(251, 191, 36);
+  --primary-hover: rgb(252, 211, 77);
+  --primary-bg-hover: rgba(251, 191, 36, 0.15);
+  --ring: rgb(251, 191, 36);
+}
+
+/* Pink */
+:root.theme-pink {
+  --primary: rgb(219, 39, 119);
+  --primary-hover: rgb(236, 72, 153);
+  --primary-bg-hover: rgba(219, 39, 119, 0.1);
+  --ring: rgb(219, 39, 119);
+}
+.dark.theme-pink {
+  --primary: rgb(244, 114, 182);
+  --primary-hover: rgb(249, 168, 212);
+  --primary-bg-hover: rgba(244, 114, 182, 0.15);
+  --ring: rgb(244, 114, 182);
+}
+
+/* Slate */
+:root.theme-slate {
+  --primary: rgb(71, 85, 105);
+  --primary-hover: rgb(100, 116, 139);
+  --primary-bg-hover: rgba(71, 85, 105, 0.1);
+  --ring: rgb(71, 85, 105);
+}
+.dark.theme-slate {
+  --primary: rgb(148, 163, 184);
+  --primary-hover: rgb(203, 213, 225);
+  --primary-bg-hover: rgba(148, 163, 184, 0.15);
+  --ring: rgb(148, 163, 184);
+}
+

@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 import { BookOpen, Layers, BookMarked, RotateCcw } from "lucide-react";
 
 import { ROUTE } from "@/models/routePath";
@@ -52,6 +53,7 @@ import { ERROR_CODE } from "@/constants/errorCode";
 import { SUCCESS_MESSAGE } from "@/constants/successMessage";
 
 function ManagementPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   
   // 1. Phân quyền Admin
@@ -67,7 +69,7 @@ function ManagementPage() {
   }
 
   if (!currentUser || currentUser.role !== "AD") {
-    toast.error("Access denied. Admin role required.");
+    toast.error(t("curriculum.accessDenied", "Access denied. Admin role required."));
     return <Navigate to={`/${ROUTE.APP}/${ROUTE.DASHBOARD}`} replace />;
   }
 
@@ -458,13 +460,13 @@ function ManagementPage() {
         <div>
           <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.25em] text-primary">
             <BookOpen className="h-5 w-5" />
-            Admin Dashboard
+            {t("curriculum.dashboard", "Admin Dashboard")}
           </div>
           <h1 className="mt-2 text-4xl font-black text-card-foreground">
-            Curriculum Management
+            {t("curriculum.title", "Curriculum Management")}
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Manage student learning semesters, core/combo subjects, and curriculum configurations.
+            {t("curriculum.description", "Manage student learning semesters, core/combo subjects, and curriculum configurations.")}
           </p>
         </div>
       </div>
@@ -480,7 +482,7 @@ function ManagementPage() {
           }`}
         >
           <Layers className="h-4 w-4" />
-          Semesters List
+          {t("curriculum.tabSemesters", "Semesters List")}
           <span className="ml-1.5 px-2 py-0.5 text-[10px] font-black rounded-full bg-secondary text-secondary-foreground border border-border">
             {semesters.length}
           </span>
@@ -495,7 +497,7 @@ function ManagementPage() {
           }`}
         >
           <BookMarked className="h-4 w-4" />
-          Combo Subjects
+          {t("curriculum.tabCombos", "Combo Subjects")}
           <span className="ml-1.5 px-2 py-0.5 text-[10px] font-black rounded-full bg-secondary text-secondary-foreground border border-border">
             {combos.filter((combo) => !combo.isDeleted).length}
           </span>
@@ -510,7 +512,7 @@ function ManagementPage() {
           }`}
         >
           <BookOpen className="h-4 w-4" />
-          All Subjects
+          {t("curriculum.tabSubjects", "All Subjects")}
           <span className="ml-1.5 px-2 py-0.5 text-[10px] font-black rounded-full bg-secondary text-secondary-foreground border border-border">
             {subjects.filter((subject) => !subject.isDeleted).length}
           </span>
@@ -525,7 +527,7 @@ function ManagementPage() {
           }`}
         >
           <RotateCcw className="h-4 w-4" />
-          Deleted History
+          {t("curriculum.tabDeleted", "Deleted History")}
           <span className="ml-1.5 px-2 py-0.5 text-[10px] font-black rounded-full bg-secondary text-secondary-foreground border border-border">
             {subjects.filter((subject) => subject.isDeleted).length +
               combos.filter((combo) => combo.isDeleted).length}

@@ -1,4 +1,5 @@
 import { Award, Medal, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -13,24 +14,26 @@ function LeaderboardStats({
   totalRanks,
   totalBadges,
 }: LeaderboardStatsProps) {
+  const { t } = useTranslation();
+
   return (
     <Card className="rounded-3xl border border-border bg-card shadow-sm lg:col-span-2">
       <CardContent className="grid gap-4 p-6 md:grid-cols-3">
         <StatItem
           icon={<Users className="h-6 w-6" />}
-          label="Total Users"
+          label={t("leaderboard.totalUsers", "Total Users")}
           value={totalUsers}
         />
 
         <StatItem
           icon={<Medal className="h-6 w-6" />}
-          label="Ranks"
+          label={t("leaderboard.ranks", "Ranks")}
           value={totalRanks}
         />
 
         <StatItem
           icon={<Award className="h-6 w-6" />}
-          label="Badges"
+          label={t("leaderboard.badges", "Badges")}
           value={totalBadges}
         />
       </CardContent>

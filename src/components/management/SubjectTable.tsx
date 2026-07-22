@@ -1,4 +1,5 @@
 import { Plus, Edit2, Trash2, Search, BookOpen, Loader2, FileText, RotateCcw, } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +37,7 @@ export default function SubjectTable({
   onRestoreClick,
   onManageSyllabusClick,
 }: SubjectTableProps) {
+  const { t } = useTranslation();
   // Sắp xếp danh sách môn học theo Học kỳ (semesterId) tăng dần
   const sortedSubjects = [...subjects].sort((a, b) => a.semesterId - b.semesterId);
 
@@ -47,7 +49,7 @@ export default function SubjectTable({
           <div className="relative flex-1">
             <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search subjects by code or name..."
+              placeholder={t("curriculum.searchSubjects", "Search subjects by code or name...")}
               value={searchKeyword}
               onChange={(e) => onSearchChange(e.target.value)}
               className="h-11 rounded-xl pl-10"
@@ -57,7 +59,7 @@ export default function SubjectTable({
             variant="outline"
             className="h-11 px-3 rounded-xl border border-border font-bold text-xs bg-secondary/10 flex items-center justify-center shrink-0"
           >
-            Total: {subjects.filter((subject) => !subject.isDeleted).length}
+            {t("curriculum.total", "Total")}: {subjects.filter((subject) => !subject.isDeleted).length}
           </Badge>
         </div>
 
@@ -66,21 +68,21 @@ export default function SubjectTable({
           className="cursor-pointer rounded-xl font-bold"
         >
           <Plus className="mr-2 h-4 w-4" />
-          Add Subject
+          {t("curriculum.addSubject", "Add Subject")}
         </Button>
       </div>
 
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="mt-2 text-sm">Loading subjects database...</p>
+          <p className="mt-2 text-sm">{t("curriculum.loadingSubjects", "Loading subjects database...")}</p>
         </div>
       ) : sortedSubjects.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border py-16 text-center">
           <BookOpen className="mx-auto h-12 w-12 text-muted-foreground" />
-          <h4 className="mt-4 font-bold text-card-foreground">No Subjects Found</h4>
+          <h4 className="mt-4 font-bold text-card-foreground">{t("curriculum.emptySubjectsTitle", "No Subjects Found")}</h4>
           <p className="mt-1 text-sm text-muted-foreground">
-            No subjects found matching your search.
+            {t("curriculum.emptySubjectsDesc", "No subjects found matching your search.")}
           </p>
         </div>
       ) : (
@@ -88,13 +90,13 @@ export default function SubjectTable({
           <Table>
             <TableHeader className="bg-secondary/40">
               <TableRow>
-                <TableHead className="w-[120px] font-bold">Subj Code</TableHead>
-                <TableHead className="font-bold">Subject Name</TableHead>
-                <TableHead className="w-[120px] font-bold">Type</TableHead>
-                <TableHead className="w-[120px] font-bold">Semester</TableHead>
-                <TableHead className="font-bold">Description</TableHead>
-                <TableHead className="w-[120px] font-bold">Syllabus</TableHead>
-                <TableHead className="w-[120px] text-right font-bold">Actions</TableHead>
+                <TableHead className="w-[120px] font-bold">{t("curriculum.colSubjCode", "Subj Code")}</TableHead>
+                <TableHead className="font-bold">{t("curriculum.colSubjectName", "Subject Name")}</TableHead>
+                <TableHead className="w-[120px] font-bold">{t("curriculum.colType", "Type")}</TableHead>
+                <TableHead className="w-[120px] font-bold">{t("curriculum.colSemester", "Semester")}</TableHead>
+                <TableHead className="font-bold">{t("curriculum.colDescription", "Description")}</TableHead>
+                <TableHead className="w-[120px] font-bold">{t("curriculum.colSyllabus", "Syllabus")}</TableHead>
+                <TableHead className="w-[120px] text-right font-bold">{t("curriculum.colActions", "Actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -124,7 +126,7 @@ export default function SubjectTable({
                     {subj.semesterNo || `Sem ${subj.semesterId}`}
                   </TableCell>
                   <TableCell className="max-w-xs truncate text-muted-foreground">
-                    {subj.description || "No description provided."}
+                    {subj.description || t("curriculum.noDescription", "No description provided.")}
                   </TableCell>
                   <TableCell>
                     <Button
@@ -134,7 +136,7 @@ export default function SubjectTable({
                       className="cursor-pointer h-7 rounded-lg text-xs font-bold gap-1 hover:bg-primary hover:text-primary-foreground border-primary/30"
                     >
                       <FileText className="h-3.5 w-3.5" />
-                      Syllabus
+                      {t("curriculum.btnSyllabus", "Syllabus")}
                     </Button>
                   </TableCell>
                   <TableCell className="text-right">
@@ -143,7 +145,7 @@ export default function SubjectTable({
     <Button
       variant="ghost"
       size="icon"
-      title="Restore subject"
+      title={t("curriculum.tooltipRestore", "Restore subject")}
       onClick={() => onRestoreClick(subj.subjectId)}
       className="cursor-pointer rounded-xl text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-500"
     >
@@ -154,7 +156,7 @@ export default function SubjectTable({
       <Button
         variant="ghost"
         size="icon"
-        title="Edit subject"
+        title={t("curriculum.tooltipEdit", "Edit subject")}
         onClick={() => onEditClick(subj)}
         className="cursor-pointer rounded-xl hover:bg-primary/10 hover:text-primary"
       >
@@ -164,7 +166,7 @@ export default function SubjectTable({
       <Button
         variant="ghost"
         size="icon"
-        title="Delete subject"
+        title={t("curriculum.tooltipDelete", "Delete subject")}
         onClick={() =>
           onDeleteClick(subj.subjectId, subj.subjectCode)
         }

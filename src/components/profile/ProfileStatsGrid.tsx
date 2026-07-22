@@ -1,4 +1,5 @@
 import { Bookmark, Download, FileText, Trophy } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import PointCoin from "@/components/PointCoin";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,6 +16,7 @@ function formatNumber(value?: number | null) {
 }
 
 function ProfileStatsGrid({ user }: ProfileStatsGridProps) {
+  const { t } = useTranslation();
   const statistics = user.statistics;
 
   const totalDocuments = statistics?.documents ?? 0;
@@ -30,31 +32,31 @@ function ProfileStatsGrid({ user }: ProfileStatsGridProps) {
       <ProfileStat
         icon={<FileText className="h-6 w-6" />}
         value={totalDocuments}
-        label="Documents"
+        label={t("profile.documents", "Documents")}
       />
 
       <ProfileStat
         icon={<Download className="h-6 w-6" />}
         value={totalDownloads}
-        label="Downloads"
+        label={t("profile.downloads", "Downloads")}
       />
 
       <ProfileStat
         icon={<Bookmark className="h-6 w-6" />}
         value={totalBookmarks}
-        label="Bookmarks"
+        label={t("profile.bookmarks", "Bookmarks")}
       />
 
       <ProfileStat
         icon={<PointCoin size={28} />}
         value={formatNumber(user.totalScore)}
-        label="Reputation Points"
+        label={t("profile.reputationPoints", "Reputation Points")}
       />
 
       <ProfileStat
         icon={<Trophy className="h-6 w-6" />}
         value={globalRank}
-        label="Global Rank"
+        label={t("profile.globalRank", "Global Rank")}
       />
     </div>
   );

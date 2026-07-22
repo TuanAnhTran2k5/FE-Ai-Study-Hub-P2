@@ -4,6 +4,7 @@ import { CheckCircle2, MoreVertical, Trash2 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -51,6 +52,7 @@ const FILTERS: { key: NotificationFilterType; label: string }[] = [
 ];
 
 function NotificationPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const currentUser = useSelector(
@@ -136,7 +138,7 @@ function NotificationPage() {
   const markAllMutation = useMutation({
     mutationFn: markAllNotificationsAsRead,
     onSuccess: () => {
-      toast.success("All notifications marked as read.");
+      toast.success(t("notifications.toast.markAllSuccess", "All notifications marked as read."));
       // NOTE CACHE: Sau khi mark all, unread count trong header/sidebar cũng giảm theo.
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
@@ -145,7 +147,7 @@ function NotificationPage() {
   const deleteMutation = useMutation({
     mutationFn: deleteNotification,
     onSuccess: () => {
-      toast.success("Notification deleted successfully.");
+      toast.success(t("notifications.toast.deleteSuccess", "Notification deleted successfully."));
       // NOTE CACHE: Xóa notification xong cần refresh cả list và summary count.
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
@@ -162,12 +164,12 @@ function NotificationPage() {
       return allNotifications.length;
     },
     onSuccess: (deletedCount) => {
-      toast.success(`${deletedCount} notifications deleted successfully.`);
+      toast.success(t("notifications.toast.deleteAllSuccess", { defaultValue: `${deletedCount} notifications deleted successfully.`, count: deletedCount }));
       setIsDeleteAllConfirmOpen(false);
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
     onError: () => {
-      toast.error("Delete all notifications failed.");
+      toast.error(t("notifications.toast.deleteAllFailed", "Delete all notifications failed."));
     },
   });
 
@@ -187,10 +189,10 @@ function NotificationPage() {
       <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
           <h1 className="text-3xl font-black text-card-foreground">
-            Notifications
+            {t("notifications.title", "Notifications")}
           </h1>
           <p className="mt-2 text-muted-foreground">
-            Stay updated with important account and document activity.
+            {t("notifications.description", "Stay updated with important account and document activity.")}
           </p>
         </div>
 
@@ -203,7 +205,7 @@ function NotificationPage() {
             onClick={() => markAllMutation.mutate()}
           >
             <CheckCircle2 className="mr-2 size-4" />
-            Mark all as read
+            {t("notifications.markAllAsRead", "Mark all as read")}
           </Button>
 
           <Button
@@ -214,7 +216,7 @@ function NotificationPage() {
             onClick={() => setIsDeleteAllConfirmOpen(true)}
           >
             <Trash2 className="mr-2 size-4" />
-            {deleteAllMutation.isPending ? "Deleting..." : "Delete all"}
+            {deleteAllMutation.isPending ? t("notifications.deleting", "Deleting...") : t("notifications.deleteAll", "Delete all")}
           </Button>
         </div>
       </div>
@@ -234,7 +236,13 @@ function NotificationPage() {
                 }`}
                 onClick={() => setActiveFilter(filter.key)}
               >
-                <span>{filter.label}</span>
+                <span>{
+                  filter.key === "ALL" 
+                    ? t("notifications.all", "All") 
+                    : filter.key === "UNREAD" 
+                      ? t("notifications.unread", "Unread") 
+                      : t("notifications.read", "Read")
+                }</span>
                 <span
                   className={`ml-2 inline-flex min-w-6 items-center justify-center rounded-full px-2 py-0.5 text-xs font-black ${
                     activeFilter === filter.key
@@ -252,19 +260,19 @@ function NotificationPage() {
             <CardContent className="p-0">
               {isLoading && (
                 <div className="p-8 text-muted-foreground">
-                  Loading notifications...
+                  {t("notifications.loading", "Loading notifications...")}
                 </div>
               )}
 
               {isError && (
                 <div className="p-8 text-destructive">
-                  Failed to load notifications.
+                  {t("notifications.failed", "Failed to load notifications.")}
                 </div>
               )}
 
               {!isLoading && !isError && notifications.length === 0 && (
                 <div className="p-10 text-center text-muted-foreground">
-                  No notifications found.
+                  {t("notifications.empty", "No notifications found.")}
                 </div>
               )}
 
@@ -328,8 +336,8 @@ function NotificationPage() {
               {notifications.length > 0 && (
                 <div className="flex flex-col items-center justify-between gap-4 border-t border-border/40 p-5 sm:flex-row">
                   <div className="text-sm text-muted-foreground">
-                    Showing <span className="font-bold text-card-foreground">{paginatedNotifications.length}</span> of{" "}
-                    <span className="font-bold text-card-foreground">{notifications.length}</span> notifications
+                    {t("notifications.showing", "Showing")} <span className="font-bold text-card-foreground">{paginatedNotifications.length}</span> {t("notifications.of", "of")}{" "}
+                    <span className="font-bold text-card-foreground">{notifications.length}</span> {t("notifications.notificationsCount", "notifications")}
                   </div>
 
                   <div className="flex items-center gap-2">
@@ -340,7 +348,7 @@ function NotificationPage() {
                       onClick={() => setCurrentPage(activePage - 1)}
                       className="h-10 rounded-xl px-4 font-bold"
                     >
-                      Previous
+                      {t("community.guest.previous", "Previous")}
                     </Button>
 
                     <div className="hidden sm:flex items-center gap-1.5">
@@ -368,12 +376,12 @@ function NotificationPage() {
                       onClick={() => setCurrentPage(activePage + 1)}
                       className="h-10 rounded-xl px-4 font-bold"
                     >
-                      Next
+                      {t("community.guest.next", "Next")}
                     </Button>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">Go to page:</span>
+                    <span className="text-sm text-muted-foreground">{t("community.guest.goToPage", "Go to page:")}</span>
                     <Select
                       value={String(activePage)}
                       onValueChange={(val) => setCurrentPage(Number(val))}
@@ -392,7 +400,7 @@ function NotificationPage() {
                             value={String(page)}
                             className="cursor-pointer rounded-lg text-sm"
                           >
-                            Page {page}
+                            {t("community.guest.page", "Page")} {page}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -407,13 +415,13 @@ function NotificationPage() {
         <Card className="h-fit rounded-3xl border border-border bg-card shadow-sm">
           <CardContent className="p-6">
             <h2 className="font-black text-card-foreground">
-              Notification Summary
+              {t("notifications.summaryTitle", "Notification Summary")}
             </h2>
             {/* NOTE SUMMARY: Summary dùng allNotifications, nên nó phản ánh tổng dữ liệu hiện tại sau delete/read. */}
             <div className="mt-5 space-y-3">
-              <SummaryRow label="Total" value={summary.total} />
-              <SummaryRow label="Unread" value={summary.unread} />
-              <SummaryRow label="Read" value={summary.read} />
+              <SummaryRow label={t("notifications.total", "Total")} value={summary.total} />
+              <SummaryRow label={t("notifications.unread", "Unread")} value={summary.unread} />
+              <SummaryRow label={t("notifications.read", "Read")} value={summary.read} />
             </div>
           </CardContent>
         </Card>
@@ -431,11 +439,10 @@ function NotificationPage() {
               </div>
 
               <DialogTitle className="text-xl font-black text-card-foreground">
-                Delete all notifications?
+                {t("notifications.deleteConfirmTitle", "Delete all notifications?")}
               </DialogTitle>
               <DialogDescription className="max-w-sm text-sm leading-6 text-muted-foreground">
-                Are you sure you want to delete all notifications? This action
-                cannot be undone.
+                {t("notifications.deleteConfirmDesc", "Are you sure you want to delete all notifications? This action cannot be undone.")}
               </DialogDescription>
             </DialogHeader>
 
@@ -447,7 +454,7 @@ function NotificationPage() {
                 onClick={() => setIsDeleteAllConfirmOpen(false)}
                 disabled={deleteAllMutation.isPending}
               >
-                Cancel
+                {t("common.cancel", "Cancel")}
               </Button>
 
               <Button
@@ -456,7 +463,7 @@ function NotificationPage() {
                 onClick={() => deleteAllMutation.mutate()}
                 disabled={deleteAllMutation.isPending}
               >
-                {deleteAllMutation.isPending ? "Deleting..." : "Delete all"}
+                {deleteAllMutation.isPending ? t("notifications.deleting", "Deleting...") : t("notifications.deleteAll", "Delete all")}
               </Button>
             </div>
           </div>

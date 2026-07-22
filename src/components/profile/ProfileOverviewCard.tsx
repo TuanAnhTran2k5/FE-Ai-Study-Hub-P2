@@ -1,4 +1,5 @@
 import { Award, CalendarDays, Mail, ShieldCheck } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import AvatarFrame from "@/components/avatarFrame/AvatarFrame";
 import ProfileStorageCard from "@/components/profile/ProfileStorageCard";
@@ -10,9 +11,10 @@ interface ProfileOverviewCardProps {
   user: UserResponse;
 }
 
-function formatDate(date?: string | null) {
+function formatDate(date?: string | null, language?: string) {
   if (!date) return "N/A";
-  return new Date(date).toLocaleDateString("vi-VN");
+  const locale = language === "vi" ? "vi-VN" : "en-US";
+  return new Date(date).toLocaleDateString(locale);
 }
 
 
@@ -26,11 +28,14 @@ function getStatusClassName(status: UserResponse["status"]) {
   return "text-red-400 border-red-400/40";
 }
 
-function getRankName(user: UserResponse) {
-  return user.currentRank?.rank.rankName || "No Rank";
+function getRankName(user: UserResponse, fallback: string) {
+  return user.currentRank?.rank.rankName || fallback;
 }
 
 function ProfileOverviewCard({ user }: ProfileOverviewCardProps) {
+  const { t, i18n } = useTranslation();
+  const currentLanguage = i18n.language || "vi";
+
   return (
     <Card className="mb-6 overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
       <CardContent className="grid gap-8 p-8 lg:grid-cols-[1.2fr_0.95fr] lg:items-center">
@@ -45,7 +50,7 @@ function ProfileOverviewCard({ user }: ProfileOverviewCardProps) {
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-2xl font-black uppercase text-card-foreground md:text-3xl">
-                {user.fullName || "Unknown User"}
+                {user.fullName || t("profile.unknownUser", "Unknown User")}
               </h2>
 
               {user.status === "ACTIVE" && (
@@ -56,7 +61,7 @@ function ProfileOverviewCard({ user }: ProfileOverviewCardProps) {
             <div className="mt-3 flex flex-wrap gap-2">
               <Badge className="rounded-full bg-yellow-500/15 px-3 py-1 font-bold text-yellow-500 hover:bg-yellow-500/15">
                 <Award className="mr-1 h-4 w-4" />
-                {getRankName(user)}
+                {getRankName(user, t("profile.noRank", "No Rank"))}
               </Badge>
 
 
@@ -74,14 +79,14 @@ function ProfileOverviewCard({ user }: ProfileOverviewCardProps) {
             <div className="mt-5 space-y-3 text-sm text-muted-foreground">
               <p className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-primary" />
-                {user.email || "No email"}
+                {user.email || t("profile.noEmail", "No email")}
               </p>
 
               <p className="flex items-center gap-2">
                 <CalendarDays className="h-4 w-4 text-primary" />
-                Joined{" "}
+                {t("profile.joined", "Joined")}{" "}
                 <span className="font-semibold text-card-foreground">
-                  {formatDate(user.createdAt)}
+                  {formatDate(user.createdAt, currentLanguage)}
                 </span>
               </p>
             </div>

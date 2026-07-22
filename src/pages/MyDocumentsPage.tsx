@@ -4,6 +4,7 @@ import { CheckSquare, Upload } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 import DocumentBulkDeleteDialog from "@/components/document/DocumentBulkDeleteDialog";
 import DocumentGrid from "@/components/document/DocumentGrid";
@@ -96,11 +97,12 @@ function getDocumentsErrorMessage(error: any) {
 }
 
 function MyDocumentsPage() {
+  const { t } = useTranslation();
   const itemsPerPage = 8;
   const [currentPage, setCurrentPage] = useState(1);
   const [keyword, setKeyword] = useState("");
   const [subjectCode, setSubjectCode] = useState("ALL");
-  const [semesterNo, setSemesterNo] = useState("ALL");
+  const [semesterNo, setSemesterNo] = useState(() => localStorage.getItem("default-semester") || "ALL");
   const [visibilityStatus, setVisibilityStatus] = useState("ALL");
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
@@ -387,16 +389,15 @@ function MyDocumentsPage() {
       <div className="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary">
-            My Documents
+            {t("myDocuments.label", "My Documents")}
           </p>
 
           <h1 className="mt-2 text-4xl font-bold text-card-foreground">
-            Manage Your Documents
+            {t("myDocuments.title", "Manage Your Documents")}
           </h1>
 
           <p className="mt-3 max-w-2xl text-muted-foreground">
-            View, organize, and manage all documents you have uploaded to AI
-            Study Hub.
+            {t("myDocuments.description", "View, organize, and manage all documents you have uploaded to AI Study Hub.")}
           </p>
         </div>
 
@@ -409,7 +410,7 @@ function MyDocumentsPage() {
               className="h-11 cursor-pointer rounded-xl px-5 font-bold"
             >
               <CheckSquare className="mr-2 h-4 w-4" />
-              Select Document
+              {t("myDocuments.select", "Select Document")}
             </Button>
 
             <Button
@@ -418,16 +419,12 @@ function MyDocumentsPage() {
               className="h-11 cursor-pointer rounded-xl bg-gradient-to-r from-primary-start to-primary-end px-5 font-bold text-primary-foreground shadow-sm hover:from-primary-start-hover hover:to-primary-end-hover"
             >
               <Upload className="mr-2 h-4 w-4" />
-              Upload Document
+              {t("myDocuments.upload", "Upload Document")}
             </Button>
           </div>
 
           <div className="text-sm text-muted-foreground">
-            Showing{" "}
-            <span className="font-bold text-card-foreground">
-              {filteredDocuments.length}
-            </span>{" "}
-            documents
+            {t("myDocuments.showingDocs", { count: filteredDocuments.length })}
           </div>
         </div>
       </div>
@@ -460,16 +457,16 @@ function MyDocumentsPage() {
       {isDocumentsLoading ? (
         <div className="rounded-2xl border border-border bg-card p-10 text-center shadow-sm">
           <p className="text-lg font-bold text-card-foreground">
-            Loading documents...
+            {t("myDocuments.loading", "Loading documents...")}
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            Please wait while your uploaded documents are loaded.
+            {t("myDocuments.loadingDesc", "Please wait while your uploaded documents are loaded.")}
           </p>
         </div>
       ) : isDocumentsError ? (
         <div className="rounded-2xl border border-border bg-card p-10 text-center shadow-sm">
           <p className="text-lg font-bold text-card-foreground">
-            Failed to load documents
+            {t("myDocuments.failed", "Failed to load documents")}
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
             {getDocumentsErrorMessage(documentsError)}
@@ -480,7 +477,7 @@ function MyDocumentsPage() {
             className="mt-5 h-10 rounded-xl"
             onClick={() => refetchDocuments()}
           >
-            Retry
+            {t("myDocuments.retry", "Retry")}
           </Button>
         </div>
       ) : (
@@ -493,15 +490,15 @@ function MyDocumentsPage() {
           {filteredDocuments.length > 0 && (
             <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t border-border/40 pt-6 sm:flex-row">
               <div className="text-sm text-muted-foreground">
-                Showing{" "}
+                {t("community.guest.showing")}{" "}
                 <span className="font-bold text-card-foreground">
                   {paginatedDocuments.length}
                 </span>{" "}
-                of{" "}
+                {t("community.guest.of")}{" "}
                 <span className="font-bold text-card-foreground">
                   {filteredDocuments.length}
                 </span>{" "}
-                documents
+                {t("community.guest.docs")}
               </div>
 
               <div className="flex items-center gap-2">
@@ -512,7 +509,7 @@ function MyDocumentsPage() {
                   onClick={() => setCurrentPage(activePage - 1)}
                   className="h-10 rounded-xl px-4 font-bold"
                 >
-                  Previous
+                  {t("community.guest.previous", "Previous")}
                 </Button>
 
                 <div className="hidden items-center gap-1.5 sm:flex">
@@ -539,13 +536,13 @@ function MyDocumentsPage() {
                   onClick={() => setCurrentPage(activePage + 1)}
                   className="h-10 rounded-xl px-4 font-bold"
                 >
-                  Next
+                  {t("community.guest.next", "Next")}
                 </Button>
               </div>
 
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">
-                  Go to page:
+                  {t("community.guest.goToPage", "Go to page:")}
                 </span>
                 <Select
                   value={String(activePage)}
@@ -560,7 +557,7 @@ function MyDocumentsPage() {
                       (_, index) => index + 1,
                     ).map((page) => (
                       <SelectItem key={page} value={String(page)}>
-                        Page {page}
+                        {t("community.guest.page", "Page")} {page}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -575,10 +572,10 @@ function MyDocumentsPage() {
         <DialogContent className="max-h-[92vh] overflow-y-auto p-6 sm:max-w-[1200px] lg:max-w-[1280px]">
           <DialogHeader>
             <DialogTitle className="text-2xl font-black">
-              Upload Document
+              {t("myDocuments.upload", "Upload Document")}
             </DialogTitle>
             <DialogDescription>
-              Add a file and complete the document details.
+              {t("myDocuments.uploadDesc", "Add a file and complete the document details.")}
             </DialogDescription>
           </DialogHeader>
 

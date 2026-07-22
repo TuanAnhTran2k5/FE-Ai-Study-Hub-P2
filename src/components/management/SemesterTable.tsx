@@ -1,4 +1,5 @@
 import { Plus, Edit2, Trash2, Layers, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,34 +27,36 @@ export default function SemesterTable({
   onEditClick,
   onDeleteClick,
 }: SemesterTableProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <h3 className="text-xl font-black text-card-foreground">
-          Semesters Management
+          {t("curriculum.semestersMgmt", "Semesters Management")}
         </h3>
         <Button
           onClick={onAddClick}
           className="cursor-pointer rounded-xl font-bold"
         >
           <Plus className="mr-2 h-4 w-4" />
-          Add Semester
+          {t("curriculum.addSemester", "Add Semester")}
         </Button>
       </div>
 
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="mt-2 text-sm">Loading semesters data...</p>
+          <p className="mt-2 text-sm">{t("curriculum.loadingSemesters", "Loading semesters data...")}</p>
         </div>
       ) : semesters.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-border py-16 text-center">
           <Layers className="mx-auto h-12 w-12 text-muted-foreground" />
           <h4 className="mt-4 font-bold text-card-foreground">
-            No Semesters Found
+            {t("curriculum.emptySemestersTitle", "No Semesters Found")}
           </h4>
           <p className="mt-1 text-sm text-muted-foreground">
-            Start by creating a new learning semester.
+            {t("curriculum.emptySemestersDesc", "Start by creating a new learning semester.")}
           </p>
         </div>
       ) : (
@@ -62,11 +65,11 @@ export default function SemesterTable({
             <TableHeader className="bg-secondary/40">
               <TableRow>
                 <TableHead className="w-[200px] font-bold">
-                  Semester Code/No
+                  {t("curriculum.colSemesterCode", "Semester Code/No")}
                 </TableHead>
-                <TableHead className="font-bold">Description</TableHead>
+                <TableHead className="font-bold">{t("curriculum.colDescription", "Description")}</TableHead>
                 <TableHead className="w-[150px] text-right font-bold">
-                  Actions
+                  {t("curriculum.colActions", "Actions")}
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -77,7 +80,7 @@ export default function SemesterTable({
                     {semester.semesterNo}
                   </TableCell>
                   <TableCell className="max-w-md truncate text-muted-foreground">
-                    {semester.description || "No description provided."}
+                    {semester.description || t("curriculum.noDescription", "No description provided.")}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">

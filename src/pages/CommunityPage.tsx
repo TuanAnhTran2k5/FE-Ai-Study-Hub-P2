@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import { AuthenticatedCommunity } from "@/components/community/AuthenticatedCommunity";
 import { GuestCommunity } from "@/components/community/GuestCommunity";
@@ -13,6 +14,7 @@ import { searchPublicDocuments } from "@/services/documentService";
 import type { SubjectResponse } from "@/types/academic.type";
 
 function CommunityPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   // Retrieve current user
@@ -90,11 +92,11 @@ function CommunityPage() {
   };
 
   if (isLoading) {
-    return <div className="p-10 text-muted-foreground">Loading...</div>;
+    return <div className="p-10 text-muted-foreground">{t("common.loading", "Loading...")}</div>;
   }
 
   if (isError) {
-    return <div className="p-10 text-destructive">Failed to load data</div>;
+    return <div className="p-10 text-destructive">{t("community.failed", "Failed to load data")}</div>;
   }
 
   if (!isAuthenticated) {

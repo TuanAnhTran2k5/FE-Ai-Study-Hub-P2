@@ -213,7 +213,7 @@ function AppSidebar() {
               >
                 <LogOut className="size-6 shrink-0" />
                 <span className="truncate group-data-[collapsible=icon]:hidden">
-                  {logoutMutation.isPending ? "Logging out..." : "Log out"}
+                  {logoutMutation.isPending ? t("sidebar.loggingOut", "Logging out...") : t("sidebar.logout", "Log out")}
                 </span>
               </button>
             </SidebarMenuButton>

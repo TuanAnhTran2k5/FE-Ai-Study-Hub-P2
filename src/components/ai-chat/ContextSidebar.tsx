@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import { FileText, Plus, Search, Sparkles, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -48,6 +49,7 @@ function ContextSidebar({
   isDialogOpen: propIsDialogOpen,
   onDialogOpenChange: propOnDialogOpenChange,
 }: ContextSidebarProps) {
+  const { t } = useTranslation();
   const [isLocalDialogOpen, setIsLocalDialogOpen] = useState(false);
   const isDialogOpen = propIsDialogOpen !== undefined ? propIsDialogOpen : isLocalDialogOpen;
   const setIsDialogOpen = propOnDialogOpenChange !== undefined ? propOnDialogOpenChange : setIsLocalDialogOpen;
@@ -95,17 +97,17 @@ function ContextSidebar({
 
   const handleAddContext = (documentId: number) => {
     if (selectedDocumentIds.includes(documentId)) {
-      toast.info("This document is already in context.");
+      toast.info(t("aiChat.alreadyInContext", "This document is already in context."));
       return;
     }
 
     if (selectedDocumentIds.length >= MAX_CONTEXT_DOCUMENTS) {
-      toast.warning(`You can select up to ${MAX_CONTEXT_DOCUMENTS} documents.`);
+      toast.warning(t("aiChat.maxSelected", { defaultValue: "You can select up to {{count}} documents.", count: MAX_CONTEXT_DOCUMENTS }));
       return;
     }
 
     onSelectedDocumentIdsChange([...selectedDocumentIds, documentId]);
-    toast.success("Document added to AI context.");
+    toast.success(t("aiChat.addedSuccess", "Document added to AI context."));
   };
 
   const handleRemoveContext = (documentId: number) => {
@@ -121,11 +123,11 @@ function ContextSidebar({
           <div className="flex items-center justify-between px-4 pb-3 pt-4">
             <div>
               <p className="text-sm font-black text-card-foreground">
-                Context Documents
+                {t("aiChat.contextTitle", "Context Documents")}
               </p>
 
               <p className="text-[11px] text-muted-foreground">
-                {selectedDocumentIds.length}/{MAX_CONTEXT_DOCUMENTS} selected
+                {selectedDocumentIds.length}/{MAX_CONTEXT_DOCUMENTS} {t("aiChat.selected", "selected")}
               </p>
             </div>
 
@@ -134,7 +136,7 @@ function ContextSidebar({
               onClick={() => setIsDialogOpen(true)}
               className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-[11px] font-bold text-primary transition-all hover:bg-primary/20 cursor-pointer"
             >
-              Manage
+              {t("aiChat.manage", "Manage")}
             </button>
           </div>
 
@@ -155,11 +157,11 @@ function ContextSidebar({
                 <FileText className="mx-auto mb-2 size-6 text-muted-foreground/50" />
 
                 <p className="text-xs font-medium text-muted-foreground">
-                  No documents in context yet
+                  {t("aiChat.emptyContext", "No documents in context yet")}
                 </p>
 
                 <p className="mt-0.5 text-[10px] text-muted-foreground/70">
-                  Add documents to give AI more context
+                  {t("aiChat.emptyContextDesc", "Add documents to give AI more context")}
                 </p>
               </div>
             ) : (
@@ -208,7 +210,7 @@ function ContextSidebar({
               className="mt-2.5 flex w-full items-center justify-center gap-1.5 rounded-2xl border border-dashed border-primary/30 py-2 text-xs font-semibold text-primary transition-all hover:border-primary/50 hover:bg-primary/5 cursor-pointer"
             >
               <Plus className="size-3.5" />
-              Add Documents
+              {t("aiChat.addDocs", "Add Documents")}
             </button>
           </div>
         </div>
@@ -220,18 +222,18 @@ function ContextSidebar({
             </div>
 
             <p className="text-sm font-black text-card-foreground">
-              Suggested Prompts
+              {t("aiChat.suggestedPrompts", "Suggested Prompts")}
             </p>
           </div>
 
           <div className="space-y-1.5 px-3 pb-4">
             {selectedDocumentIds.length === 0 ? (
               <p className="rounded-2xl border border-dashed border-border/60 bg-muted/20 p-4 text-center text-xs text-muted-foreground">
-                Select documents to generate suggested prompts.
+                {t("aiChat.emptyPrompts", "Select documents to generate suggested prompts.")}
               </p>
             ) : suggestedPrompts.length === 0 ? (
               <p className="rounded-2xl border border-dashed border-border/60 bg-muted/20 p-4 text-center text-xs text-muted-foreground">
-                No suggested prompts yet.
+                {t("aiChat.noPromptsYet", "No suggested prompts yet.")}
               </p>
             ) : (
               suggestedPrompts.map((prompt) => (
@@ -257,12 +259,11 @@ function ContextSidebar({
         >
           <DialogHeader className="border-b border-border/40 px-6 py-5">
             <DialogTitle className="text-lg font-black text-card-foreground">
-              Select Documents for AI Context
+              {t("aiChat.selectDocsTitle", "Select Documents for AI Context")}
             </DialogTitle>
 
             <p className="text-sm text-muted-foreground">
-              {selectedDocumentIds.length}/{MAX_CONTEXT_DOCUMENTS} documents
-              selected
+              {selectedDocumentIds.length}/{MAX_CONTEXT_DOCUMENTS} {t("aiChat.selected", "selected")}
             </p>
           </DialogHeader>
 
@@ -273,26 +274,26 @@ function ContextSidebar({
               <Input
                 value={keyword}
                 onChange={(event) => setKeyword(event.target.value)}
-                placeholder="Search by title, subject..."
-                className="h-11 rounded-2xl border-border/60 pl-10 text-sm focus-visible:border-primary/50"
+                placeholder={t("aiChat.searchPlaceholder", "Search by title, subject...")}
+                className="h-full rounded-2xl border-border bg-card pl-10 text-sm focus-visible:border-primary/50"
               />
             </div>
 
             {isLoading && (
               <p className="py-8 text-center text-sm text-muted-foreground">
-                Loading your documents...
+                {t("aiChat.loadingDocs", "Loading your documents...")}
               </p>
             )}
 
             {isError && (
               <p className="py-8 text-center text-sm text-destructive">
-                Cannot load documents. Please try again.
+                {t("aiChat.loadFailed", "Cannot load documents. Please try again.")}
               </p>
             )}
 
             {!isLoading && !isError && filteredDocuments.length === 0 && (
               <p className="py-8 text-center text-sm text-muted-foreground">
-                No documents found.
+                {t("myDocuments.emptyTitle", "No documents found.")}
               </p>
             )}
 
@@ -342,7 +343,7 @@ function ContextSidebar({
                         </span>
 
                         <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-muted-foreground">
-                          {doc.visibilityStatus}
+                          {doc.visibilityStatus === "PUBLIC" ? t("myDocuments.public", "Public") : t("myDocuments.private", "Private")}
                         </span>
 
                         <span className="text-[10px] text-muted-foreground">
@@ -362,7 +363,7 @@ function ContextSidebar({
                           : ""
                       }`}
                     >
-                      {isAdded ? "✓ Added" : isMaxSelected ? "Max 5" : "Add"}
+                      {isAdded ? t("aiChat.addedStatus", "✓ Added") : isMaxSelected ? t("aiChat.maxStatus", "Max 5") : t("aiChat.addStatus", "Add")}
                     </Button>
                   </div>
                 );

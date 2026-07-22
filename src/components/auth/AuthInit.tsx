@@ -11,6 +11,21 @@ export default function AuthInit({ children }: AuthInitProps) {
   const { t } = useTranslation();
   const { isChecking } = useAuthCheck();
 
+  React.useEffect(() => {
+    const savedColor = localStorage.getItem("theme-color") || "blue";
+    const root = document.documentElement;
+    const themeClasses = [
+      "theme-blue",
+      "theme-indigo",
+      "theme-purple",
+      "theme-emerald",
+      "theme-orange",
+      "theme-rose",
+    ];
+    themeClasses.forEach((cls) => root.classList.remove(cls));
+    root.classList.add(`theme-${savedColor}`);
+  }, []);
+
   if (isChecking) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
