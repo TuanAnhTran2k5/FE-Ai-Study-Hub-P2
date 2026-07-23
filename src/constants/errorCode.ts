@@ -1,69 +1,43 @@
 export const ERROR_CODE = {
-  FIELD_REQUIRED: "This field is required",
-
-  INVALID_EMAIL: "Invalid email format",
-
-  INVALID_PASSWORD:
-    "Password must contain at least 8 characters, including uppercase, lowercase, number and special character",
-
-  PASSWORD_NOT_MATCH: "Password and Confirm Password do not match",
-
-  EMAIL_ALREADY_EXISTS: "Email already exists",
-
-  USER_NOT_FOUND: "User not found",
-
-  INVALID_CREDENTIALS: "Invalid email or password",
-
-  ACCOUNT_BANNED: "Your account has been banned",
-
-  ACCOUNT_INACTIVE: "Your account is inactive",
-
-  EMAIL_NOT_VERIFIED: "Please verify your email",
-
-  OTP_INVALID: "Invalid OTP code",
-
-  OTP_EXPIRED: "OTP code has expired",
-
-  OTP_SENT: "OTP has been sent to your email",
-
-  OTP_RESENT: "OTP has been resent to your email",
-
-  OTP_REQUIRED: "OTP code is required",
-
-  UNAUTHORIZED: "You are not authorized",
-
-  FORBIDDEN: "Access denied",
-
-  GOOGLE_LOGIN_FAILED: "Google login failed",
-
-  PROFILE_UPDATE_FAILED: "Update profile failed",
-
-  UNSUPPORTED_IMAGE_TYPE:
-    "Unsupported image format. Allowed formats: PNG, JPG, JPEG, WEBP, GIF, HEIC, HEIF, BMP, SVG, AVIF, TIFF, ICO.",
-
-  INVALID_IMAGE_SIZE: "Image size exceeds the 5MB limit.",
-
-  FILE_UPLOAD_FAILED:
-    "Failed to upload or process the image. Please try again with another image.",
-
-  SEMESTER_NO_REQUIRED: "Semester code or number is required",
-  COMBO_CODE_REQUIRED: "Combo code is required",
-  COMBO_NAME_REQUIRED: "Combo name is required",
-  COMBO_SUBJECTS_REQUIRED: "At least one subject must belong to this combo",
-  SUBJECT_CODE_REQUIRED: "Subject code is required",
-  SUBJECT_NAME_REQUIRED: "Subject name is required",
-  SEMESTER_SELECT_REQUIRED: "Semester selection is required for all subjects",
-
-  CREATE_SEMESTER_FAILED: "Failed to create semester",
-  UPDATE_SEMESTER_FAILED: "Failed to update semester",
-  DELETE_SEMESTER_FAILED: "Failed to delete semester",
-  CREATE_COMBO_FAILED: "Failed to create combo subject",
-  UPDATE_COMBO_FAILED: "Failed to update combo subject",
-  DELETE_COMBO_FAILED: "Failed to delete combo subject",
-  CREATE_SUBJECT_FAILED: "Failed to add subject",
-  UPDATE_SUBJECT_FAILED: "Failed to update subject",
-  DELETE_SUBJECT_FAILED: "Failed to delete subject",
-
-  SERVER_ERROR: "Something went wrong. Please try again later",
+  FIELD_REQUIRED: "error.fieldRequired",
+  INVALID_EMAIL: "error.invalidEmail",
+  INVALID_PASSWORD: "error.invalidPassword",
+  PASSWORD_NOT_MATCH: "error.passwordNotMatch",
+  FULLNAME_MIN: "error.fullNameMin",
+  FULLNAME_MAX: "error.fullNameMax",
+  EMAIL_ALREADY_EXISTS: "error.emailAlreadyExists",
+  USER_NOT_FOUND: "error.userNotFound",
+  INVALID_CREDENTIALS: "error.invalidCredentials",
+  ACCOUNT_BANNED: "error.accountBanned",
+  ACCOUNT_INACTIVE: "error.accountInactive",
+  EMAIL_NOT_VERIFIED: "error.emailNotVerified",
+  OTP_INVALID: "error.otpInvalid",
+  OTP_EXPIRED: "error.otpExpired",
+  OTP_SENT: "error.otpSent",
+  OTP_RESENT: "error.otpResent",
+  OTP_REQUIRED: "error.otpRequired",
+  UNAUTHORIZED: "error.unauthorized",
+  FORBIDDEN: "error.forbidden",
+  GOOGLE_LOGIN_FAILED: "error.googleLoginFailed",
+  PROFILE_UPDATE_FAILED: "error.profileUpdateFailed",
+  UNSUPPORTED_IMAGE_TYPE: "error.unsupportedImageType",
+  INVALID_IMAGE_SIZE: "error.invalidImageSize",
+  FILE_UPLOAD_FAILED: "error.fileUploadFailed",
+  SEMESTER_NO_REQUIRED: "error.semesterNoRequired",
+  COMBO_CODE_REQUIRED: "error.comboCodeRequired",
+  COMBO_NAME_REQUIRED: "error.comboNameRequired",
+  COMBO_SUBJECTS_REQUIRED: "error.comboSubjectsRequired",
+  SUBJECT_CODE_REQUIRED: "error.subjectCodeRequired",
+  SUBJECT_NAME_REQUIRED: "error.subjectNameRequired",
+  SEMESTER_SELECT_REQUIRED: "error.semesterSelectRequired",
+  CREATE_SEMESTER_FAILED: "error.createSemesterFailed",
+  UPDATE_SEMESTER_FAILED: "error.updateSemesterFailed",
+  DELETE_SEMESTER_FAILED: "error.deleteSemesterFailed",
+  CREATE_COMBO_FAILED: "error.createComboFailed",
+  UPDATE_COMBO_FAILED: "error.updateComboFailed",
+  DELETE_COMBO_FAILED: "error.deleteComboFailed",
+  CREATE_SUBJECT_FAILED: "error.createSubjectFailed",
+  UPDATE_SUBJECT_FAILED: "error.updateSubjectFailed",
+  DELETE_SUBJECT_FAILED: "error.deleteSubjectFailed",
+  SERVER_ERROR: "error.serverError",
 };
-

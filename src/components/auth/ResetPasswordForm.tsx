@@ -183,7 +183,7 @@ function ResetPasswordForm() {
 
           {errors.password && (
             <p className="mt-3 text-sm font-bold text-destructive">
-              {errors.password}
+              {t(errors.password)}
             </p>
           )}
         </div>
@@ -227,7 +227,7 @@ function ResetPasswordForm() {
 
           {errors.confirmPassword && (
             <p className="mt-3 text-sm font-bold text-destructive">
-              {errors.confirmPassword}
+              {t(errors.confirmPassword)}
             </p>
           )}
         </div>

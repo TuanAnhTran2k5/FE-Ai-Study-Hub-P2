@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Loader2, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,7 @@ export default function SemesterDialog({
   onSubmit,
   isPending,
 }: SemesterDialogProps) {
+  const { t } = useTranslation();
   const [semesterNo, setSemesterNo] = useState("");
   const [description, setDescription] = useState("");
 
@@ -65,18 +67,18 @@ export default function SemesterDialog({
       <DialogContent className="rounded-3xl border border-border bg-card sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-2xl font-black text-card-foreground">
-            {editingSemester ? "Edit Semester" : "Add Semester"}
+            {editingSemester ? t("curriculum.editSemester", "Edit Semester") : t("curriculum.addSemester", "Add Semester")}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="semesterNo" className="font-bold">
-              Semester Code / Number
+              {t("curriculum.semesterCodeLabel", "Semester Code / Number")}
             </Label>
             <Input
               id="semesterNo"
-              placeholder="e.g. Semester 1, Spring 2026..."
+              placeholder={t("curriculum.semesterCodePlaceholder", "e.g. Semester 1, Spring 2026...")}
               value={semesterNo}
               onChange={(e) => setSemesterNo(e.target.value)}
               className="h-11 rounded-xl"
@@ -87,11 +89,11 @@ export default function SemesterDialog({
 
           <div className="space-y-2">
             <Label htmlFor="description" className="font-bold">
-              Description (Optional)
+              {t("curriculum.descriptionOptional", "Description (Optional)")}
             </Label>
             <Textarea
               id="description"
-              placeholder="Details about this learning semester..."
+              placeholder={t("curriculum.descriptionPlaceholder", "Details about this learning semester...")}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="rounded-xl min-h-[100px]"
@@ -108,7 +110,7 @@ export default function SemesterDialog({
               className="cursor-pointer rounded-xl font-bold"
             >
               <X className="mr-2 h-4 w-4" />
-              Cancel
+              {t("curriculum.btnCancel", "Cancel")}
             </Button>
             <Button
               type="submit"
@@ -116,7 +118,7 @@ export default function SemesterDialog({
               className="cursor-pointer rounded-xl font-bold"
             >
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save
+              {t("curriculum.btnSave", "Save")}
             </Button>
           </DialogFooter>
         </form>

@@ -15,6 +15,7 @@ import {
 } from "@/validations/auth.validation";
 import { ROUTE } from "@/models/routePath";
 import { authRegister } from "@/services/authService";
+import { ERROR_CODE } from "@/constants/errorCode";
 
 type RegisterErrors = Partial<Record<keyof RegisterFormValues, string>>;
 
@@ -52,6 +53,31 @@ function RegisterForm() {
     },
 
     onError: (error: any) => {
+      const responseData = error.response?.data;
+      if (
+        responseData?.code === 400 &&
+        responseData?.message === "validation error" &&
+        Array.isArray(responseData?.data)
+      ) {
+        const fieldErrors: RegisterErrors = {};
+        responseData.data.forEach((errStr: string) => {
+          if (errStr.includes("fullName")) {
+            if (errStr.toLowerCase().includes("blank")) {
+              fieldErrors.fullName = ERROR_CODE.FIELD_REQUIRED;
+            } else if (errStr.toLowerCase().includes("between 5 and 50")) {
+              fieldErrors.fullName = ERROR_CODE.FULLNAME_MIN;
+            }
+          } else if (errStr.includes("email")) {
+            fieldErrors.email = ERROR_CODE.INVALID_EMAIL;
+          } else if (errStr.includes("password")) {
+            fieldErrors.password = ERROR_CODE.INVALID_PASSWORD;
+          }
+        });
+        if (Object.keys(fieldErrors).length > 0) {
+          setErrors(fieldErrors);
+          return;
+        }
+      }
       const message = error.response?.data?.message || error.message;
       toast.error(message);
     },
@@ -127,7 +153,7 @@ function RegisterForm() {
 
           {errors.email && (
             <p className="mt-1 text-sm font-medium text-destructive">
-              {errors.email}
+              {t(errors.email)}
             </p>
           )}
         </div>
@@ -144,6 +170,9 @@ function RegisterForm() {
               value={formData.fullName}
               onChange={(event) => handleChange("fullName", event.target.value)}
               placeholder={t("auth.enterFullName")}
+              required
+              minLength={5}
+              maxLength={50}
               className={`h-12 rounded-lg bg-muted pl-11 ${
                 errors.fullName
                   ? "border-destructive focus-visible:ring-destructive/20"
@@ -154,7 +183,7 @@ function RegisterForm() {
 
           {errors.fullName && (
             <p className="mt-1 text-sm font-medium text-destructive">
-              {errors.fullName}
+              {t(errors.fullName)}
             </p>
           )}
         </div>
@@ -190,7 +219,7 @@ function RegisterForm() {
 
           {errors.password && (
             <p className="mt-1 text-sm font-medium text-destructive">
-              {errors.password}
+              {t(errors.password)}
             </p>
           )}
         </div>
@@ -228,7 +257,7 @@ function RegisterForm() {
 
           {errors.confirmPassword && (
             <p className="mt-1 text-sm font-medium text-destructive">
-              {errors.confirmPassword}
+              {t(errors.confirmPassword)}
             </p>
           )}
         </div>

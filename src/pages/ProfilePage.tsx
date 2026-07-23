@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 
 import ProfileBadgesCard from "@/components/profile/ProfileBadgesCard";
 import ProfileHeader from "@/components/profile/ProfileHeader";
@@ -13,6 +14,7 @@ import type { RootState } from "@/redux/store";
 import { getUserProfile } from "@/services/userService";
 
 function ProfilePage() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const reduxUser = useSelector((state: RootState) => state.user);
 
@@ -36,7 +38,7 @@ function ProfilePage() {
         <Card className="rounded-3xl border border-border bg-card shadow-sm">
           <CardContent className="p-8 text-center">
             <p className="font-bold text-card-foreground">
-              Please login to view your profile.
+              {t("profile.loginPrompt", "Please login to view your profile.")}
             </p>
           </CardContent>
         </Card>
@@ -50,7 +52,7 @@ function ProfilePage() {
         <Card className="rounded-3xl border border-border bg-card shadow-sm">
           <CardContent className="p-8 text-center">
             <p className="font-bold text-card-foreground">
-              Loading profile...
+              {t("profile.loadingProfile", "Loading profile...")}
             </p>
           </CardContent>
         </Card>

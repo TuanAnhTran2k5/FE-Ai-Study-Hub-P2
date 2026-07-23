@@ -35,8 +35,8 @@ import {
   deleteSyllabus,
 } from "@/services/adminSyllabusService";
 import type { SubjectResponse } from "@/types/curriculum.type";
-import { SUCCESS_MESSAGE } from "@/constants/successMessage";
 import { ERROR_CODE } from "@/constants/errorCode";
+import { useTranslation } from "react-i18next";
 
 interface SyllabusManageDialogProps {
   isOpen: boolean;
@@ -50,6 +50,7 @@ export default function SyllabusManageDialog({
   subject,
 }: SyllabusManageDialogProps) {
   if (!subject) return null;
+  const { t } = useTranslation();
 
   const queryClient = useQueryClient();
 
@@ -125,14 +126,14 @@ export default function SyllabusManageDialog({
   const uploadMutation = useMutation({
     mutationFn: (file: File) => uploadSyllabus(subject.subjectId, file),
     onSuccess: () => {
-      toast.success(SUCCESS_MESSAGE.CREATE_SUBJECT_SUCCESS);
+      toast.success(t("success.createSubject"));
       refetchSyllabus();
       refetchHistory();
       queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || ERROR_CODE.CREATE_SUBJECT_FAILED);
+      toast.error(error.response?.data?.message || t(ERROR_CODE.CREATE_SUBJECT_FAILED));
     },
   });
 
@@ -141,14 +142,14 @@ export default function SyllabusManageDialog({
     mutationFn: (data: { jsonContent: string; reason: string }) =>
       updateSyllabus(subject.subjectId, data),
     onSuccess: () => {
-      toast.success(SUCCESS_MESSAGE.UPDATE_SUBJECT_SUCCESS);
+      toast.success(t("success.updateSubject"));
       refetchSyllabus();
       refetchHistory();
       queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || ERROR_CODE.UPDATE_SUBJECT_FAILED);
+      toast.error(error.response?.data?.message || t(ERROR_CODE.UPDATE_SUBJECT_FAILED));
     },
   });
 
@@ -156,7 +157,7 @@ export default function SyllabusManageDialog({
   const rollbackMutation = useMutation({
     mutationFn: (historyId: number) => rollbackSyllabus(subject.subjectId, historyId),
     onSuccess: (data) => {
-      toast.success(`Rolled back successfully to version ${data.embeddingVersion}!`);
+      toast.success(t("success.rollbackVersion", { version: data.embeddingVersion, defaultValue: `Rolled back successfully to version ${data.embeddingVersion}!` }));
       refetchSyllabus();
       refetchHistory();
       queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
@@ -171,14 +172,14 @@ export default function SyllabusManageDialog({
   const deleteMutation = useMutation({
     mutationFn: () => deleteSyllabus(subject.subjectId),
     onSuccess: () => {
-      toast.success("Syllabus deleted successfully!");
+      toast.success(t("success.deleteSyllabus", "Syllabus deleted successfully!"));
       setIsDeleting(false);
       refetchSyllabus();
       queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || ERROR_CODE.DELETE_SUBJECT_FAILED);
+      toast.error(error.response?.data?.message || t(ERROR_CODE.DELETE_SUBJECT_FAILED));
     },
   });
 

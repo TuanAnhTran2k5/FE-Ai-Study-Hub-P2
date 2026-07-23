@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Plus, Loader2, X } from "lucide-react";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,6 +54,7 @@ export default function ComboDialog({
   onSubmit,
   isPending,
 }: ComboDialogProps) {
+  const { t } = useTranslation();
   const [comboCode, setComboCode] = useState("");
   const [comboName, setComboName] = useState("");
   const [subjects, setSubjects] = useState<SubjectRequest[]>([]);
@@ -166,7 +168,7 @@ export default function ComboDialog({
       <DialogContent className="rounded-3xl border border-border bg-card sm:max-w-4xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-black text-card-foreground">
-            {editingCombo ? "Edit Combo Subject" : "Add Combo Subject"}
+            {editingCombo ? t("curriculum.editCombo", "Edit Combo Subject") : t("curriculum.addCombo", "Add Combo Subject")}
           </DialogTitle>
         </DialogHeader>
 
@@ -175,11 +177,11 @@ export default function ComboDialog({
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="comboCode" className="font-bold">
-                Combo Code
+                {t("curriculum.comboCodeLabel", "Combo Code")}
               </Label>
               <Input
                 id="comboCode"
-                placeholder="e.g. SE_CS_M1"
+                placeholder={t("curriculum.comboCodePlaceholder", "e.g. SE_CS_M1")}
                 value={comboCode}
                 onChange={(e) => setComboCode(e.target.value)}
                 className="h-11 rounded-xl"
@@ -190,11 +192,11 @@ export default function ComboDialog({
 
             <div className="space-y-2">
               <Label htmlFor="comboName" className="font-bold">
-                Combo Name
+                {t("curriculum.comboNameLabel", "Combo Name")}
               </Label>
               <Input
                 id="comboName"
-                placeholder="e.g. Software Engineering Core"
+                placeholder={t("curriculum.comboNamePlaceholder", "e.g. Software Engineering Core")}
                 value={comboName}
                 onChange={(e) => setComboName(e.target.value)}
                 className="h-11 rounded-xl"
@@ -208,7 +210,7 @@ export default function ComboDialog({
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="text-lg font-bold text-card-foreground">
-                Subjects List
+                {t("curriculum.subjectsList", "Subjects List")}
               </h4>
               <Button
                 type="button"
@@ -219,13 +221,13 @@ export default function ComboDialog({
                 disabled={isPending}
               >
                 <Plus className="mr-1 h-4 w-4" />
-                Add Subject Line
+                {t("curriculum.addSubjectLine", "Add Subject Line")}
               </Button>
             </div>
 
             {subjects.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-border p-8 text-center text-muted-foreground">
-                No subjects added yet. Please click "Add Subject Line" to start.
+                {t("curriculum.noSubjectsAdded", 'No subjects added yet. Please click "Add Subject Line" to start.')}
               </div>
             ) : (
               <div className="overflow-hidden rounded-2xl border border-border bg-card/30">
@@ -233,22 +235,22 @@ export default function ComboDialog({
                   <TableHeader className="bg-secondary/40">
                     <TableRow>
                       <TableHead className="w-[140px] font-bold">
-                        Subj Code *
+                        {t("curriculum.colSubjCode", "Subj Code *")}
                       </TableHead>
                       <TableHead className="w-[220px] font-bold">
-                        Subject Name *
+                        {t("curriculum.colSubjectName", "Subject Name *")}
                       </TableHead>
                       <TableHead className="w-[120px] font-bold">
-                        Type
+                        {t("curriculum.colType", "Type")}
                       </TableHead>
                       <TableHead className="w-[150px] font-bold">
-                        Semester *
+                        {t("curriculum.colSemester", "Semester *")}
                       </TableHead>
                       <TableHead className="font-bold">
-                        Description (Optional)
+                        {t("curriculum.colDescription", "Description (Optional)")}
                       </TableHead>
                       <TableHead className="w-[60px] text-center font-bold">
-                        Action
+                        {t("curriculum.colAction", "Action")}
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -257,14 +259,14 @@ export default function ComboDialog({
                       <TableRow key={idx} className="hover:bg-transparent">
                         <TableCell className="p-2">
                           <Input
-                            placeholder="e.g. HSF302"
+                            placeholder={t("curriculum.placeholderSubjCode", "e.g. HSF302")}
                             value={subject.subjectCode}
                             onChange={(e) =>
                               handleSubjectFieldChange(
                                 idx,
                                 "subjectCode",
                                 e.target.value,
-                              )
+                                )
                             }
                             className="h-9 rounded-lg"
                             disabled={isPending}
@@ -273,14 +275,14 @@ export default function ComboDialog({
                         </TableCell>
                         <TableCell className="p-2">
                           <Input
-                            placeholder="e.g. Working with Spring Framework"
+                            placeholder={t("curriculum.placeholderSubjName", "e.g. Working with Spring Framework")}
                             value={subject.subjectName}
                             onChange={(e) =>
                               handleSubjectFieldChange(
                                 idx,
                                 "subjectName",
                                 e.target.value,
-                              )
+                                )
                             }
                             className="h-9 rounded-lg"
                             disabled={isPending}
@@ -296,7 +298,7 @@ export default function ComboDialog({
                             disabled={isPending}
                           >
                             <SelectTrigger className="h-9 w-full rounded-lg bg-card border-input">
-                              <SelectValue placeholder="Type" />
+                              <SelectValue placeholder={t("curriculum.placeholderType", "Type")} />
                             </SelectTrigger>
                             <SelectContent className="bg-popover border border-border rounded-xl">
                               <SelectItem value="CORE">CORE</SelectItem>
@@ -312,12 +314,12 @@ export default function ComboDialog({
                                 idx,
                                 "semesterId",
                                 Number(val),
-                              )
+                                )
                             }
                             disabled={isPending}
                           >
                             <SelectTrigger className="h-9 w-full rounded-lg bg-card border-input">
-                              <SelectValue placeholder="Semester" />
+                              <SelectValue placeholder={t("curriculum.placeholderSemester", "Semester")} />
                             </SelectTrigger>
                             <SelectContent className="bg-popover border border-border rounded-xl">
                               {semesters.map((sem) => (
@@ -333,14 +335,14 @@ export default function ComboDialog({
                         </TableCell>
                         <TableCell className="p-2">
                           <Input
-                            placeholder="Short description..."
+                            placeholder={t("curriculum.placeholderDesc", "Short description...")}
                             value={subject.description}
                             onChange={(e) =>
                               handleSubjectFieldChange(
                                 idx,
                                 "description",
                                 e.target.value,
-                              )
+                                )
                             }
                             className="h-9 rounded-lg"
                             disabled={isPending}
@@ -352,7 +354,7 @@ export default function ComboDialog({
                             onClick={() => handleRemoveSubjectField(idx)}
                             className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground transition-all mx-auto"
                             disabled={isPending}
-                            title="Remove Subject"
+                            title={t("curriculum.tooltipRemoveSubject", "Remove Subject")}
                           >
                             <X className="h-4 w-4" />
                           </button>
@@ -374,7 +376,7 @@ export default function ComboDialog({
               className="cursor-pointer rounded-xl font-bold"
             >
               <X className="mr-2 h-4 w-4" />
-              Cancel
+              {t("curriculum.btnCancel", "Cancel")}
             </Button>
             <Button
               type="submit"
@@ -382,7 +384,7 @@ export default function ComboDialog({
               className="cursor-pointer rounded-xl font-bold"
             >
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save
+              {t("curriculum.btnSave", "Save")}
             </Button>
           </DialogFooter>
         </form>

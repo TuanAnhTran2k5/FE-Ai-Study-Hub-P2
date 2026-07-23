@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 import {
   Popover,
@@ -19,6 +20,7 @@ import {
 } from "@/services/notificationService";
 
 function NotificationBell() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
@@ -78,13 +80,13 @@ function NotificationBell() {
         className="w-[380px] overflow-hidden rounded-3xl border border-border bg-popover p-0 text-popover-foreground shadow-xl"
       >
         <div className="border-b border-border px-5 py-4">
-          <h3 className="font-black text-card-foreground">Notifications</h3>
+          <h3 className="font-black text-card-foreground">{t("notifications.title", "Notifications")}</h3>
         </div>
 
         <div className="max-h-[420px] overflow-y-auto">
           {latestNotifications.length === 0 ? (
             <p className="px-5 py-6 text-sm text-muted-foreground">
-              No notifications yet.
+              {t("notifications.empty", "No notifications yet.")}
             </p>
           ) : (
             latestNotifications.map((item) => (
@@ -123,7 +125,7 @@ function NotificationBell() {
             navigate(`/${ROUTE.APP}/${ROUTE.NOTIFICATIONS}`);
           }}
         >
-          View all notifications
+          {t("notifications.viewAll", "View all notifications")}
         </button>
       </PopoverContent>
     </Popover>

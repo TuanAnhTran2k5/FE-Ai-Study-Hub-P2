@@ -22,7 +22,8 @@ export const registerSchema = z
     fullName: z
       .string()
       .nonempty(ERROR_CODE.FIELD_REQUIRED)
-      .max(50, "Full name must be less than 50 characters"),
+      .min(5, ERROR_CODE.FULLNAME_MIN)
+      .max(50, ERROR_CODE.FULLNAME_MAX),
 
     password: z
       .string()

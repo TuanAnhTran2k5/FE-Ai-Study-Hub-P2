@@ -1,6 +1,8 @@
 import type { FormEvent } from "react";
 import { useRef, useState } from "react";
 import { FileText, FileUp, Globe2, Lock, UploadCloud, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
+
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,6 +43,7 @@ function DocumentUploadForm({
   onCancel,
   onSubmit,
 }: DocumentUploadFormProps) {
+  const { t } = useTranslation();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [visibility, setVisibility] = useState("PUBLIC");
   const [selectedSemesterId, setSelectedSemesterId] = useState("");
@@ -89,7 +92,7 @@ function DocumentUploadForm({
       {/* CỘT TRÁI: CHỌN FILE */}
       <div className="space-y-4">
         <p className="text-sm text-muted-foreground">
-          Share your knowledge with the community and help others learn.
+          {t("documentUpload.shareText", "Share your knowledge with the community and help others learn.")}
         </p>
 
         <div
@@ -143,10 +146,10 @@ function DocumentUploadForm({
               </div>
 
               <h3 className="mt-4 text-xl font-black text-card-foreground">
-                Drag & drop your file here
+                {t("documentUpload.dragDropText", "Drag & drop your file here")}
               </h3>
               <p className="mt-2 text-sm text-muted-foreground">
-                or click to browse from your device
+                {t("documentUpload.orClickText", "or click to browse from your device")}
               </p>
 
               <Button
@@ -156,16 +159,16 @@ function DocumentUploadForm({
                 onClick={() => fileInputRef.current?.click()}
               >
                 <UploadCloud className="mr-2 size-4" />
-                Choose File
+                {t("documentUpload.chooseFile", "Choose File")}
               </Button>
             </>
           )}
 
           <p className="mt-5 text-sm font-medium text-muted-foreground">
-            Supported formats: PDF, DOCX, PPTX, XLS, XLSX, TXT
+            {t("documentUpload.supportedFormats", "Supported formats: PDF, DOCX, PPTX, XLS, XLSX, TXT")}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Maximum file size: 20MB
+            {t("documentUpload.maxSize", "Maximum file size: 20MB")}
           </p>
         </div>
       </div>
@@ -173,23 +176,23 @@ function DocumentUploadForm({
       {/* CỘT PHẢI: THÔNG TIN DOCUMENT */}
       <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
         <h3 className="text-xl font-black text-card-foreground">
-          Document Information
+          {t("documentUpload.docInfo", "Document Information")}
         </h3>
 
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="upload-title">Title *</Label>
+            <Label htmlFor="upload-title">{t("documentUpload.titleLabel", "Title *")}</Label>
             <Input
               id="upload-title"
               name="title"
-              placeholder="Enter document title"
+              placeholder={t("documentUpload.titlePlaceholder", "Enter document title")}
               className="h-11 text-sm"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Semester *</Label>
+            <Label>{t("documentUpload.semesterLabel", "Semester *")}</Label>
             <Select
               name="semesterId"
               required
@@ -200,7 +203,9 @@ function DocumentUploadForm({
               <SelectTrigger className="h-11 w-full text-sm">
                 <SelectValue
                   placeholder={
-                    isAcademicLoading ? "Loading semesters..." : "Select semester"
+                    isAcademicLoading
+                      ? t("documentUpload.loadingSemesters", "Loading semesters...")
+                      : t("documentUpload.semesterPlaceholder", "Select semester")
                   }
                 />
               </SelectTrigger>
@@ -210,7 +215,7 @@ function DocumentUploadForm({
                     key={semester.semesterId}
                     value={String(semester.semesterId)}
                   >
-                    Semester {semester.semesterNo}
+                    {t("documentUpload.semesterOption", { num: semester.semesterNo, defaultValue: `Semester ${semester.semesterNo}` })}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -218,7 +223,7 @@ function DocumentUploadForm({
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <Label>Subject *</Label>
+            <Label>{t("documentUpload.subjectLabel", "Subject *")}</Label>
             <Select
               name="subjectId"
               required
@@ -227,7 +232,9 @@ function DocumentUploadForm({
               <SelectTrigger className="h-11 w-full text-sm">
                 <SelectValue
                   placeholder={
-                    selectedSemesterId ? "Select subject" : "Select semester first"
+                    selectedSemesterId
+                      ? t("documentUpload.subjectPlaceholder", "Select subject")
+                      : t("documentUpload.selectSemesterFirst", "Select semester first")
                   }
                 />
               </SelectTrigger>
@@ -246,7 +253,7 @@ function DocumentUploadForm({
         </div>
 
         <div className="mt-5 space-y-2">
-          <Label>Visibility *</Label>
+          <Label>{t("documentUpload.visibilityLabel", "Visibility *")}</Label>
           <div className="grid gap-3 md:grid-cols-2">
             <button
               type="button"
@@ -263,13 +270,13 @@ function DocumentUploadForm({
                 </div>
                 <div>
                   <p className="text-sm font-bold text-card-foreground">
-                    Public
+                    {t("documentUpload.publicTitle", "Public")}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Visible to everyone
+                    {t("documentUpload.publicDesc1", "Visible to everyone")}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Earn more reputation points
+                    {t("documentUpload.publicDesc2", "Earn more reputation points")}
                   </p>
                 </div>
               </div>
@@ -290,13 +297,13 @@ function DocumentUploadForm({
                 </div>
                 <div>
                   <p className="text-sm font-bold text-card-foreground">
-                    Private
+                    {t("documentUpload.privateTitle", "Private")}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Only visible to you
+                    {t("documentUpload.privateDesc1", "Only visible to you")}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    Not publicly accessible
+                    {t("documentUpload.privateDesc2", "Not publicly accessible")}
                   </p>
                 </div>
               </div>
@@ -311,8 +318,8 @@ function DocumentUploadForm({
               <div className="mb-2 flex items-center justify-between text-sm">
                 <span className="font-bold text-card-foreground">
                   {uploadProgress >= 99
-                    ? "Processing document..."
-                    : "Uploading document"}
+                    ? t("documentUpload.processing", "Processing document...")
+                    : t("documentUpload.uploading", "Uploading document...")}
                 </span>
                 <span className="font-bold text-primary">
                   {uploadProgress}%
@@ -334,7 +341,9 @@ function DocumentUploadForm({
               className="h-11 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground hover:bg-primary-hover"
             >
               <UploadCloud className="mr-2 size-4" />
-              {isSubmitting ? "Uploading..." : "Upload Document"}
+              {isSubmitting
+                ? t("documentUpload.btnUploading", "Uploading...")
+                : t("documentUpload.btnUpload", "Upload Document")}
             </Button>
             <Button
               type="button"
@@ -343,7 +352,7 @@ function DocumentUploadForm({
               className="h-11 rounded-xl px-6 text-sm"
               onClick={onCancel}
             >
-              Cancel
+              {t("documentUpload.btnCancel", "Cancel")}
             </Button>
           </div>
         </div>

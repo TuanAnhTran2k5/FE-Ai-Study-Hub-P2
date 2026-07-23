@@ -196,7 +196,7 @@ function ForgotPasswordVerifyOtpForm() {
 
           {errors.otpCode && (
             <p className="mt-3 text-sm font-bold text-destructive">
-              {errors.otpCode}
+              {t(errors.otpCode)}
             </p>
           )}
         </div>

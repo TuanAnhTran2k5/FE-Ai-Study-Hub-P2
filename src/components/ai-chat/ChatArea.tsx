@@ -341,7 +341,7 @@ function ChatArea({
                     {message.sources && message.sources.length > 0 && (
                       <div className="mt-3 border-t border-border/40 pt-2.5">
                         <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                          Sources
+                          {t("chat.sources", "Sources")}
                         </p>
 
                         <div className="flex flex-wrap gap-1.5">

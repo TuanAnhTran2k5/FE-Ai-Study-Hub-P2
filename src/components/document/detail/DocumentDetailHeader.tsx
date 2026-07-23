@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { VisibilityStatus } from "@/models/document.enum";
 import type { DocumentResponse } from "@/types/document.type";
+import { useTranslation } from "react-i18next";
 
 type DocumentDetailHeaderProps = {
   document: DocumentResponse;
@@ -40,6 +41,7 @@ function DocumentDetailHeader({
   onOpenNewTab,
   onDownload,
 }: DocumentDetailHeaderProps) {
+  const { t } = useTranslation();
   return (
     <div className="mb-5 rounded-3xl border border-border bg-card p-5 shadow-sm backdrop-blur-sm">
       <div className="flex flex-col gap-4">
@@ -52,7 +54,7 @@ function DocumentDetailHeader({
               onClick={onBack}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              {t("document.btnBack", "Back")}
             </Button>
 
             <div className="min-w-0 flex-1">
@@ -77,7 +79,7 @@ function DocumentDetailHeader({
                   ) : (
                     <Lock className="mr-1 h-3 w-3" />
                   )}
-                  {document.visibilityStatus}
+                  {document.visibilityStatus === VisibilityStatus.PUBLIC ? t("document.visibilityPublic", "PUBLIC") : t("document.visibilityPrivate", "PRIVATE")}
                 </Badge>
 
                 <Badge className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black text-slate-700 hover:bg-slate-100">
@@ -97,7 +99,7 @@ function DocumentDetailHeader({
                   onClick={onUpdate}
                 >
                   <Pencil className="mr-2 h-4 w-4" />
-                  Edit
+                  {t("document.btnEdit", "Edit")}
                 </Button>
 
                 <Button
@@ -108,7 +110,7 @@ function DocumentDetailHeader({
                   disabled={isDeleting}
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
-                  Delete
+                  {t("document.btnDelete", "Delete")}
                 </Button>
               </>
             )}
@@ -121,7 +123,7 @@ function DocumentDetailHeader({
               disabled={!canOpenInNewTab}
             >
               <ExternalLink className="mr-2 h-4 w-4" />
-              Open New Tab
+              {t("document.btnOpenTab", "Open New Tab")}
             </Button>
 
             <Button
@@ -130,7 +132,7 @@ function DocumentDetailHeader({
               onClick={onDownload}
             >
               <Download className="mr-2 h-4 w-4" />
-              Download
+              {t("document.btnDownload", "Download")}
             </Button>
           </div>
         </div>

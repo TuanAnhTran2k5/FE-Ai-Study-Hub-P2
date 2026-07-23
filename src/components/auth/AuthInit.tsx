@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { useAuthCheck } from "@/hooks/useAuthCheck";
 import { Loader2 } from "lucide-react";
 
+import { THEME_COLORS } from "@/constants/themeColors";
+
 interface AuthInitProps {
   children: React.ReactNode;
 }
@@ -14,14 +16,7 @@ export default function AuthInit({ children }: AuthInitProps) {
   React.useEffect(() => {
     const savedColor = localStorage.getItem("theme-color") || "blue";
     const root = document.documentElement;
-    const themeClasses = [
-      "theme-blue",
-      "theme-indigo",
-      "theme-purple",
-      "theme-emerald",
-      "theme-orange",
-      "theme-rose",
-    ];
+    const themeClasses = THEME_COLORS.map((color) => color.colorClass);
     themeClasses.forEach((cls) => root.classList.remove(cls));
     root.classList.add(`theme-${savedColor}`);
   }, []);
