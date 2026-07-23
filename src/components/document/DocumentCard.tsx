@@ -210,7 +210,9 @@ function DocumentCard({
                         <Trophy className="h-4 w-4 text-primary" />
                         <p className="mt-2 text-xs text-muted-foreground">Current rank</p>
                         <p className="truncate font-black text-card-foreground">
-                          {document.ownerCurrentRank?.rank.rankName ?? "N/A"}
+                          {document.ownerCurrentRank?.rank.rankName ??
+                            document.ownerRankName ??
+                            "N/A"}
                         </p>
                       </div>
                       <div className="rounded-xl bg-secondary p-3">

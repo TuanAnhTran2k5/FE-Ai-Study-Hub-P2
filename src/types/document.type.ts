@@ -14,6 +14,7 @@ export interface DocumentResponse {
   ownerAvatar?: string | null;
   ownerTotalScore?: number | null;
   ownerCurrentRank?: UserRank | null;
+  ownerRankName?: string | null;
   ownerDocumentCount?: number | null;
   ownerDownloadCount?: number | null;
 
