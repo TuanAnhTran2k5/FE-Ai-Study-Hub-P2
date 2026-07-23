@@ -16,7 +16,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getAllAcademicSubjects } from "@/services/academicService";
-import { getBookmarks, removeBookmark } from "@/services/documentService";
+import {
+  getBookmarks,
+  removeBookmark,
+  searchPublicDocuments,
+} from "@/services/documentService";
 import { ERROR_CODE } from "@/constants/errorCode";
 import { ROUTE } from "@/models/routePath";
 import type { SubjectResponse } from "@/types/academic.type";
@@ -50,6 +54,15 @@ function BookmarksPage() {
   } = useQuery({
     queryKey: ["bookmarks"],
     queryFn: getBookmarks,
+  });
+
+  // Bookmark API currently returns only the document's basic owner fields.
+  // Reuse the richer public-document payload so the uploader popover can show
+  // score, rank, document count and download count without another BE endpoint.
+  const { data: publicDocuments = [] } = useQuery({
+    queryKey: ["bookmarkPublicDocuments"],
+    queryFn: () => searchPublicDocuments(""),
+    retry: 1,
   });
 
   const { data: academicSubjects = [] } = useQuery({
@@ -134,12 +147,32 @@ function BookmarksPage() {
   }, [bookmarks, currentUserId, keyword, ownerFilter, sortOrder]);
 
   const filteredDocuments = useMemo(() => {
+    const publicDocumentMap = new Map(
+      publicDocuments.map((document) => [document.documentId, document]),
+    );
+    const publicOwnerMap = new Map(
+      publicDocuments.map((document) => [Number(document.ownerId), document]),
+    );
+
     return filteredBookmarks.map((bookmark) => {
       const document = bookmark.document;
+      const publicDocument =
+        publicDocumentMap.get(document.documentId) ??
+        publicOwnerMap.get(Number(document.ownerId));
       const subject = subjectMap.get(document.subjectId);
 
       return {
         ...document,
+        ownerName: document.ownerName ?? publicDocument?.ownerName,
+        ownerAvatar: document.ownerAvatar ?? publicDocument?.ownerAvatar,
+        ownerTotalScore:
+          document.ownerTotalScore ?? publicDocument?.ownerTotalScore,
+        ownerCurrentRank:
+          document.ownerCurrentRank ?? publicDocument?.ownerCurrentRank,
+        ownerDocumentCount:
+          document.ownerDocumentCount ?? publicDocument?.ownerDocumentCount,
+        ownerDownloadCount:
+          document.ownerDownloadCount ?? publicDocument?.ownerDownloadCount,
         subjectCode: document.subjectCode ?? subject?.subjectCode,
         subjectName: document.subjectName ?? subject?.subjectName,
         semesterNo: document.semesterNo ?? subject?.semesterNo ?? null,
@@ -147,7 +180,7 @@ function BookmarksPage() {
         comboName: document.comboName ?? subject?.comboName ?? null,
       };
     });
-  }, [filteredBookmarks, subjectMap]);
+  }, [filteredBookmarks, publicDocuments, subjectMap]);
 
   const bookmarkedAtMap = useMemo(() => {
     return new Map<number, string>(
