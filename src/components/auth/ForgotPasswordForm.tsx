@@ -147,7 +147,7 @@ function ForgotPasswordForm() {
 
           {errors.email && (
             <p className="mt-3 text-sm font-bold text-destructive">
-              {errors.email}
+              {t(errors.email)}
             </p>
           )}
         </div>

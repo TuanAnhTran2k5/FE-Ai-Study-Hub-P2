@@ -50,7 +50,7 @@ const ALLOWED_UPLOAD_TYPES = [
   "text/plain",
 ];
 
-function getUploadErrorMessage(error: any) {
+function getUploadErrorMessage(error: any, t: any) {
   const status = error.response?.status;
   const serverMessage = error.response?.data?.message;
 
@@ -59,25 +59,25 @@ function getUploadErrorMessage(error: any) {
   }
 
   if (status === 401) {
-    return "Please login again before uploading";
+    return t("error.loginPrompt", "Please login again before uploading");
   }
 
   if (status === 404) {
-    return "Selected subject was not found";
+    return t("error.subjectNotFound", "Selected subject was not found");
   }
 
   if (status === 413) {
-    return "File is too large";
+    return t("error.fileTooLarge", "File is too large");
   }
 
   if (error.request) {
-    return "Cannot connect to backend server";
+    return t("error.serverError", "Cannot connect to backend server");
   }
 
-  return "Upload document failed";
+  return t("document.uploadFailed", "Upload document failed");
 }
 
-function getDocumentsErrorMessage(error: any) {
+function getDocumentsErrorMessage(error: any, t: any) {
   const status = error.response?.status;
   const serverMessage = error.response?.data?.message;
 
@@ -86,14 +86,14 @@ function getDocumentsErrorMessage(error: any) {
   }
 
   if (status === 401) {
-    return "Please login again to view your documents";
+    return t("error.loginPrompt", "Please login again to view your documents");
   }
 
   if (error.request) {
-    return "Cannot connect to backend server";
+    return t("error.serverError", "Cannot connect to backend server");
   }
 
-  return "Failed to load documents";
+  return t("error.failedToLoadDocuments", "Failed to load documents");
 }
 
 function MyDocumentsPage() {
@@ -156,14 +156,14 @@ function MyDocumentsPage() {
     },
     onSuccess: () => {
       setUploadProgress(100);
-      toast.success("Upload document successfully");
+      toast.success(t("document.uploadSuccess", "Upload document successfully"));
       setIsUploadOpen(false);
       setUploadProgress(0);
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
     },
     onError: (error: any) => {
       setUploadProgress(0);
-      toast.error(getUploadErrorMessage(error), {
+      toast.error(getUploadErrorMessage(error, t), {
         toastId: "upload-document-error",
       });
     },
@@ -176,13 +176,13 @@ function MyDocumentsPage() {
       );
     },
     onSuccess: () => {
-      toast.success("Documents deleted successfully");
+      toast.success(t("document.deleteSuccess", "Documents deleted successfully"));
       setSelectedDocumentIds([]);
       setIsBulkDeleteOpen(false);
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
     },
     onError: () => {
-      toast.error("Delete documents failed");
+      toast.error(t("document.deleteFailed", "Delete documents failed"));
     },
   });
 
@@ -339,35 +339,35 @@ function MyDocumentsPage() {
     );
 
     if (!(file instanceof File) || file.size === 0) {
-      toast.error("Please choose a file", {
+      toast.error(t("document.chooseFilePrompt", "Please choose a file"), {
         toastId: "upload-document-validation",
       });
       return;
     }
 
     if (!ALLOWED_UPLOAD_TYPES.includes(file.type)) {
-      toast.error("Only PDF, DOCX, PPTX, XLS, XLSX, and TXT files are supported", {
+      toast.error(t("document.unsupportedTypePrompt", "Only PDF, DOCX, PPTX, XLS, XLSX, and TXT files are supported"), {
         toastId: "upload-document-validation",
       });
       return;
     }
 
     if (file.size > MAX_UPLOAD_SIZE) {
-      toast.error("File must be 20MB or smaller", {
+      toast.error(t("document.fileTooLargePrompt", "File must be 20MB or smaller"), {
         toastId: "upload-document-validation",
       });
       return;
     }
 
     if (!title) {
-      toast.error("Please enter document title", {
+      toast.error(t("document.enterTitlePrompt", "Please enter document title"), {
         toastId: "upload-document-validation",
       });
       return;
     }
 
     if (!Number.isFinite(subjectId) || subjectId <= 0) {
-      toast.error("Please select subject", {
+      toast.error(t("document.selectSubjectPrompt", "Please select subject"), {
         toastId: "upload-document-validation",
       });
       return;

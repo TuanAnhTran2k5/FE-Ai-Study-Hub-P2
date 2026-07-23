@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Lock, KeyRound, ArrowLeft, Loader2, Save, Eye, EyeOff } from "lucide-react";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
+import { getErrorMessage } from "@/utils/errorHelper";
 
 import { ERROR_CODE } from "@/constants/errorCode";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,7 @@ interface ChangePasswordFlowProps {
 }
 
 export function ChangePasswordFlow({ email, onSuccess, onCancel }: ChangePasswordFlowProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [view, setView] = useState<"otp-send" | "otp-verify" | "password-reset">("otp-send");
   const [otpCode, setOtpCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -54,7 +55,7 @@ export function ChangePasswordFlow({ email, onSuccess, onCancel }: ChangePasswor
     },
     onError: (error: any) => {
       const serverMessage = error.response?.data?.message || error.message;
-      toast.error(serverMessage || ERROR_CODE.SERVER_ERROR);
+      toast.error(getErrorMessage(serverMessage, t, i18n.language));
     },
   });
 
@@ -70,7 +71,7 @@ export function ChangePasswordFlow({ email, onSuccess, onCancel }: ChangePasswor
     },
     onError: (error: any) => {
       const serverMessage = error.response?.data?.message || error.message;
-      toast.error(serverMessage || ERROR_CODE.SERVER_ERROR);
+      toast.error(getErrorMessage(serverMessage, t, i18n.language));
     },
   });
 
@@ -91,7 +92,7 @@ export function ChangePasswordFlow({ email, onSuccess, onCancel }: ChangePasswor
     },
     onError: (error: any) => {
       const serverMessage = error.response?.data?.message || error.message;
-      toast.error(serverMessage || ERROR_CODE.SERVER_ERROR);
+      toast.error(getErrorMessage(serverMessage, t, i18n.language));
     },
   });
 
@@ -104,10 +105,10 @@ export function ChangePasswordFlow({ email, onSuccess, onCancel }: ChangePasswor
               <Lock className="size-6" />
             </div>
             <h3 className="text-lg font-bold text-card-foreground">
-              Confirm Security Verification
+              {t("profile.confirmSecurity", "Confirm Security Verification")}
             </h3>
             <p className="mt-2 text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
-              We will send a one-time verification OTP code to your registered email: <strong className="text-card-foreground">{email}</strong>.
+              {t("profile.sendOtpDesc", "We will send a one-time verification OTP code to your registered email:")} <strong className="text-card-foreground">{email}</strong>.
             </p>
           </div>
 
@@ -120,7 +121,7 @@ export function ChangePasswordFlow({ email, onSuccess, onCancel }: ChangePasswor
               disabled={sendOtpMutation.isPending}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              {t("profile.btnBack", "Back")}
             </Button>
 
             <Button
@@ -134,7 +135,7 @@ export function ChangePasswordFlow({ email, onSuccess, onCancel }: ChangePasswor
               ) : (
                 <KeyRound className="mr-2 h-4 w-4" />
               )}
-              Send OTP
+              {t("profile.btnSendOtp", "Send OTP")}
             </Button>
           </div>
         </div>
@@ -147,10 +148,10 @@ export function ChangePasswordFlow({ email, onSuccess, onCancel }: ChangePasswor
               <KeyRound className="size-6" />
             </div>
             <h3 className="text-lg font-bold text-card-foreground">
-              Enter Verification Code
+              {t("profile.enterVerificationCode", "Enter Verification Code")}
             </h3>
             <p className="mt-2 text-sm text-muted-foreground max-w-sm mx-auto leading-relaxed">
-              Please enter the 6-digit OTP code sent to: <strong className="text-card-foreground">{email}</strong>.
+              {t("profile.enterOtpDesc", "Please enter the 6-digit OTP code sent to:")} <strong className="text-card-foreground">{email}</strong>.
             </p>
           </div>
 
@@ -167,14 +168,14 @@ export function ChangePasswordFlow({ email, onSuccess, onCancel }: ChangePasswor
                   setChangePasswordErrors(prev => ({ ...prev, otpCode: "" }));
                 }
               }}
-              placeholder="Enter 6-digit OTP"
+              placeholder={t("profile.otpPlaceholder", "Enter 6-digit OTP")}
               className={`h-11 rounded-xl text-center text-base font-semibold tracking-[0.2em] placeholder:tracking-normal ${
                 changePasswordErrors.otpCode ? "border-destructive focus-visible:ring-destructive/20" : ""
               }`}
             />
             {changePasswordErrors.otpCode && (
               <p className="mt-2 text-xs font-medium text-destructive text-center">
-                {changePasswordErrors.otpCode}
+                {t(changePasswordErrors.otpCode)}
               </p>
             )}
           </div>
@@ -188,7 +189,7 @@ export function ChangePasswordFlow({ email, onSuccess, onCancel }: ChangePasswor
               disabled={verifyOtpMutation.isPending}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              {t("profile.btnBack", "Back")}
             </Button>
 
             <Button
@@ -211,7 +212,7 @@ export function ChangePasswordFlow({ email, onSuccess, onCancel }: ChangePasswor
               {verifyOtpMutation.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
-              Verify
+              {t("profile.btnVerify", "Verify")}
             </Button>
           </div>
         </div>
@@ -224,17 +225,17 @@ export function ChangePasswordFlow({ email, onSuccess, onCancel }: ChangePasswor
               <Lock className="size-6" />
             </div>
             <h3 className="text-lg font-bold text-card-foreground">
-              Create New Password
+              {t("profile.createNewPassword", "Create New Password")}
             </h3>
             <p className="mt-1 text-xs text-muted-foreground">
-              Create a secure and strong password for your account.
+              {t("profile.newPasswordDesc", "Create a secure and strong password for your account.")}
             </p>
           </div>
 
           <div className="space-y-4">
             <div>
               <label className="mb-1.5 block text-xs font-bold text-card-foreground">
-                New Password
+                {t("profile.newPasswordLabel", "New Password")}
               </label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -247,7 +248,7 @@ export function ChangePasswordFlow({ email, onSuccess, onCancel }: ChangePasswor
                       setChangePasswordErrors(prev => ({ ...prev, password: "" }));
                     }
                   }}
-                  placeholder="Enter new password"
+                  placeholder={t("profile.newPasswordPlaceholder", "Enter new password")}
                   className={`h-11 rounded-xl pl-10 pr-10 ${
                     changePasswordErrors.password ? "border-destructive focus-visible:ring-destructive/20" : ""
                   }`}
@@ -266,14 +267,14 @@ export function ChangePasswordFlow({ email, onSuccess, onCancel }: ChangePasswor
               </div>
               {changePasswordErrors.password && (
                 <p className="mt-1 text-xs font-medium text-destructive">
-                  {changePasswordErrors.password}
+                  {t(changePasswordErrors.password)}
                 </p>
               )}
             </div>
 
             <div>
               <label className="mb-1.5 block text-xs font-bold text-card-foreground">
-                Confirm New Password
+                {t("profile.confirmPasswordLabel", "Confirm New Password")}
               </label>
               <div className="relative">
                 <Lock className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -286,7 +287,7 @@ export function ChangePasswordFlow({ email, onSuccess, onCancel }: ChangePasswor
                       setChangePasswordErrors(prev => ({ ...prev, confirmPassword: "" }));
                     }
                   }}
-                  placeholder="Confirm your new password"
+                  placeholder={t("profile.confirmPasswordPlaceholder", "Confirm your new password")}
                   className={`h-11 rounded-xl pl-10 pr-10 ${
                     changePasswordErrors.confirmPassword ? "border-destructive focus-visible:ring-destructive/20" : ""
                   }`}
@@ -305,7 +306,7 @@ export function ChangePasswordFlow({ email, onSuccess, onCancel }: ChangePasswor
               </div>
               {changePasswordErrors.confirmPassword && (
                 <p className="mt-1 text-xs font-medium text-destructive">
-                  {changePasswordErrors.confirmPassword}
+                  {t(changePasswordErrors.confirmPassword)}
                 </p>
               )}
             </div>
@@ -320,7 +321,7 @@ export function ChangePasswordFlow({ email, onSuccess, onCancel }: ChangePasswor
               disabled={resetPasswordMutation.isPending}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              {t("profile.btnBack", "Back")}
             </Button>
 
             <Button
@@ -346,7 +347,7 @@ export function ChangePasswordFlow({ email, onSuccess, onCancel }: ChangePasswor
               ) : (
                 <Save className="mr-2 h-4 w-4" />
               )}
-              Reset Password
+              {t("profile.btnResetPassword", "Reset Password")}
             </Button>
           </div>
         </div>

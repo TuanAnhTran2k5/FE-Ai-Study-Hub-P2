@@ -252,7 +252,7 @@ function LoginForm() {
 
         {errors.email && (
           <p className="mt-1 text-sm font-medium text-destructive">
-            {errors.email}
+            {t(errors.email)}
           </p>
         )}
 
@@ -293,7 +293,7 @@ function LoginForm() {
 
         {errors.password && (
           <p className="mt-1 text-sm font-medium text-destructive">
-            {errors.password}
+            {t(errors.password)}
           </p>
         )}
 

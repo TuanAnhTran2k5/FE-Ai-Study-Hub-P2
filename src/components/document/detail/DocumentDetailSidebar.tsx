@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { DocumentResponse } from "@/types/document.type";
+import { useTranslation } from "react-i18next";
 
 type DocumentDetailSidebarProps = {
   document: DocumentResponse;
@@ -41,6 +42,7 @@ function DocumentDetailSidebar({
   onRate,
   onReport,
 }: DocumentDetailSidebarProps) {
+  const { t, i18n } = useTranslation();
   const uploadedByName =
     document.originalUploaderName ?? document.ownerName ?? "Unknown owner";
 
@@ -62,7 +64,7 @@ function DocumentDetailSidebar({
       <Card className="rounded-3xl border border-border bg-card shadow-sm">
         <CardContent className="p-4">
           <h3 className="text-base font-black text-card-foreground">
-            Uploaded By
+            {t("document.statistics.uploadedBy", "Uploaded By")}
           </h3>
 
           <div className="mt-5 flex items-center gap-3">
@@ -135,7 +137,7 @@ function DocumentDetailSidebar({
             {canRate && (
               <div className="rounded-2xl bg-secondary p-3">
                 <p className="mb-2 text-sm font-bold text-card-foreground">
-                  Rate this document
+                  {t("document.rateThis", "Rate this document")}
                 </p>
 
                 <div className="flex gap-1">
@@ -172,7 +174,7 @@ function DocumentDetailSidebar({
                 onClick={onReport}
               >
                 <Flag className="mr-2 h-4 w-4" />
-                Report Document
+                {t("document.reportThis", "Report Document")}
               </Button>
             )}
           </div>
@@ -182,29 +184,29 @@ function DocumentDetailSidebar({
       <Card className="rounded-3xl border border-border bg-card shadow-sm">
         <CardContent className="p-5">
           <h3 className="text-base font-black text-card-foreground">
-            Document Info
+            {t("document.infoTitle", "Document Info")}
           </h3>
 
           <div className="mt-5 space-y-5">
             <InfoRow
-              label="Subject"
+              label={t("document.statistics.subject", "Subject")}
               value={document.subjectName ?? document.subjectCode ?? "N/A"}
             />
 
             <InfoRow
-              label="Semester"
+              label={t("document.statistics.semester", "Semester")}
               value={
                 document.semesterNo ?? "N/A"
               }
             />
 
             <InfoRow
-              label="File Size"
+              label={t("document.statistics.fileSize", "File Size")}
               value={formatFileSize(document.fileSize)}
             />
 
             <InfoRow
-              label="Course Code"
+              label={t("document.statistics.courseCode", "Course Code")}
               value={document.subjectCode ?? `Subject ${document.subjectId}`}
             />
           </div>
@@ -214,13 +216,13 @@ function DocumentDetailSidebar({
       <Card className="rounded-3xl border border-border bg-card shadow-sm">
         <CardContent className="p-5">
           <h3 className="text-base font-black text-card-foreground">
-            Statistics
+            {t("document.statsTitle", "Statistics")}
           </h3>
 
           <div className="mt-5 space-y-3">
             <StatItem
               icon={<Download className="h-4 w-4" />}
-              label="Downloads"
+              label={t("document.statistics.downloads", "Downloads")}
               value={document.downloadCount ?? 0}
             />
 
@@ -232,14 +234,14 @@ function DocumentDetailSidebar({
                   }`}
                 />
               }
-              label="Bookmarks"
+              label={t("document.statistics.bookmarks", "Bookmarks")}
               value={document.bookmarkCount ?? 0}
             />
 
             <div className="pt-2">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-sm font-bold text-card-foreground">
-                  Rating
+                  {t("document.statistics.rating", "Rating")}
                 </span>
                 <span className="font-black text-card-foreground">
                   {averageRating} / 5
@@ -261,12 +263,12 @@ function DocumentDetailSidebar({
       <Card className="rounded-3xl border border-border bg-card shadow-sm">
         <CardContent className="p-5">
           <h3 className="text-base font-black text-card-foreground">
-            Created
+            {t("document.statistics.created", "Created")}
           </h3>
 
           <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
             <CalendarDays className="h-4 w-4" />
-            <span>{new Date(document.createdAt).toLocaleString("vi-VN")}</span>
+            <span>{new Date(document.createdAt).toLocaleString(i18n.language === "vi" ? "vi-VN" : "en-US")}</span>
           </div>
         </CardContent>
       </Card>

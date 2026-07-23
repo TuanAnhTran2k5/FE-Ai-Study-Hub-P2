@@ -348,6 +348,20 @@
 
 /* Accent Colors Themes */
 
+/* Blue */
+:root.theme-blue {
+  --primary: rgb(3, 105, 161);
+  --primary-hover: rgb(125, 211, 252);
+  --primary-bg-hover: rgba(3, 105, 161, 0.1);
+  --ring: rgb(2, 132, 199);
+}
+.dark.theme-blue {
+  --primary: rgb(56, 189, 248);
+  --primary-hover: rgb(125, 211, 252);
+  --primary-bg-hover: rgba(56, 189, 248, 0.15);
+  --ring: rgb(56, 189, 248);
+}
+
 /* Indigo */
 :root.theme-indigo {
   --primary: rgb(79, 70, 229);

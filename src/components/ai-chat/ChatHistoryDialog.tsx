@@ -1,4 +1,5 @@
 import { MessageSquare, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -26,17 +27,18 @@ function ChatHistoryDialog({
   onSelectSession,
   onDeleteSession,
 }: ChatHistoryDialogProps) {
+  const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl rounded-3xl">
         <DialogHeader>
-          <DialogTitle>All Chat History</DialogTitle>
+          <DialogTitle>{t("chat.allHistory", "All Chat History")}</DialogTitle>
         </DialogHeader>
 
         <div className="max-h-[520px] space-y-2 overflow-y-auto pr-1">
           {sessions.length === 0 ? (
             <p className="py-8 text-center text-sm text-muted-foreground">
-              No chat history yet.
+              {t("chat.noHistory", "No chat history yet.")}
             </p>
           ) : (
             sessions.map((session) => (

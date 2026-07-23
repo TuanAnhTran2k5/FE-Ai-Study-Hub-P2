@@ -4,8 +4,8 @@ import { Camera, Edit, Loader2, Save, X, Lock } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 
+import { useTranslation } from "react-i18next";
 import { ERROR_CODE } from "@/constants/errorCode";
-import { SUCCESS_MESSAGE } from "@/constants/successMessage";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,6 +25,7 @@ interface EditProfileDialogProps {
 }
 
 function EditProfileDialog({ user }: EditProfileDialogProps) {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -62,7 +63,7 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
       queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
       queryClient.invalidateQueries({ queryKey: ["document"] });
-      toast.success(SUCCESS_MESSAGE.PROFILE_UPDATED);
+      toast.success(t("success.profileUpdated"));
       setOpen(false);
     },
 
@@ -70,13 +71,13 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
       const errorMessage = error.response?.data?.message;
 
       if (errorMessage === "UNSUPPORTED_IMAGE_TYPE") {
-        toast.error(ERROR_CODE.UNSUPPORTED_IMAGE_TYPE);
+        toast.error(t(ERROR_CODE.UNSUPPORTED_IMAGE_TYPE));
       } else if (errorMessage === "INVALID_IMAGE_SIZE") {
-        toast.error(ERROR_CODE.INVALID_IMAGE_SIZE);
+        toast.error(t(ERROR_CODE.INVALID_IMAGE_SIZE));
       } else if (errorMessage === "FILE_UPLOAD_FAILED") {
-        toast.error(ERROR_CODE.FILE_UPLOAD_FAILED);
+        toast.error(t(ERROR_CODE.FILE_UPLOAD_FAILED));
       } else {
-        toast.error(ERROR_CODE.PROFILE_UPDATE_FAILED);
+        toast.error(t(ERROR_CODE.PROFILE_UPDATE_FAILED));
       }
     },
   });
@@ -92,7 +93,7 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
     const isValidExtension = allowedExtensions.test(file.name);
 
     if (!isImageMime && !isValidExtension) {
-      toast.error(ERROR_CODE.UNSUPPORTED_IMAGE_TYPE);
+      toast.error(t(ERROR_CODE.UNSUPPORTED_IMAGE_TYPE));
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -102,7 +103,7 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
     // 2. Kiểm tra kích thước file (tối đa 5MB)
     const MAX_SIZE = 5 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-      toast.error(ERROR_CODE.INVALID_IMAGE_SIZE);
+      toast.error(t(ERROR_CODE.INVALID_IMAGE_SIZE));
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -117,12 +118,12 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
     const trimmedFullName = fullName.trim();
 
     if (!trimmedFullName) {
-      toast.error(ERROR_CODE.FIELD_REQUIRED);
+      toast.error(t(ERROR_CODE.FIELD_REQUIRED));
       return;
     }
 
     if (trimmedFullName.length < 5 || trimmedFullName.length > 50) {
-      toast.error("Full name must be between 5 and 50 characters");
+      toast.error(t("profile.validation.fullNameLength", "Full name must be between 5 and 50 characters"));
       return;
     }
 
@@ -149,14 +150,14 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
           className="h-11 cursor-pointer rounded-xl font-bold"
         >
           <Edit className="mr-2 h-4 w-4" />
-          Edit Profile
+          {t("profile.editProfile", "Edit Profile")}
         </Button>
       </DialogTrigger>
 
       <DialogContent className="rounded-3xl border-border bg-card sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-2xl font-black text-card-foreground">
-            {view === "profile" ? "Edit Profile" : "Change Password"}
+            {view === "profile" ? t("profile.editProfile", "Edit Profile") : t("profile.changePassword", "Change Password")}
           </DialogTitle>
         </DialogHeader>
 
@@ -201,18 +202,18 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
 
             <div>
               <label className="mb-2 block text-sm font-bold text-card-foreground">
-                Full name
+                {t("profile.fullNameLabel", "Full name")}
               </label>
 
               <Input
                 value={fullName}
                 onChange={(event) => setFullName(event.target.value)}
-                placeholder="Enter your full name"
+                placeholder={t("profile.enterFullName", "Enter your full name")}
                 className="h-11 rounded-xl"
               />
 
               <p className="mt-2 text-xs text-muted-foreground">
-                Full name must be between 5 and 50 characters.
+                {t("profile.validation.fullNameLengthHint", "Full name must be between 5 and 50 characters.")}
               </p>
             </div>
 
@@ -224,7 +225,7 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
                 className="h-11 w-full cursor-pointer rounded-xl font-bold border-primary/20 text-primary hover:bg-primary/5"
               >
                 <Lock className="mr-2 h-4 w-4" />
-                Change Password
+                {t("profile.changePassword", "Change Password")}
               </Button>
             </div>
 
@@ -237,7 +238,7 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
                 disabled={updateMutation.isPending}
               >
                 <X className="mr-2 h-4 w-4" />
-                Cancel
+                {t("profile.btnCancel", "Cancel")}
               </Button>
 
               <Button
@@ -251,7 +252,7 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
                 ) : (
                   <Save className="mr-2 h-4 w-4" />
                 )}
-                Save
+                {t("profile.btnSave", "Save")}
               </Button>
             </div>
           </div>

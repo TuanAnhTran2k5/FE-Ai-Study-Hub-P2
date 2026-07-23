@@ -391,11 +391,11 @@ function DocumentDetailPage() {
       );
 
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
-      toast.success("Document updated successfully");
+      toast.success(t("document.updateSuccess", "Document updated successfully"));
       setIsUpdateOpen(false);
     },
     onError: () => {
-      toast.error("Update document failed");
+      toast.error(t("document.updateFailed", "Update document failed"));
     },
   });
 
@@ -403,7 +403,7 @@ function DocumentDetailPage() {
   const deleteMutation = useMutation({
     mutationFn: () => deleteDocument(documentId as number),
     onSuccess: () => {
-      toast.success("Document deleted successfully");
+      toast.success(t("document.deleteSuccess", "Document deleted successfully"));
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
       queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
       queryClient.invalidateQueries({ queryKey: ["admin-dashboard-stats"] });
@@ -412,7 +412,7 @@ function DocumentDetailPage() {
       navigate("/app/mydocuments");
     },
     onError: () => {
-      toast.error("Delete document failed");
+      toast.error(t("document.deleteFailed", "Delete document failed"));
     },
   });
 
@@ -421,7 +421,7 @@ function DocumentDetailPage() {
   const saveToStorageMutation = useMutation({
     mutationFn: () => downloadPublicDocument(documentId as number),
     onSuccess: (response) => {
-      toast.success("Document saved to your storage successfully");
+      toast.success(t("document.saveStorageSuccess", "Document saved to your storage successfully"));
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
       queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
 
@@ -430,7 +430,7 @@ function DocumentDetailPage() {
       }
     },
     onError: () => {
-      toast.error("Save to storage failed");
+      toast.error(t("document.saveStorageFailed", "Save to storage failed"));
     },
   });
 
@@ -479,18 +479,18 @@ function DocumentDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["document", documentId] });
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
       queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
-      toast.success("Document bookmarked successfully");
+      toast.success(t("document.bookmarkSuccess", "Document bookmarked successfully"));
     },
     onError: (error) => {
       const message = getBackendErrorMessage(error);
 
       if (message.toLowerCase().includes("already bookmarked")) {
         setIsBookmarked(true);
-        toast.info("Document already bookmarked");
+        toast.info(t("document.alreadyBookmarked", "Document already bookmarked"));
         return;
       }
 
-      toast.error(message || "Bookmark failed");
+      toast.error(message || t("document.bookmarkFailed", "Bookmark failed"));
     },
   });
 
@@ -530,11 +530,11 @@ function DocumentDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["document", documentId] });
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
       queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
-      toast.success("Bookmark removed successfully");
+      toast.success(t("document.bookmarkRemoveSuccess", "Bookmark removed successfully"));
     },
     onError: (error) => {
       const message = getBackendErrorMessage(error);
-      toast.error(message || "Remove bookmark failed");
+      toast.error(message || t("document.removeBookmarkFailed", "Remove bookmark failed"));
     },
   });
 
@@ -574,10 +574,10 @@ function DocumentDetailPage() {
           ),
       );
 
-      toast.success("Rating submitted successfully");
+      toast.success(t("document.rateSuccess", "Rating submitted successfully"));
     },
     onError: () => {
-      toast.error("Rating failed");
+      toast.error(t("document.rateFailed", "Rating failed"));
     },
   });
 
@@ -594,14 +594,14 @@ function DocumentDetailPage() {
           : undefined,
       }),
     onSuccess: () => {
-      toast.success("Report submitted successfully");
+      toast.success(t("document.reportSuccess", "Report submitted successfully"));
       setIsReportOpen(false);
       setReportDescription("");
       setReportEvidenceFile(null);
     },
     onError: (error) => {
       const message = getBackendErrorMessage(error);
-      toast.error(message || "Report failed");
+      toast.error(message || t("document.reportFailed", "Report failed"));
     },
   });
 
@@ -661,12 +661,12 @@ function DocumentDetailPage() {
   );
 
   if (!title) {
-    toast.error("Please enter document title");
+    toast.error(t("document.enterTitlePrompt", "Please enter document title"));
     return;
   }
 
   if (!Number.isFinite(subjectId) || subjectId <= 0) {
-    toast.error("Please select subject");
+    toast.error(t("document.selectSubjectPrompt", "Please select subject"));
     return;
   }
 

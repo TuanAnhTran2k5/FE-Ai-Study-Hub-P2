@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Loader2, X } from "lucide-react";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,6 +46,7 @@ export default function SubjectDialog({
   onSubmit,
   isPending,
 }: SubjectDialogProps) {
+  const { t } = useTranslation();
   const [subjectCode, setSubjectCode] = useState("");
   const [subjectName, setSubjectName] = useState("");
   const [subjectType, setSubjectType] = useState<SubjectType>("COMBO");
@@ -97,18 +99,18 @@ export default function SubjectDialog({
       <DialogContent className="rounded-3xl border border-border bg-card sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-2xl font-black text-card-foreground">
-            {editingSubject?.subject ? "Edit Subject" : "Quick Add Subject"}
+            {editingSubject?.subject ? t("curriculum.editSubject", "Edit Subject") : t("curriculum.quickAddSubject", "Quick Add Subject")}
           </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="subjectCode" className="font-bold">
-              Subject Code
+              {t("curriculum.subjectCodeLabel", "Subject Code")}
             </Label>
             <Input
               id="subjectCode"
-              placeholder="e.g. PRN211"
+              placeholder={t("curriculum.subjectCodePlaceholder", "e.g. PRN211")}
               value={subjectCode}
               onChange={(e) => setSubjectCode(e.target.value)}
               className="h-11 rounded-xl"
@@ -119,11 +121,11 @@ export default function SubjectDialog({
 
           <div className="space-y-2">
             <Label htmlFor="subjectName" className="font-bold">
-              Subject Name
+              {t("curriculum.subjectNameLabel", "Subject Name")}
             </Label>
             <Input
               id="subjectName"
-              placeholder="e.g. C# .NET Programming"
+              placeholder={t("curriculum.subjectNamePlaceholder", "e.g. C# .NET Programming")}
               value={subjectName}
               onChange={(e) => setSubjectName(e.target.value)}
               className="h-11 rounded-xl"
@@ -134,14 +136,14 @@ export default function SubjectDialog({
 
           <div className="grid gap-4 grid-cols-2">
             <div className="space-y-2">
-              <Label className="font-bold">Type</Label>
+              <Label className="font-bold">{t("curriculum.colType", "Type")}</Label>
               <Select
                 value={subjectType}
                 onValueChange={(val) => setSubjectType(val as SubjectType)}
                 disabled={isPending}
               >
                 <SelectTrigger className="h-11 w-full rounded-xl bg-card border-input">
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder={t("curriculum.selectType", "Select type")} />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border border-border rounded-xl">
                   <SelectItem value="CORE">CORE</SelectItem>
@@ -151,14 +153,14 @@ export default function SubjectDialog({
             </div>
 
             <div className="space-y-2">
-              <Label className="font-bold">Semester</Label>
+              <Label className="font-bold">{t("curriculum.placeholderSemester", "Semester")}</Label>
               <Select
                 value={String(semesterId)}
                 onValueChange={(val) => setSemesterId(Number(val))}
                 disabled={isPending}
               >
                 <SelectTrigger className="h-11 w-full rounded-xl bg-card border-input">
-                  <SelectValue placeholder="Select semester" />
+                  <SelectValue placeholder={t("curriculum.selectSemester", "Select semester")} />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border border-border rounded-xl">
                   {semesters.map((sem) => (
@@ -176,11 +178,11 @@ export default function SubjectDialog({
 
           <div className="space-y-2">
             <Label htmlFor="description" className="font-bold">
-              Description (Optional)
+              {t("curriculum.descriptionOptional", "Description (Optional)")}
             </Label>
             <Textarea
               id="description"
-              placeholder="Details about this subject..."
+              placeholder={t("curriculum.detailsAboutSubject", "Details about this subject...")}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="rounded-xl min-h-[80px]"
@@ -197,7 +199,7 @@ export default function SubjectDialog({
               className="cursor-pointer rounded-xl font-bold"
             >
               <X className="mr-2 h-4 w-4" />
-              Cancel
+              {t("curriculum.btnCancel", "Cancel")}
             </Button>
             <Button
               type="submit"
@@ -205,7 +207,7 @@ export default function SubjectDialog({
               className="cursor-pointer rounded-xl font-bold"
             >
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save
+              {t("curriculum.btnSave", "Save")}
             </Button>
           </DialogFooter>
         </form>

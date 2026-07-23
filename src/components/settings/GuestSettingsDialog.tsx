@@ -30,14 +30,7 @@ export default function GuestSettingsDialog() {
     localStorage.setItem("theme-color", color.id);
 
     const root = document.documentElement;
-    const themeClasses = [
-      "theme-blue",
-      "theme-indigo",
-      "theme-purple",
-      "theme-emerald",
-      "theme-orange",
-      "theme-rose",
-    ];
+    const themeClasses = THEME_COLORS.map((c) => c.colorClass);
     themeClasses.forEach((cls) => root.classList.remove(cls));
     root.classList.add(`theme-${color.id}`);
 

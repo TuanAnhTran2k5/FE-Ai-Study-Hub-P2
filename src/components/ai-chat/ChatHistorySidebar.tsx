@@ -77,12 +77,12 @@ function ChatHistorySidebar({
         onDeletedActiveSession();
       }
 
-      toast.success("Chat deleted successfully.");
+      toast.success(t("chat.deleteSuccess", "Chat deleted successfully."));
     },
 
     onError: (error: any) => {
       const serverMessage = error.response?.data?.message;
-      toast.error(serverMessage || "Cannot delete chat.");
+      toast.error(serverMessage || t("chat.cannotDeleteChat", "Cannot delete chat."));
     },
   });
 
@@ -93,11 +93,11 @@ function ChatHistorySidebar({
       queryClient.invalidateQueries({ queryKey: ["ragChatSessions"] });
       setEditingSessionId(null);
       setNewTitle("");
-      toast.success("Chat renamed successfully.");
+      toast.success(t("chat.renameSuccess", "Chat renamed successfully."));
     },
     onError: (error: any) => {
       const serverMessage = error.response?.data?.message;
-      toast.error(serverMessage || "Cannot rename chat.");
+      toast.error(serverMessage || t("chat.cannotRenameChat", "Cannot rename chat."));
     },
   });
 
@@ -113,7 +113,7 @@ function ChatHistorySidebar({
   const handleRenameSubmit = (sessionId: number) => {
     const title = newTitle.trim();
     if (!title) {
-      toast.warn("Title cannot be empty");
+      toast.warn(t("chat.titleEmptyWarn", "Title cannot be empty"));
       return;
     }
     renameMutation.mutate({ sessionId, title });

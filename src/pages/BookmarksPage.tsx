@@ -103,7 +103,7 @@ function BookmarksPage() {
     },
 
     onError: (error: Error) => {
-      toast.error(error.message || ERROR_CODE.SERVER_ERROR);
+      toast.error(error.message || t(ERROR_CODE.SERVER_ERROR));
     },
   });
 

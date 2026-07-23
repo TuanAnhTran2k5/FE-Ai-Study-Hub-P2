@@ -50,7 +50,6 @@ import type {
   SubjectResponse,
 } from "@/types/curriculum.type";
 import { ERROR_CODE } from "@/constants/errorCode";
-import { SUCCESS_MESSAGE } from "@/constants/successMessage";
 
 function ManagementPage() {
   const { t } = useTranslation();
@@ -195,11 +194,11 @@ function ManagementPage() {
       queryClient.invalidateQueries({ queryKey: ["admin-semesters"] });
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
       queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
-      toast.success(SUCCESS_MESSAGE.CREATE_SEMESTER_SUCCESS);
+      toast.success(t("success.createSemester"));
       setIsSemesterDialogOpen(false);
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || ERROR_CODE.CREATE_SEMESTER_FAILED);
+      toast.error(error.response?.data?.message || t(ERROR_CODE.CREATE_SEMESTER_FAILED));
     },
   });
 
@@ -210,11 +209,11 @@ function ManagementPage() {
       queryClient.invalidateQueries({ queryKey: ["admin-semesters"] });
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
       queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
-      toast.success(SUCCESS_MESSAGE.UPDATE_SEMESTER_SUCCESS);
+      toast.success(t("success.updateSemester"));
       setIsSemesterDialogOpen(false);
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || ERROR_CODE.UPDATE_SEMESTER_FAILED);
+      toast.error(error.response?.data?.message || t(ERROR_CODE.UPDATE_SEMESTER_FAILED));
     },
   });
 
@@ -224,11 +223,11 @@ function ManagementPage() {
       queryClient.invalidateQueries({ queryKey: ["admin-semesters"] });
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
       queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
-      toast.success(SUCCESS_MESSAGE.DELETE_SEMESTER_SUCCESS);
+      toast.success(t("success.deleteSemester"));
       setDeleteConfirm(null);
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || ERROR_CODE.DELETE_SEMESTER_FAILED);
+      toast.error(error.response?.data?.message || t(ERROR_CODE.DELETE_SEMESTER_FAILED));
     },
   });
 
@@ -238,11 +237,11 @@ function ManagementPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
       queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
-      toast.success(SUCCESS_MESSAGE.CREATE_COMBO_SUCCESS);
+      toast.success(t("success.createCombo"));
       setIsComboDialogOpen(false);
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || ERROR_CODE.CREATE_COMBO_FAILED);
+      toast.error(error.response?.data?.message || t(ERROR_CODE.CREATE_COMBO_FAILED));
     },
   });
 
@@ -252,14 +251,14 @@ function ManagementPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
       queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
-      toast.success(SUCCESS_MESSAGE.UPDATE_COMBO_SUCCESS);
+      toast.success(t("success.updateCombo"));
       setIsComboDialogOpen(false);
       setIsSubjectDialogOpen(false);
       setEditingSubject(null);
       setSubjectDeleteConfirm(null);
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || ERROR_CODE.UPDATE_COMBO_FAILED);
+      toast.error(error.response?.data?.message || t(ERROR_CODE.UPDATE_COMBO_FAILED));
     },
   });
 
@@ -268,11 +267,11 @@ function ManagementPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
       queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
-      toast.success(SUCCESS_MESSAGE.DELETE_COMBO_SUCCESS);
+      toast.success(t("success.deleteCombo"));
       setDeleteConfirm(null);
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || ERROR_CODE.DELETE_COMBO_FAILED);
+      toast.error(error.response?.data?.message || t(ERROR_CODE.DELETE_COMBO_FAILED));
     },
   });
 
@@ -282,7 +281,7 @@ function ManagementPage() {
     queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
     queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
 
-    toast.success("Combo restored successfully!");
+    toast.success(t("success.restoreCombo", "Combo restored successfully!"));
   },
   onError: (error: any) => {
     toast.error(
@@ -297,11 +296,11 @@ function ManagementPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
-      toast.success("Subject created successfully!");
+      toast.success(t("curriculum.subjectCreateSuccess", "Subject created successfully!"));
       setIsSingleSubjectDialogOpen(false);
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to create subject");
+      toast.error(error.response?.data?.message || t("curriculum.subjectCreateFailed", "Failed to create subject"));
     },
   });
 
@@ -311,11 +310,11 @@ function ManagementPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
-      toast.success("Subject updated successfully!");
+      toast.success(t("curriculum.subjectUpdateSuccess", "Subject updated successfully!"));
       setIsSingleSubjectDialogOpen(false);
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to update subject");
+      toast.error(error.response?.data?.message || t("curriculum.subjectUpdateFailed", "Failed to update subject"));
     },
   });
 
@@ -324,12 +323,12 @@ function ManagementPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
-      toast.success("Subject deleted successfully!");
+      toast.success(t("curriculum.subjectDeleteSuccess", "Subject deleted successfully!"));
       setDeleteConfirm(null);
       setSubjectDeleteConfirm(null);
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || "Failed to delete subject");
+      toast.error(error.response?.data?.message || t("curriculum.subjectDeleteFailed", "Failed to delete subject"));
     },
   });
 
@@ -339,11 +338,11 @@ function ManagementPage() {
     queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
     queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
 
-    toast.success("Subject restored successfully!");
+    toast.success(t("curriculum.subjectRestoreSuccess", "Subject restored successfully!"));
   },
   onError: (error: any) => {
     toast.error(
-      error.response?.data?.message || "Failed to restore subject",
+      error.response?.data?.message || t("curriculum.subjectRestoreFailed", "Failed to restore subject"),
     );
   },
 });
