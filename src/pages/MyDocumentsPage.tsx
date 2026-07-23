@@ -160,6 +160,8 @@ function MyDocumentsPage() {
       setIsUploadOpen(false);
       setUploadProgress(0);
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
     onError: (error: any) => {
       setUploadProgress(0);

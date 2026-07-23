@@ -2,7 +2,7 @@ export type CaseStatus = "PENDING_REVIEW" | "WARNING_1" | "WARNING_2" | "RESOLVE
 
 export type ReportStatus = "PENDING" | "APPROVED" | "REJECTED" | "RESOLVED";
 
-export type AdminDecision = "REMOVE_DOCUMENT" | "REJECT_REPORT" | "WARNING_1" | "WARNING_2";
+export type AdminDecision = "BAN" | "REMOVE_DOCUMENT" | "REJECT";
 
 export interface ReportCaseAdminResponse {
   caseId: number;

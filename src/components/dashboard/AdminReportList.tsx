@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "react-toastify";
-import { getPendingReportCases, getReportsByCase, resolveReportCase, getHistoryReportCases, refundAppealCase } from "@/services/adminReportService";
+import { getPendingReportCases, getReportsByCase, resolveReportCase, getHistoryReportCases, refundAppealCase, claimReportCase, unclaimReportCase } from "@/services/adminReportService";
 import type { ReportCaseAdminResponse, ReportDetailResponse, AdminDecision } from "@/types/adminReport.type";
 import type { UserResponse } from "@/types/user.type";
 
@@ -20,7 +20,7 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
   const queryClient = useQueryClient();
   const [selectedCase, setSelectedCase] = useState<ReportCaseAdminResponse | null>(null);
   const [adminNote, setAdminNote] = useState("");
-  const [decision, setDecision] = useState<AdminDecision>("REJECT_REPORT");
+  const [decision, setDecision] = useState<AdminDecision>("REJECT");
 
   const [subTab, setSubTab] = useState<"PENDING" | "HISTORY">("PENDING");
   const [showRefundModal, setShowRefundModal] = useState(false);
@@ -92,6 +92,45 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
     }
   });
 
+  // Claim case mutation
+  const claimMutation = useMutation({
+    mutationFn: (caseId: number) => claimReportCase(caseId, currentUser.userId),
+    onSuccess: (data) => {
+      setSelectedCase(data);
+      queryClient.invalidateQueries({ queryKey: ["admin-pending-reports"] });
+    },
+    onError: (err: any) => {
+      toast.error(err?.response?.data?.message || t("admin.claimFailed", "Failed to claim report case"));
+    },
+  });
+
+  // Unclaim case mutation
+  const unclaimMutation = useMutation({
+    mutationFn: (caseId: number) => unclaimReportCase(caseId, currentUser.userId),
+    onSuccess: () => {
+      setSelectedCase(null);
+      queryClient.invalidateQueries({ queryKey: ["admin-pending-reports"] });
+    },
+    onError: () => {
+      setSelectedCase(null);
+      queryClient.invalidateQueries({ queryKey: ["admin-pending-reports"] });
+    },
+  });
+
+  const handleReviewCase = (caseId: number) => {
+    claimMutation.mutate(caseId);
+  };
+
+  const handleCloseDialog = () => {
+    if (selectedCase) {
+      if (subTab === "PENDING") {
+        unclaimMutation.mutate(selectedCase.caseId);
+      } else {
+        setSelectedCase(null);
+      }
+    }
+  };
+
   const handleResolve = () => {
     if (!selectedCase) return;
     resolveMutation.mutate({
@@ -156,7 +195,7 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
               {reportCases.map((rc) => (
                 <div 
                   key={rc.caseId}
-                  onClick={() => subTab === "PENDING" && setSelectedCase(rc)}
+                  onClick={() => subTab === "PENDING" && handleReviewCase(rc.caseId)}
                   className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl border border-border/50 bg-secondary/5 hover:border-border transition-all duration-300 hover:shadow-sm ${subTab === "PENDING" ? "cursor-pointer hover:-translate-y-0.5" : ""}`}
                 >
                   <div className="space-y-1.5 min-w-0">
@@ -209,9 +248,10 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
 
                   {subTab === "PENDING" ? (
                     <Button
+                      disabled={claimMutation.isPending}
                       onClick={(e) => {
                         e.stopPropagation();
-                        setSelectedCase(rc);
+                        handleReviewCase(rc.caseId);
                       }}
                       className="h-8 rounded-xl font-bold text-xs bg-primary/10 border border-primary/20 text-primary hover:bg-primary hover:text-primary-foreground flex items-center gap-1.5 shrink-0"
                     >
@@ -255,7 +295,7 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
       </Card>
 
       {/* RESOLVE CASE DIALOG */}
-      <Dialog open={!!selectedCase} onOpenChange={(open) => !open && setSelectedCase(null)}>
+      <Dialog open={!!selectedCase} onOpenChange={(open) => !open && handleCloseDialog()}>
         <DialogContent className="rounded-3xl border border-slate-400/80 dark:border-border/80 bg-card/98 backdrop-blur-xl w-[92vw] max-w-2xl p-6 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
           {selectedCase && (
             <>
@@ -333,17 +373,14 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
                     onChange={(e) => setDecision(e.target.value as AdminDecision)}
                     className="w-full h-10 px-3.5 rounded-2xl border border-border bg-background text-xs font-bold text-card-foreground focus:outline-none focus:border-primary transition-colors cursor-pointer"
                   >
-                    <option value="REJECT_REPORT">
+                    <option value="REJECT">
                       🟢 {t("admin.decisionReject", "Bác bỏ báo cáo (Giữ lại tài liệu)")}
                     </option>
                     <option value="REMOVE_DOCUMENT">
                       🔴 {t("admin.decisionRemove", "Đồng ý báo cáo (Gỡ bỏ tài liệu)")}
                     </option>
-                    <option value="WARNING_1">
-                      🟡 {t("admin.decisionWarning1", "Cảnh cáo tác giả cấp 1 (Warning 1)")}
-                    </option>
-                    <option value="WARNING_2">
-                      🟠 {t("admin.decisionWarning2", "Cảnh cáo tác giả cấp 2 (Warning 2)")}
+                    <option value="BAN">
+                      ❌ {t("admin.decisionBan", "Khóa tài khoản tác giả (Ban)")}
                     </option>
                   </select>
                 </div>
@@ -365,19 +402,17 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
               <DialogFooter className="flex flex-col sm:flex-row gap-2 mt-4">
                 <Button 
                   onClick={handleResolve}
-                  disabled={resolveMutation.isPending}
+                  disabled={resolveMutation.isPending || unclaimMutation.isPending}
                   className={`w-full sm:w-auto font-black text-xs px-4 py-2 flex items-center justify-center gap-1.5 rounded-2xl ${
-                    decision === "REMOVE_DOCUMENT" 
+                    decision === "BAN" || decision === "REMOVE_DOCUMENT" 
                       ? "bg-red-600 hover:bg-red-700 text-white" 
-                      : decision.includes("WARNING") 
-                      ? "bg-amber-500 hover:bg-amber-600 text-white"
                       : "bg-teal-600 hover:bg-teal-700 text-white"
                   }`}
                 >
-                  {decision === "REMOVE_DOCUMENT" ? (
-                    <Trash2 className="h-3.5 w-3.5" />
-                  ) : decision.includes("WARNING") ? (
+                  {decision === "BAN" ? (
                     <ShieldAlert className="h-3.5 w-3.5" />
+                  ) : decision === "REMOVE_DOCUMENT" ? (
+                    <Trash2 className="h-3.5 w-3.5" />
                   ) : (
                     <ShieldCheck className="h-3.5 w-3.5" />
                   )}
@@ -386,8 +421,8 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
                 
                 <Button 
                   variant="secondary" 
-                  onClick={() => setSelectedCase(null)}
-                  disabled={resolveMutation.isPending}
+                  onClick={handleCloseDialog}
+                  disabled={resolveMutation.isPending || unclaimMutation.isPending}
                   className="w-full sm:w-auto font-bold text-xs px-4 py-2 border border-border bg-secondary hover:bg-secondary-foreground/10 text-card-foreground rounded-2xl"
                 >
                   {t("common.close", "Close")}
