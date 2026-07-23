@@ -77,15 +77,14 @@ const menuItems = [
     icon: LayoutDashboard,
   },
   {
+    titleKey: "sidebar.curriculum",
+    url: ROUTE.CURRICULUM,
+    icon: BookOpen,
+  },
+  {
     titleKey: "sidebar.settings",
     url: ROUTE.SETTINGS,
     icon: Settings,
-  },
-  {
-    titleKey: "sidebar.curriculum",
-    url: ROUTE.ADMIN_CURRICULUM,
-    icon: BookOpen,
-    isAdminOnly: true,
   },
   {
     titleKey: "sidebar.badges",
@@ -160,26 +159,30 @@ function AppSidebar() {
                 .filter((item) => !item.isAdminOnly || currentUser?.role === "AD")
                 .map((item) => {
                   const Icon = item.icon;
-                const isActive = location.pathname === `/app/${item.url}`;
-                const badge =
-                  item.titleKey === "sidebar.notifications"
-                    ? unreadNotificationCount
-                    : 0;
+                  const resolvedPath =
+                    item.url === ROUTE.CURRICULUM && currentUser?.role === "AD"
+                      ? ROUTE.ADMIN_CURRICULUM
+                      : item.url;
+                  const isActive = location.pathname === `/app/${resolvedPath}`;
+                  const badge =
+                    item.titleKey === "sidebar.notifications"
+                      ? unreadNotificationCount
+                      : 0;
 
-                return (
-                  <SidebarMenuItem
-                    key={item.titleKey}
-                    className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center"
-                  >
-                    <SidebarMenuButton asChild>
-                      <Link
-                        to={item.url}
-                        className={`relative flex h-11 items-center gap-3 rounded-2xl px-4 text-[15px] font-semibold transition-all duration-300 group-data-[collapsible=icon]:size-13 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 ${
-                          isActive
-                            ? "bg-primary text-primary-foreground shadow-md hover:bg-primary hover:text-primary-foreground"
-                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                        }`}
-                      >
+                  return (
+                    <SidebarMenuItem
+                      key={item.titleKey}
+                      className="group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center"
+                    >
+                      <SidebarMenuButton asChild>
+                        <Link
+                          to={resolvedPath}
+                          className={`relative flex h-11 items-center gap-3 rounded-2xl px-4 text-[15px] font-semibold transition-all duration-300 group-data-[collapsible=icon]:size-13 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0 ${
+                            isActive
+                              ? "bg-primary text-primary-foreground shadow-md hover:bg-primary hover:text-primary-foreground"
+                              : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                          }`}
+                        >
                         <Icon className="size-6 shrink-0" />
 
                         <span className="truncate group-data-[collapsible=icon]:hidden">

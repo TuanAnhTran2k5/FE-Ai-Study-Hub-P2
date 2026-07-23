@@ -807,6 +807,7 @@
     "dashboard": "Bảng điều khiển Admin",
     "title": "Quản lý chương trình học",
     "description": "Quản lý các học kỳ học tập của sinh viên, các môn học cốt lõi/combo, và các cấu hình chương trình học.",
+    "userDescription": "Xem danh sách học kỳ, môn học cốt lõi và môn học combo thuộc chương trình học đào tạo.",
     "tabSemesters": "Danh sách học kỳ",
     "tabCombos": "Môn học Combo",
     "tabSubjects": "Tất cả môn học",

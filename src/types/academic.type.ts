@@ -16,3 +16,12 @@ export interface SubjectResponse {
   comboCode?: string | null;
   comboName?: string | null;
 }
+
+export interface ComboSubjectResponse {
+  comboId: number;
+  comboCode: string;
+  comboName: string;
+  subjects: SubjectResponse[];
+  isDeleted: boolean;
+}
+

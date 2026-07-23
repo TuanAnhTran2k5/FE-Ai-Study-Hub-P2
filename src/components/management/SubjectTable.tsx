@@ -19,11 +19,12 @@ interface SubjectTableProps {
   isLoading: boolean;
   searchKeyword: string;
   onSearchChange: (keyword: string) => void;
-  onAddClick: () => void;
-  onEditClick: (subject: SubjectResponse) => void;
-  onDeleteClick: (id: number, identifier: string) => void;
-  onRestoreClick: (id: number) => void;
-  onManageSyllabusClick: (subject: SubjectResponse) => void;
+  readOnly?: boolean;
+  onAddClick?: () => void;
+  onEditClick?: (subject: SubjectResponse) => void;
+  onDeleteClick?: (id: number, identifier: string) => void;
+  onRestoreClick?: (id: number) => void;
+  onManageSyllabusClick?: (subject: SubjectResponse) => void;
 }
 
 export default function SubjectTable({
@@ -31,6 +32,7 @@ export default function SubjectTable({
   isLoading,
   searchKeyword,
   onSearchChange,
+  readOnly = false,
   onAddClick,
   onEditClick,
   onDeleteClick,
@@ -63,13 +65,15 @@ export default function SubjectTable({
           </Badge>
         </div>
 
-        <Button
-          onClick={onAddClick}
-          className="cursor-pointer rounded-xl font-bold"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          {t("curriculum.addSubject", "Add Subject")}
-        </Button>
+        {!readOnly && onAddClick && (
+          <Button
+            onClick={onAddClick}
+            className="cursor-pointer rounded-xl font-bold"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            {t("curriculum.addSubject", "Add Subject")}
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
@@ -95,8 +99,12 @@ export default function SubjectTable({
                 <TableHead className="w-[120px] font-bold">{t("curriculum.colType", "Type")}</TableHead>
                 <TableHead className="w-[120px] font-bold">{t("curriculum.colSemester", "Semester")}</TableHead>
                 <TableHead className="font-bold">{t("curriculum.colDescription", "Description")}</TableHead>
-                <TableHead className="w-[120px] font-bold">{t("curriculum.colSyllabus", "Syllabus")}</TableHead>
-                <TableHead className="w-[120px] text-right font-bold">{t("curriculum.colActions", "Actions")}</TableHead>
+                {!readOnly && (
+                  <>
+                    <TableHead className="w-[120px] font-bold">{t("curriculum.colSyllabus", "Syllabus")}</TableHead>
+                    <TableHead className="w-[120px] text-right font-bold">{t("curriculum.colActions", "Actions")}</TableHead>
+                  </>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -128,56 +136,68 @@ export default function SubjectTable({
                   <TableCell className="max-w-xs truncate text-muted-foreground">
                     {subj.description || t("curriculum.noDescription", "No description provided.")}
                   </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onManageSyllabusClick(subj)}
-                      className="cursor-pointer h-7 rounded-lg text-xs font-bold gap-1 hover:bg-primary hover:text-primary-foreground border-primary/30"
-                    >
-                      <FileText className="h-3.5 w-3.5" />
-                      {t("curriculum.btnSyllabus", "Syllabus")}
-                    </Button>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-  {subj.isDeleted ? (
-    <Button
-      variant="ghost"
-      size="icon"
-      title={t("curriculum.tooltipRestore", "Restore subject")}
-      onClick={() => onRestoreClick(subj.subjectId)}
-      className="cursor-pointer rounded-xl text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-500"
-    >
-      <RotateCcw className="h-4 w-4" />
-    </Button>
-  ) : (
-    <>
-      <Button
-        variant="ghost"
-        size="icon"
-        title={t("curriculum.tooltipEdit", "Edit subject")}
-        onClick={() => onEditClick(subj)}
-        className="cursor-pointer rounded-xl hover:bg-primary/10 hover:text-primary"
-      >
-        <Edit2 className="h-4 w-4" />
-      </Button>
+                  {!readOnly && (
+                    <>
+                      <TableCell>
+                        {onManageSyllabusClick && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onManageSyllabusClick(subj)}
+                            className="cursor-pointer h-7 rounded-lg text-xs font-bold gap-1 hover:bg-primary hover:text-primary-foreground border-primary/30"
+                          >
+                            <FileText className="h-3.5 w-3.5" />
+                            {t("curriculum.btnSyllabus", "Syllabus")}
+                          </Button>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          {subj.isDeleted ? (
+                            onRestoreClick && (
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                title={t("curriculum.tooltipRestore", "Restore subject")}
+                                onClick={() => onRestoreClick(subj.subjectId)}
+                                className="cursor-pointer rounded-xl text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-500"
+                              >
+                                <RotateCcw className="h-4 w-4" />
+                              </Button>
+                            )
+                          ) : (
+                            <>
+                              {onEditClick && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  title={t("curriculum.tooltipEdit", "Edit subject")}
+                                  onClick={() => onEditClick(subj)}
+                                  className="cursor-pointer rounded-xl hover:bg-primary/10 hover:text-primary"
+                                >
+                                  <Edit2 className="h-4 w-4" />
+                                </Button>
+                              )}
 
-      <Button
-        variant="ghost"
-        size="icon"
-        title={t("curriculum.tooltipDelete", "Delete subject")}
-        onClick={() =>
-          onDeleteClick(subj.subjectId, subj.subjectCode)
-        }
-        className="cursor-pointer rounded-xl hover:bg-destructive/10 hover:text-destructive"
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button>
-    </>
-  )}
-</div>
-                  </TableCell>
+                              {onDeleteClick && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  title={t("curriculum.tooltipDelete", "Delete subject")}
+                                  onClick={() =>
+                                    onDeleteClick(subj.subjectId, subj.subjectCode)
+                                  }
+                                  className="cursor-pointer rounded-xl hover:bg-destructive/10 hover:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </TableCell>
+                    </>
+                  )}
                 </TableRow>
               ))}
             </TableBody>

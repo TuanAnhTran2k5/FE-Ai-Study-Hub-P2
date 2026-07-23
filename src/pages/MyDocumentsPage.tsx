@@ -469,7 +469,7 @@ function MyDocumentsPage() {
             {t("myDocuments.failed", "Failed to load documents")}
           </p>
           <p className="mt-2 text-sm text-muted-foreground">
-            {getDocumentsErrorMessage(documentsError)}
+            {getDocumentsErrorMessage(documentsError, t)}
           </p>
           <Button
             type="button"

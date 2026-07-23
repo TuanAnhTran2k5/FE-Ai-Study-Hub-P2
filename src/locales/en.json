@@ -807,6 +807,7 @@
     "dashboard": "Admin Dashboard",
     "title": "Curriculum Management",
     "description": "Manage student learning semesters, core/combo subjects, and curriculum configurations.",
+    "userDescription": "View the list of semesters, core subjects, and combo subjects of the training curriculum.",
     "tabSemesters": "Semesters List",
     "tabCombos": "Combo Subjects",
     "tabSubjects": "All Subjects",

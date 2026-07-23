@@ -25,6 +25,7 @@ import SettingsPage from "@/pages/SettingsPage";
 import ManagementPage from "@/pages/ManagementPage";
 import DashboardPage from "@/pages/DashboardPage";
 import BadgesManagementPage from "@/pages/BadgesManagementPage";
+import CurriculumPage from "@/pages/CurriculumPage";
 
 export const router = createBrowserRouter([
   {
@@ -134,6 +135,10 @@ export const router = createBrowserRouter([
       {
         path: ROUTE.SETTINGS,
         element: <SettingsPage />,
+      },
+      {
+        path: ROUTE.CURRICULUM,
+        element: <CurriculumPage />,
       },
       {
         path: ROUTE.ADMIN_CURRICULUM,

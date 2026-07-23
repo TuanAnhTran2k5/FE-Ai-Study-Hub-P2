@@ -1,10 +1,17 @@
 import api from "@/configs/api";
 import type { APIResponse } from "@/types/auth";
-import type { SemesterResponse, SubjectResponse } from "@/types/academic.type";
+import type { SemesterResponse, SubjectResponse, ComboSubjectResponse } from "@/types/academic.type";
 
 export const getSemesters = async (): Promise<SemesterResponse[]> => {
   const response =
     await api.get<APIResponse<SemesterResponse[]>>("/user/academic/semesters");
+
+  return response.data.result;
+};
+
+export const getComboSubjects = async (): Promise<ComboSubjectResponse[]> => {
+  const response =
+    await api.get<APIResponse<ComboSubjectResponse[]>>("/user/academic/combos");
 
   return response.data.result;
 };
