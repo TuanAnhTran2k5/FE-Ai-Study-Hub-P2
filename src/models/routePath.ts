@@ -21,6 +21,7 @@ export const ROUTE = {
   LEADERBOARD: "leaderboard",
   PROFILE: "profile",
   SETTINGS: "settings",
+  CURRICULUM: "curriculum",
   ADMIN_CURRICULUM: "admin/curriculum",
   ADMIN_BADGES: "admin/badges",
 };

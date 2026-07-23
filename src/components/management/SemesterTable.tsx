@@ -15,14 +15,16 @@ import type { SemesterResponse } from "@/types/curriculum.type";
 interface SemesterTableProps {
   semesters: SemesterResponse[];
   isLoading: boolean;
-  onAddClick: () => void;
-  onEditClick: (semester: SemesterResponse) => void;
-  onDeleteClick: (id: number, identifier: string) => void;
+  readOnly?: boolean;
+  onAddClick?: () => void;
+  onEditClick?: (semester: SemesterResponse) => void;
+  onDeleteClick?: (id: number, identifier: string) => void;
 }
 
 export default function SemesterTable({
   semesters,
   isLoading,
+  readOnly = false,
   onAddClick,
   onEditClick,
   onDeleteClick,
@@ -33,15 +35,17 @@ export default function SemesterTable({
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <h3 className="text-xl font-black text-card-foreground">
-          {t("curriculum.semestersMgmt", "Semesters Management")}
+          {readOnly ? t("curriculum.tabSemesters", "Semesters List") : t("curriculum.semestersMgmt", "Semesters Management")}
         </h3>
-        <Button
-          onClick={onAddClick}
-          className="cursor-pointer rounded-xl font-bold"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          {t("curriculum.addSemester", "Add Semester")}
-        </Button>
+        {!readOnly && onAddClick && (
+          <Button
+            onClick={onAddClick}
+            className="cursor-pointer rounded-xl font-bold"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            {t("curriculum.addSemester", "Add Semester")}
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
@@ -68,9 +72,11 @@ export default function SemesterTable({
                   {t("curriculum.colSemesterCode", "Semester Code/No")}
                 </TableHead>
                 <TableHead className="font-bold">{t("curriculum.colDescription", "Description")}</TableHead>
-                <TableHead className="w-[150px] text-right font-bold">
-                  {t("curriculum.colActions", "Actions")}
-                </TableHead>
+                {!readOnly && (
+                  <TableHead className="w-[150px] text-right font-bold">
+                    {t("curriculum.colActions", "Actions")}
+                  </TableHead>
+                )}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -82,31 +88,37 @@ export default function SemesterTable({
                   <TableCell className="max-w-md truncate text-muted-foreground">
                     {semester.description || t("curriculum.noDescription", "No description provided.")}
                   </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onEditClick(semester)}
-                        className="cursor-pointer rounded-xl hover:bg-primary/10 hover:text-primary"
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() =>
-                          onDeleteClick(
-                            semester.semesterId,
-                            semester.semesterNo,
-                          )
-                        }
-                        className="cursor-pointer rounded-xl hover:bg-destructive/10 hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+                  {!readOnly && (
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        {onEditClick && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => onEditClick(semester)}
+                            className="cursor-pointer rounded-xl hover:bg-primary/10 hover:text-primary"
+                          >
+                            <Edit2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                        {onDeleteClick && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() =>
+                              onDeleteClick(
+                                semester.semesterId,
+                                semester.semesterNo,
+                              )
+                            }
+                            className="cursor-pointer rounded-xl hover:bg-destructive/10 hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>

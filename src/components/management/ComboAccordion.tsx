@@ -31,15 +31,16 @@ interface ComboAccordionProps {
   isLoading: boolean;
   searchKeyword: string;
   onSearchChange: (keyword: string) => void;
-  onAddClick: () => void;
-  onEditClick: (combo: ComboSubjectResponse) => void;
-  onDeleteClick: (id: number, identifier: string) => void;
-  onEditSubjectClick: (subject: any, combo: ComboSubjectResponse) => void;
-  onDeleteSubjectClick: (subject: any, combo: ComboSubjectResponse) => void;
-  onRestoreSubjectClick: (id: number) => void;
-  onAddSubjectClick: (combo: ComboSubjectResponse) => void;
-  onRestoreClick: (id: number) => void;
-  onManageSyllabusClick: (subject: any) => void;
+  readOnly?: boolean;
+  onAddClick?: () => void;
+  onEditClick?: (combo: ComboSubjectResponse) => void;
+  onDeleteClick?: (id: number, identifier: string) => void;
+  onEditSubjectClick?: (subject: any, combo: ComboSubjectResponse) => void;
+  onDeleteSubjectClick?: (subject: any, combo: ComboSubjectResponse) => void;
+  onRestoreSubjectClick?: (id: number) => void;
+  onAddSubjectClick?: (combo: ComboSubjectResponse) => void;
+  onRestoreClick?: (id: number) => void;
+  onManageSyllabusClick?: (subject: any) => void;
 }
 
 export default function ComboAccordion({
@@ -47,6 +48,7 @@ export default function ComboAccordion({
   isLoading,
   searchKeyword,
   onSearchChange,
+  readOnly = false,
   onAddClick,
   onEditClick,
   onDeleteClick,
@@ -73,13 +75,15 @@ export default function ComboAccordion({
           />
         </div>
 
-        <Button
-          onClick={onAddClick}
-          className="cursor-pointer rounded-xl font-bold"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          {t("curriculum.addCombo", "Add Combo Subject")}
-        </Button>
+        {!readOnly && onAddClick && (
+          <Button
+            onClick={onAddClick}
+            className="cursor-pointer rounded-xl font-bold"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            {t("curriculum.addCombo", "Add Combo Subject")}
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
@@ -135,40 +139,48 @@ export default function ComboAccordion({
                     className="flex items-center gap-3"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {combo.isDeleted ? (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        title={t("curriculum.tooltipRestoreCombo", "Restore combo")}
-                        onClick={() => onRestoreClick(combo.comboId)}
-                        className="cursor-pointer rounded-xl text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-500"
-                      >
-                        <RotateCcw className="h-4 w-4" />
-                      </Button>
-                    ) : (
-                      <>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title={t("curriculum.tooltipEditCombo", "Edit combo")}
-                          onClick={() => onEditClick(combo)}
-                          className="cursor-pointer rounded-xl hover:bg-primary/10 hover:text-primary"
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
+                    {!readOnly && (
+                      combo.isDeleted ? (
+                        onRestoreClick && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            title={t("curriculum.tooltipRestoreCombo", "Restore combo")}
+                            onClick={() => onRestoreClick(combo.comboId)}
+                            className="cursor-pointer rounded-xl text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-500"
+                          >
+                            <RotateCcw className="h-4 w-4" />
+                          </Button>
+                        )
+                      ) : (
+                        <>
+                          {onEditClick && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title={t("curriculum.tooltipEditCombo", "Edit combo")}
+                              onClick={() => onEditClick(combo)}
+                              className="cursor-pointer rounded-xl hover:bg-primary/10 hover:text-primary"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                          )}
 
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          title={t("curriculum.tooltipDeleteCombo", "Delete combo")}
-                          onClick={() =>
-                            onDeleteClick(combo.comboId, combo.comboName)
-                          }
-                          className="cursor-pointer rounded-xl hover:bg-destructive/10 hover:text-destructive"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </>
+                          {onDeleteClick && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              title={t("curriculum.tooltipDeleteCombo", "Delete combo")}
+                              onClick={() =>
+                                onDeleteClick(combo.comboId, combo.comboName)
+                              }
+                              className="cursor-pointer rounded-xl hover:bg-destructive/10 hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </>
+                      )
                     )}
 
                     <Button
@@ -195,15 +207,17 @@ export default function ComboAccordion({
                       <h5 className="text-sm font-bold text-card-foreground">
                         {t("curriculum.comboBelongTitle", "Subjects belonging to this Combo:")}
                       </h5>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onAddSubjectClick(combo)}
-                        className="cursor-pointer rounded-lg text-xs font-bold"
-                      >
-                        <Plus className="mr-1 h-3.5 w-3.5" />
-                        {t("curriculum.quickAddSubject", "Quick Add Subject")}
-                      </Button>
+                      {!readOnly && onAddSubjectClick && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onAddSubjectClick(combo)}
+                          className="cursor-pointer rounded-lg text-xs font-bold"
+                        >
+                          <Plus className="mr-1 h-3.5 w-3.5" />
+                          {t("curriculum.quickAddSubject", "Quick Add Subject")}
+                        </Button>
+                      )}
                     </div>
 
                     {combo.subjects.length === 0 ? (
@@ -230,12 +244,16 @@ export default function ComboAccordion({
                               <TableHead className="font-bold">
                                 {t("curriculum.colDescription", "Description")}
                               </TableHead>
-                              <TableHead className="w-[120px] font-bold">
-                                {t("curriculum.colSyllabus", "Syllabus")}
-                              </TableHead>
-                              <TableHead className="w-[100px] text-right font-bold">
-                                {t("curriculum.colActions", "Actions")}
-                              </TableHead>
+                              {!readOnly && (
+                                <>
+                                  <TableHead className="w-[120px] font-bold">
+                                    {t("curriculum.colSyllabus", "Syllabus")}
+                                  </TableHead>
+                                  <TableHead className="w-[100px] text-right font-bold">
+                                    {t("curriculum.colActions", "Actions")}
+                                  </TableHead>
+                                </>
+                              )}
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -271,59 +289,71 @@ export default function ComboAccordion({
                                 <TableCell className="max-w-xs truncate text-muted-foreground">
                                   {subj.description || "N/A"}
                                 </TableCell>
-                                <TableCell>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => onManageSyllabusClick(subj)}
-                                    className="cursor-pointer h-7 rounded-lg text-xs font-bold gap-1 hover:bg-primary hover:text-primary-foreground border-primary/30"
-                                  >
-                                    <FileText className="h-3.5 w-3.5" />
-                                    {t("curriculum.btnSyllabus", "Syllabus")}
-                                  </Button>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <div className="flex justify-end gap-1">
-                                    {subj.isDeleted ? (
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        title={t("curriculum.tooltipRestore", "Restore subject")}
-                                        onClick={() =>
-                                          onRestoreSubjectClick(subj.subjectId)
-                                        }
-                                        className="cursor-pointer h-7 w-7 rounded-md text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-500"
-                                      >
-                                        <RotateCcw className="h-3.5 w-3.5" />
-                                      </Button>
-                                    ) : (
-                                      <>
+                                {!readOnly && (
+                                  <>
+                                    <TableCell>
+                                      {onManageSyllabusClick && (
                                         <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          title={t("curriculum.tooltipEdit", "Edit subject")}
-                                          onClick={() =>
-                                            onEditSubjectClick(subj, combo)
-                                          }
-                                          className="cursor-pointer h-7 w-7 rounded-md hover:bg-primary/10 hover:text-primary"
+                                          variant="outline"
+                                          size="sm"
+                                          onClick={() => onManageSyllabusClick(subj)}
+                                          className="cursor-pointer h-7 rounded-lg text-xs font-bold gap-1 hover:bg-primary hover:text-primary-foreground border-primary/30"
                                         >
-                                          <Edit2 className="h-3.5 w-3.5" />
+                                          <FileText className="h-3.5 w-3.5" />
+                                          {t("curriculum.btnSyllabus", "Syllabus")}
                                         </Button>
-                                        <Button
-                                          variant="ghost"
-                                          size="icon"
-                                          title={t("curriculum.tooltipDelete", "Delete subject")}
-                                          onClick={() =>
-                                            onDeleteSubjectClick(subj, combo)
-                                          }
-                                          className="cursor-pointer h-7 w-7 rounded-md hover:bg-destructive/10 hover:text-destructive"
-                                        >
-                                          <Trash2 className="h-3.5 w-3.5" />
-                                        </Button>
-                                      </>
-                                    )}
-                                  </div>
-                                </TableCell>
+                                      )}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                      <div className="flex justify-end gap-1">
+                                        {subj.isDeleted ? (
+                                          onRestoreSubjectClick && (
+                                            <Button
+                                              variant="ghost"
+                                              size="icon"
+                                              title={t("curriculum.tooltipRestore", "Restore subject")}
+                                              onClick={() =>
+                                                onRestoreSubjectClick(subj.subjectId)
+                                              }
+                                              className="cursor-pointer h-7 w-7 rounded-md text-emerald-500 hover:bg-emerald-500/10 hover:text-emerald-500"
+                                            >
+                                              <RotateCcw className="h-3.5 w-3.5" />
+                                            </Button>
+                                          )
+                                        ) : (
+                                          <>
+                                            {onEditSubjectClick && (
+                                              <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                title={t("curriculum.tooltipEdit", "Edit subject")}
+                                                onClick={() =>
+                                                  onEditSubjectClick(subj, combo)
+                                                }
+                                                className="cursor-pointer h-7 w-7 rounded-md hover:bg-primary/10 hover:text-primary"
+                                              >
+                                                <Edit2 className="h-3.5 w-3.5" />
+                                              </Button>
+                                            )}
+                                            {onDeleteSubjectClick && (
+                                              <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                title={t("curriculum.tooltipDelete", "Delete subject")}
+                                                onClick={() =>
+                                                  onDeleteSubjectClick(subj, combo)
+                                                }
+                                                className="cursor-pointer h-7 w-7 rounded-md hover:bg-destructive/10 hover:text-destructive"
+                                              >
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                              </Button>
+                                            )}
+                                          </>
+                                        )}
+                                      </div>
+                                    </TableCell>
+                                  </>
+                                )}
                               </TableRow>
                             ))}
                           </TableBody>
