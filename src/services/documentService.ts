@@ -221,3 +221,23 @@ export const getReportReasons = async (): Promise<ReportReasonResponse[]> => {
 
   return response.data.result;
 };
+
+export const uploadReportEvidence = async (
+  file: File,
+): Promise<{ publicUrl: string }> => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await api.post<APIResponse<{ publicUrl: string }>>(
+    "/user/reports/upload-evidence",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
+
+  return response.data.result;
+};
+

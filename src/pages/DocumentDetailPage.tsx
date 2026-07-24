@@ -45,6 +45,7 @@ import {
   reportDocument,
   searchPublicDocuments,
   updateDocument,
+  uploadReportEvidence,
   viewDocumentContent,
 } from "@/services/documentService";
 import type { RootState } from "@/redux/store";
@@ -698,15 +699,21 @@ function DocumentDetailPage() {
   // NOTE COMMUNITY ACTION: Report document vi phạm cho moderation team.
   // reasonId lấy trực tiếp từ API /user/reports/reasons để khớp bảng report_reason của backend.
   const reportMutation = useMutation({
-    mutationFn: () =>
-      reportDocument({
+    mutationFn: async () => {
+      let uploadedUrl: string | undefined = undefined;
+
+      if (reportEvidenceFile) {
+        const uploadRes = await uploadReportEvidence(reportEvidenceFile);
+        uploadedUrl = uploadRes.publicUrl;
+      }
+
+      return reportDocument({
         documentId: documentId as number,
         reasonId: Number(effectiveReportReasonId),
         description: reportDescription.trim() || undefined,
-        evidenceUrl: reportEvidenceFile
-          ? `image:${reportEvidenceFile.name}`
-          : undefined,
-      }),
+        evidenceUrl: uploadedUrl,
+      });
+    },
     onSuccess: () => {
       toast.success(t("document.reportSuccess", "Report submitted successfully"));
       setIsReportOpen(false);
