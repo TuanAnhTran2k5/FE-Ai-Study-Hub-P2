@@ -8,7 +8,7 @@ RUN npm ci || npm install
 COPY . .
 
 # Environment variables for build time
-ARG VITE_API_URL=http://223.130.11.23:8080/api
+ARG VITE_API_URL=https://aistudyhub.cloud/api
 ARG VITE_GOOGLE_CLIENT_ID=852155010975-aree4h5ahmtj2k69o7ruafnj9crp3kq7.apps.googleusercontent.com
 ARG VITE_SYSTEM_ADMIN_EMAIL=aistudyhub062026@gmail.com
 

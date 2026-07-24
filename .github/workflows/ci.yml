@@ -43,7 +43,7 @@ jobs:
           file: ./Dockerfile
           push: true
           build-args: |
-            VITE_API_URL=http://223.130.11.23:8080/api
+            VITE_API_URL=https://aistudyhub.cloud/api
             VITE_GOOGLE_CLIENT_ID=852155010975-aree4h5ahmtj2k69o7ruafnj9crp3kq7.apps.googleusercontent.com
             VITE_SYSTEM_ADMIN_EMAIL=aistudyhub062026@gmail.com
           tags: |
