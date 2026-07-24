@@ -42,6 +42,7 @@ import {
   uploadDocument,
 } from "@/services/documentService";
 import type {
+  BookmarkResponse,
   DocumentResponse,
   DocumentUploadRequest,
   DocumentUploadResponse,
@@ -238,12 +239,45 @@ function MyDocumentsPage() {
         documentIds.map((documentId) => deleteDocument(documentId)),
       );
     },
-    onSuccess: () => {
+    onSuccess: (_response, deletedDocumentIds) => {
       toast.success(t("document.deleteSuccess", "Documents deleted successfully"));
+
+      // Xóa ngay khỏi mọi cache danh sách để Community/Bookmarks không giữ
+      // card cũ trong lúc chờ refetch từ backend.
+      queryClient.setQueriesData<DocumentResponse[]>(
+        { queryKey: ["publicDocuments"] },
+        (currentDocuments) =>
+          currentDocuments?.filter(
+            (document) =>
+              !deletedDocumentIds.includes(document.documentId),
+          ),
+      );
+      queryClient.setQueriesData<DocumentResponse[]>(
+        { queryKey: ["bookmarkPublicDocuments"] },
+        (currentDocuments) =>
+          currentDocuments?.filter(
+            (document) =>
+              !deletedDocumentIds.includes(document.documentId),
+          ),
+      );
+      queryClient.setQueriesData<BookmarkResponse[]>(
+        { queryKey: ["bookmarks"] },
+        (currentBookmarks) =>
+          currentBookmarks?.filter(
+            (bookmark) =>
+              !deletedDocumentIds.includes(bookmark.document.documentId),
+          ),
+      );
+
       setSelectedDocumentIds([]);
       setIsSelectionMode(false);
       setIsBulkDeleteOpen(false);
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
+      queryClient.invalidateQueries({
+        queryKey: ["bookmarkPublicDocuments"],
+      });
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
     },
     onError: () => {
       toast.error(t("document.deleteFailed", "Delete documents failed"));

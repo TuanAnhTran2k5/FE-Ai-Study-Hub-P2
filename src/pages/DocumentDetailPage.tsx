@@ -461,6 +461,7 @@ function DocumentDetailPage() {
       );
 
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
       queryClient.invalidateQueries({ queryKey: ["bookmarkPublicDocuments"] });
       toast.success(t("document.updateSuccess", "Document updated successfully"));

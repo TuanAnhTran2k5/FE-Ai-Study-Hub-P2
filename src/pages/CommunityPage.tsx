@@ -40,6 +40,9 @@ function CommunityPage() {
       isAuthenticated ? (authUserId ?? "current-user") : "guest",
     ],
     queryFn: () => searchPublicDocuments(""),
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 
   // Fetch academic subjects from backend
