@@ -152,6 +152,9 @@ function BookmarksPage() {
       queryClient.invalidateQueries({
         queryKey: ["publicDocuments"],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["bookmarkPublicDocuments"],
+      });
     },
 
     onError: (error: Error) => {
@@ -197,6 +200,9 @@ function BookmarksPage() {
       );
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
       queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
+      queryClient.invalidateQueries({
+        queryKey: ["bookmarkPublicDocuments"],
+      });
       setSelectedDocumentIds([]);
       setIsSelectionMode(false);
       setIsBulkRemoveOpen(false);

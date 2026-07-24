@@ -66,6 +66,9 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
       queryClient.invalidateQueries({ queryKey: ["admin-pending-reports"] });
       queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["document"] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarkPublicDocuments"] });
       queryClient.invalidateQueries({ queryKey: ["admin-dashboard-stats"] });
       queryClient.invalidateQueries({ queryKey: ["admin-moderation-summary"] });
     },
@@ -84,6 +87,9 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
       queryClient.invalidateQueries({ queryKey: ["admin-history-reports"] });
       queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["document"] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarkPublicDocuments"] });
       queryClient.invalidateQueries({ queryKey: ["admin-dashboard-stats"] });
       queryClient.invalidateQueries({ queryKey: ["admin-moderation-summary"] });
     },

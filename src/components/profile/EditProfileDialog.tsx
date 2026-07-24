@@ -63,6 +63,8 @@ function EditProfileDialog({ user }: EditProfileDialogProps) {
       queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
       queryClient.invalidateQueries({ queryKey: ["document"] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarkPublicDocuments"] });
       toast.success(t("success.profileUpdated"));
       setOpen(false);
     },
