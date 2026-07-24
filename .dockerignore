@@ -1,0 +1,10 @@
+node_modules
+dist
+.git
+.gitignore
+.vscode
+.qodo
+README.md
+Dockerfile
+docker-compose.yml
+.github

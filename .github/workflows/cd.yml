@@ -1,0 +1,48 @@
+name: Frontend CD Pipeline
+
+on:
+  workflow_run:
+    workflows: ["Frontend CI Pipeline"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      (github.event.workflow_run.head_branch == 'main' ||
+       github.event.workflow_run.head_branch == 'master' ||
+       github.event.workflow_run.head_branch == 'TuanAnh-FE')
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Copy docker-compose.yml to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          source: "docker-compose.yml"
+          target: "/root/app-fe"
+
+      - name: Deploy Frontend via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            mkdir -p /root/app-fe
+            cd /root/app-fe
+            export IMAGE_TAG=${{ github.event.workflow_run.head_sha }}
+            export DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+            echo "Deploying image: ${DOCKER_USERNAME}/fe-ai-study-hub:${IMAGE_TAG}"
+            docker compose pull
+            docker compose up -d --remove-orphans
+            echo "Deploy completed! Running containers:"
+            docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
