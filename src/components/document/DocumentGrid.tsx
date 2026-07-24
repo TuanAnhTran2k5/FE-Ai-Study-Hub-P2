@@ -9,6 +9,10 @@ interface DocumentGridProps {
   isRemoving?: boolean;
   getBookmarkedAt?: (document: DocumentResponse) => string | undefined;
   gridClassName?: string;
+  selectionMode?: boolean;
+  selectedDocumentIds?: number[];
+  onToggleSelect?: (document: DocumentResponse) => void;
+  viewMode?: "grid" | "list";
 }
 
 function DocumentGrid({
@@ -18,6 +22,10 @@ function DocumentGrid({
   isRemoving,
   getBookmarkedAt,
   gridClassName,
+  selectionMode,
+  selectedDocumentIds = [],
+  onToggleSelect,
+  viewMode = "grid",
 }: DocumentGridProps) {
   const { t } = useTranslation();
 
@@ -30,6 +38,42 @@ function DocumentGrid({
         <p className="mt-2 text-sm text-muted-foreground">
           {t("myDocuments.emptyDesc", "Try searching with another keyword or filter.")}
         </p>
+      </div>
+    );
+  }
+
+  if (viewMode === "list") {
+    return (
+      <div className="w-full overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="overflow-x-auto">
+          <div className="min-w-[1020px]">
+            <div className="grid grid-cols-[minmax(0,2fr)_minmax(170px,1fr)_150px_110px_110px_190px] items-center gap-5 border-b border-border bg-secondary/40 px-5 py-3 text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              <span>Name</span>
+              <span>Owner</span>
+              <span>Subject</span>
+              <span>Status</span>
+              <span>File size</span>
+              <span className="text-right">Actions</span>
+            </div>
+
+            <div>
+              {documents.map((document) => (
+                <DocumentCard
+                  key={document.documentId}
+                  document={document}
+                  onView={onView}
+                  onRemove={onRemove}
+                  isRemoving={isRemoving}
+                  bookmarkedAt={getBookmarkedAt?.(document)}
+                  selectionMode={selectionMode}
+                  isSelected={selectedDocumentIds.includes(document.documentId)}
+                  onToggleSelect={onToggleSelect}
+                  viewMode="list"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -49,6 +93,10 @@ function DocumentGrid({
           onRemove={onRemove}
           isRemoving={isRemoving}
           bookmarkedAt={getBookmarkedAt?.(document)}
+          selectionMode={selectionMode}
+          isSelected={selectedDocumentIds.includes(document.documentId)}
+          onToggleSelect={onToggleSelect}
+          viewMode={viewMode}
         />
       ))}
     </div>

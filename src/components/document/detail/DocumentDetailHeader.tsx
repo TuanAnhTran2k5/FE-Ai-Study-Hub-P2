@@ -19,6 +19,7 @@ type DocumentDetailHeaderProps = {
   fileTypeLabel: string;
   subjectCode: string;
   isOwner: boolean;
+  canEdit: boolean;
   isDeleting: boolean;
   canOpenInNewTab: boolean;
   onBack: () => void;
@@ -33,6 +34,7 @@ function DocumentDetailHeader({
   fileTypeLabel,
   subjectCode,
   isOwner,
+  canEdit,
   isDeleting,
   canOpenInNewTab,
   onBack,
@@ -95,8 +97,14 @@ function DocumentDetailHeader({
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-11 cursor-pointer rounded-2xl border-primary/25 bg-primary/5 px-5 font-bold text-primary hover:bg-primary/10 hover:text-primary"
+                  className="h-11 cursor-pointer rounded-2xl border-primary/25 bg-primary/5 px-5 font-bold text-primary hover:bg-primary/10 hover:text-primary disabled:cursor-not-allowed disabled:border-border disabled:bg-secondary disabled:text-muted-foreground disabled:opacity-50"
                   onClick={onUpdate}
+                  disabled={!canEdit}
+                  title={
+                    canEdit
+                      ? t("document.btnEdit", "Edit")
+                      : "You cannot edit a document downloaded from another user"
+                  }
                 >
                   <Pencil className="mr-2 h-4 w-4" />
                   {t("document.btnEdit", "Edit")}

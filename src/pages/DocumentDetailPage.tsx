@@ -43,7 +43,9 @@ import {
   ratingDocument,
   removeBookmark,
   reportDocument,
+  searchPublicDocuments,
   updateDocument,
+  uploadReportEvidence,
   viewDocumentContent,
 } from "@/services/documentService";
 import type { RootState } from "@/redux/store";
@@ -215,6 +217,49 @@ function DocumentDetailPage() {
     enabled: Number.isFinite(documentId),
   });
 
+  // Bản tải về My Documents có documentId riêng. Tìm bản PUBLIC gốc để
+  // rating luôn được ghi vào tài liệu Community thay vì bản sao PRIVATE.
+  const { data: communitySourceDocuments = [] } = useQuery({
+    queryKey: [
+      "publicDocuments",
+      currentUser?.userId != null
+        ? String(currentUser.userId)
+        : "current-user",
+    ],
+    queryFn: () => searchPublicDocuments(""),
+    enabled: Boolean(
+      document?.originalUploaderId &&
+        document.visibilityStatus !== VisibilityStatus.PUBLIC,
+    ),
+    staleTime: 0,
+  });
+
+  const originalPublicDocument = useMemo(() => {
+    if (!document) return undefined;
+    if (document.visibilityStatus === VisibilityStatus.PUBLIC) return document;
+
+    const originalUploaderId = Number(document.originalUploaderId);
+    if (!Number.isFinite(originalUploaderId)) return undefined;
+
+    return (
+      communitySourceDocuments.find(
+        (candidate) =>
+          Number(candidate.ownerId) === originalUploaderId &&
+          candidate.fileName === document.fileName &&
+          Number(candidate.fileSize) === Number(document.fileSize),
+      ) ??
+      communitySourceDocuments.find(
+        (candidate) =>
+          Number(candidate.ownerId) === originalUploaderId &&
+          candidate.title === document.title &&
+          Number(candidate.subjectId) === Number(document.subjectId),
+      )
+    );
+  }, [communitySourceDocuments, document]);
+
+  const ratingTargetDocumentId =
+    originalPublicDocument?.documentId ?? documentId;
+
   const {
     data: reportReasons,
     isLoading: isReportReasonsLoading,
@@ -249,10 +294,15 @@ function DocumentDetailPage() {
         : selectedReportReason?.description ||
           "Select a report reason to see more details.";
 
-  const { data: bookmarks = [] } = useQuery({
+  const {
+    data: bookmarks = [],
+    isSuccess: areBookmarksLoaded,
+  } = useQuery({
     queryKey: ["bookmarks", currentUser?.userId],
     queryFn: getBookmarks,
     enabled: !!currentUser?.userId,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   useEffect(() => {
@@ -276,9 +326,24 @@ function DocumentDetailPage() {
       (bookmark) => Number(bookmark.document?.documentId) === Number(documentId),
     );
 
-    setIsBookmarked(Boolean(document.isBookmarked || bookmarkedByServer));
-    setSelectedRating(document.myRating ?? 0);
-  }, [bookmarks, document, documentId]);
+    // Sau khi danh sách bookmark đã tải xong, đây là nguồn dữ liệu chính xác.
+    // Không dùng phép OR với document.isBookmarked vì metadata document có thể
+    // vẫn chứa giá trị cache cũ sau khi bookmark bị xóa ở một trang khác.
+    setIsBookmarked(
+      areBookmarksLoaded
+        ? bookmarkedByServer
+        : Boolean(document.isBookmarked),
+    );
+    setSelectedRating(
+      originalPublicDocument?.myRating ?? document.myRating ?? 0,
+    );
+  }, [
+    areBookmarksLoaded,
+    bookmarks,
+    document,
+    documentId,
+    originalPublicDocument?.myRating,
+  ]);
 
   // Nếu một document của người khác bị mở nhầm qua /app/mydocuments/:id,
   // tự chuyển về đúng route community để URL và ngữ cảnh trang khớp nhau.
@@ -378,21 +443,28 @@ function DocumentDetailPage() {
             : currentDocument,
       );
 
-      queryClient.setQueryData<DocumentResponse[]>(["myDocuments"], (documents) =>
-        documents?.map((currentDocument) =>
-          currentDocument.documentId === documentId
-            ? {
-                ...currentDocument,
-                title: updatedValues.title,
-                subjectId: updatedDocument.subjectId ?? updatedValues.subjectId,
-                visibilityStatus: updatedValues.visibilityStatus,
-                updatedAt: updatedDocument.updatedAt ?? currentDocument.updatedAt,
-              }
-            : currentDocument,
-        ),
+      queryClient.setQueriesData<DocumentResponse[]>(
+        { queryKey: ["myDocuments"] },
+        (documents) =>
+          documents?.map((currentDocument) =>
+            currentDocument.documentId === documentId
+              ? {
+                  ...currentDocument,
+                  title: updatedValues.title,
+                  subjectId:
+                    updatedDocument.subjectId ?? updatedValues.subjectId,
+                  visibilityStatus: updatedValues.visibilityStatus,
+                  updatedAt:
+                    updatedDocument.updatedAt ?? currentDocument.updatedAt,
+                }
+              : currentDocument,
+          ),
       );
 
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarkPublicDocuments"] });
       toast.success(t("document.updateSuccess", "Document updated successfully"));
       setIsUpdateOpen(false);
     },
@@ -408,6 +480,8 @@ function DocumentDetailPage() {
       toast.success(t("document.deleteSuccess", "Document deleted successfully"));
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
       queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarkPublicDocuments"] });
       queryClient.invalidateQueries({ queryKey: ["admin-dashboard-stats"] });
       queryClient.invalidateQueries({ queryKey: ["admin-moderation-summary"] });
       setIsDeleteOpen(false);
@@ -426,6 +500,7 @@ function DocumentDetailPage() {
       toast.success(t("document.saveStorageSuccess", "Document saved to your storage successfully"));
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
       queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarkPublicDocuments"] });
 
       if (response.documentId) {
         navigate(`/${ROUTE.APP}/${ROUTE.MY_DOCUMENTS}/${response.documentId}`);
@@ -481,6 +556,7 @@ function DocumentDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["document", documentId] });
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
       queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarkPublicDocuments"] });
       toast.success(t("document.bookmarkSuccess", "Document bookmarked successfully"));
     },
     onError: (error) => {
@@ -532,6 +608,7 @@ function DocumentDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["document", documentId] });
       queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
       queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarkPublicDocuments"] });
       toast.success(t("document.bookmarkRemoveSuccess", "Bookmark removed successfully"));
     },
     onError: (error) => {
@@ -543,8 +620,17 @@ function DocumentDetailPage() {
   // NOTE COMMUNITY ACTION: Đánh giá sao cho document public.
   // Sau khi backend trả average/ratingCount, FE ghi lại vào cache detail và publicDocuments.
   const ratingMutation = useMutation({
-    mutationFn: (ratingValue: number) =>
-      ratingDocument(documentId as number, { ratingValue }),
+    mutationFn: (ratingValue: number) => {
+      if (
+        document?.originalUploaderId &&
+        document.visibilityStatus !== VisibilityStatus.PUBLIC &&
+        !originalPublicDocument
+      ) {
+        throw new Error("Cannot find the original public document");
+      }
+
+      return ratingDocument(ratingTargetDocumentId as number, { ratingValue });
+    },
     onSuccess: (response) => {
       setSelectedRating(response.ratingValue);
       queryClient.setQueryData<DocumentResponse>(
@@ -560,12 +646,27 @@ function DocumentDetailPage() {
             : currentDocument,
       );
 
+      if (ratingTargetDocumentId !== documentId) {
+        queryClient.setQueryData<DocumentResponse>(
+          ["document", ratingTargetDocumentId],
+          (currentDocument) =>
+            currentDocument
+              ? applyRatingToDocument(
+                  currentDocument,
+                  response.ratingValue,
+                  response.averageRating,
+                  response.ratingCount,
+                )
+              : currentDocument,
+        );
+      }
+
       // Cập nhật luôn cache danh sách Community để khi quay lại card đã hiện sao mới.
       queryClient.setQueriesData<DocumentResponse[]>(
         { queryKey: ["publicDocuments"] },
         (currentDocuments) =>
           currentDocuments?.map((currentDocument) =>
-            currentDocument.documentId === documentId
+            currentDocument.documentId === ratingTargetDocumentId
               ? applyRatingToDocument(
                   currentDocument,
                   response.ratingValue,
@@ -576,25 +677,43 @@ function DocumentDetailPage() {
           ),
       );
 
+      queryClient.invalidateQueries({
+        queryKey: ["publicDocuments"],
+        refetchType: "active",
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["bookmarkPublicDocuments"],
+        refetchType: "active",
+      });
       toast.success(t("document.rateSuccess", "Rating submitted successfully"));
     },
-    onError: () => {
-      toast.error(t("document.rateFailed", "Rating failed"));
+    onError: (error) => {
+      toast.error(
+        error instanceof Error && error.message
+          ? error.message
+          : t("document.rateFailed", "Rating failed"),
+      );
     },
   });
 
   // NOTE COMMUNITY ACTION: Report document vi phạm cho moderation team.
   // reasonId lấy trực tiếp từ API /user/reports/reasons để khớp bảng report_reason của backend.
   const reportMutation = useMutation({
-    mutationFn: () =>
-      reportDocument({
+    mutationFn: async () => {
+      let uploadedUrl: string | undefined = undefined;
+
+      if (reportEvidenceFile) {
+        const uploadRes = await uploadReportEvidence(reportEvidenceFile);
+        uploadedUrl = uploadRes.publicUrl;
+      }
+
+      return reportDocument({
         documentId: documentId as number,
         reasonId: Number(effectiveReportReasonId),
         description: reportDescription.trim() || undefined,
-        evidenceUrl: reportEvidenceFile
-          ? `image:${reportEvidenceFile.name}`
-          : undefined,
-      }),
+        evidenceUrl: uploadedUrl,
+      });
+    },
     onSuccess: () => {
       toast.success(t("document.reportSuccess", "Report submitted successfully"));
       setIsReportOpen(false);
@@ -708,6 +827,10 @@ function DocumentDetailPage() {
   }
 
   const isOwner = Number(currentUser?.userId) === Number(document.ownerId);
+  const canEdit =
+    isOwner &&
+    (!document.originalUploaderId ||
+      Number(document.originalUploaderId) === Number(currentUser?.userId));
   const isBannedOrHidden = document.moderationStatus === "HIDDEN" || document.moderationStatus === "REMOVED";
 
   if (isBannedOrHidden) {
@@ -793,10 +916,15 @@ const subjectCode =
   fileTypeLabel={fileTypeLabel}
   subjectCode={subjectCode}
   isOwner={isOwner}
+  canEdit={canEdit}
   isDeleting={deleteMutation.isPending}
   canOpenInNewTab={!!canOpenInNewTab}
   onBack={() => navigate(-1)}
-  onUpdate={() => setIsUpdateOpen(true)}
+  onUpdate={() => {
+    if (canEdit) {
+      setIsUpdateOpen(true);
+    }
+  }}
   onDelete={handleDelete}
   onOpenNewTab={() => blobPreviewUrl && window.open(blobPreviewUrl, "_blank")}
   onDownload={handleDownload}

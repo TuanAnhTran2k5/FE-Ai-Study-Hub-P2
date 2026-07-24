@@ -66,6 +66,9 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
       queryClient.invalidateQueries({ queryKey: ["admin-pending-reports"] });
       queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["document"] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarkPublicDocuments"] });
       queryClient.invalidateQueries({ queryKey: ["admin-dashboard-stats"] });
       queryClient.invalidateQueries({ queryKey: ["admin-moderation-summary"] });
     },
@@ -84,6 +87,9 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
       queryClient.invalidateQueries({ queryKey: ["admin-history-reports"] });
       queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
+      queryClient.invalidateQueries({ queryKey: ["document"] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+      queryClient.invalidateQueries({ queryKey: ["bookmarkPublicDocuments"] });
       queryClient.invalidateQueries({ queryKey: ["admin-dashboard-stats"] });
       queryClient.invalidateQueries({ queryKey: ["admin-moderation-summary"] });
     },
@@ -341,14 +347,24 @@ export default function AdminReportList({ currentUser }: AdminReportListProps) {
                           {report.description || t("admin.noDescription", "No description provided")}
                         </p>
                         {report.evidenceUrl && (
-                          <a 
-                            href={report.evidenceUrl}
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-[10px] text-primary hover:underline font-bold"
-                          >
-                            Evidence Link
-                          </a>
+                          <div className="mt-2 space-y-1.5 border-t border-border/30 pt-2">
+                            <span className="text-[10px] font-black uppercase text-muted-foreground tracking-wider block">
+                              📷 {t("admin.evidenceProof", "Ảnh minh chứng đính kèm:")}
+                            </span>
+                            <a 
+                              href={report.evidenceUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              title={t("admin.viewFullSize", "Bấm để xem ảnh kích thước đầy đủ")}
+                              className="inline-block group"
+                            >
+                              <img 
+                                src={report.evidenceUrl} 
+                                alt="Report Evidence Proof" 
+                                className="max-h-48 max-w-full rounded-2xl border border-border object-contain hover:scale-[1.02] transition-transform shadow-sm bg-black/5 dark:bg-white/5"
+                              />
+                            </a>
+                          </div>
                         )}
                       </div>
                     ))}
