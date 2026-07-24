@@ -1,6 +1,13 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckSquare, Upload } from "lucide-react";
+import {
+  CheckSquare,
+  LayoutGrid,
+  List,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -106,8 +113,17 @@ function MyDocumentsPage() {
   const [visibilityStatus, setVisibilityStatus] = useState("ALL");
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<number[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const processingTimerRef = useRef<ReturnType<typeof setInterval> | null>(
+    null,
+  );
+  const [viewMode, setViewMode] = useState<"grid" | "list">(
+    () =>
+      (localStorage.getItem("my-documents-view") as "grid" | "list") ||
+      "grid",
+  );
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -118,6 +134,40 @@ function MyDocumentsPage() {
       : localStorage.getItem("authUserId");
   const isAuthenticated =
     !!localStorage.getItem("accessToken") || !!currentUser?.userId;
+
+  const stopProcessingTimer = () => {
+    if (processingTimerRef.current) {
+      clearInterval(processingTimerRef.current);
+      processingTimerRef.current = null;
+    }
+  };
+
+  const handleUploadProgress = (rawProgress: number) => {
+    // Upload byte thật chiếm 70% tổng tiến trình hiển thị.
+    const uploadStageProgress = Math.round(
+      Math.max(0, Math.min(100, rawProgress)) * 0.7,
+    );
+
+    setUploadProgress((current) =>
+      Math.max(current, uploadStageProgress),
+    );
+
+    // Khi gửi file xong, mô phỏng từng bước xử lý nhưng không vượt quá 95%.
+    // Chỉ response thành công từ API mới được phép chuyển lên 100%.
+    if (rawProgress >= 100 && !processingTimerRef.current) {
+      processingTimerRef.current = setInterval(() => {
+        setUploadProgress((current) => {
+          if (current >= 95) return 95;
+          if (current < 85) return Math.min(85, current + 3);
+          return Math.min(95, current + 1);
+        });
+      }, 450);
+    }
+  };
+
+  useEffect(() => {
+    return stopProcessingTimer;
+  }, []);
 
   const {
     data: documents = [],
@@ -130,6 +180,9 @@ function MyDocumentsPage() {
     queryFn: getMyDocuments,
     enabled: isAuthenticated,
     retry: 1,
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 
   const { data: semesters = [], isLoading: isSemestersLoading } = useQuery({
@@ -150,12 +203,19 @@ function MyDocumentsPage() {
     Error,
     DocumentUploadRequest
   >({
-    mutationFn: (data) => uploadDocument(data, setUploadProgress),
+    mutationFn: (data) => uploadDocument(data, handleUploadProgress),
     onMutate: () => {
+      stopProcessingTimer();
       setUploadProgress(0);
     },
-    onSuccess: () => {
+    onSuccess: async () => {
+      stopProcessingTimer();
+      setUploadProgress((current) => Math.max(current, 85));
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      setUploadProgress((current) => Math.max(current, 95));
+      await new Promise((resolve) => setTimeout(resolve, 300));
       setUploadProgress(100);
+      await new Promise((resolve) => setTimeout(resolve, 550));
       toast.success(t("document.uploadSuccess", "Upload document successfully"));
       setIsUploadOpen(false);
       setUploadProgress(0);
@@ -164,6 +224,7 @@ function MyDocumentsPage() {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
     onError: (error: any) => {
+      stopProcessingTimer();
       setUploadProgress(0);
       toast.error(getUploadErrorMessage(error, t), {
         toastId: "upload-document-error",
@@ -180,6 +241,7 @@ function MyDocumentsPage() {
     onSuccess: () => {
       toast.success(t("document.deleteSuccess", "Documents deleted successfully"));
       setSelectedDocumentIds([]);
+      setIsSelectionMode(false);
       setIsBulkDeleteOpen(false);
       queryClient.invalidateQueries({ queryKey: ["myDocuments"] });
     },
@@ -297,10 +359,6 @@ function MyDocumentsPage() {
 
   const handleBulkDeleteOpenChange = (open: boolean) => {
     setIsBulkDeleteOpen(open);
-
-    if (!open && !bulkDeleteMutation.isPending) {
-      setSelectedDocumentIds([]);
-    }
   };
 
   const handleToggleDocumentSelect = (documentId: number) => {
@@ -313,8 +371,13 @@ function MyDocumentsPage() {
 
   const handleSelectAllDocuments = () => {
     setSelectedDocumentIds(
-      enrichedDocuments.map((document) => document.documentId),
+      filteredDocuments.map((document) => document.documentId),
     );
+  };
+
+  const handleExitSelectionMode = () => {
+    setIsSelectionMode(false);
+    setSelectedDocumentIds([]);
   };
 
   const handleConfirmBulkDelete = () => {
@@ -405,14 +468,61 @@ function MyDocumentsPage() {
 
         <div className="flex flex-col items-start gap-3 md:items-end">
           <div className="flex flex-wrap justify-start gap-3 md:justify-end">
+            <div className="flex h-11 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+              <button
+                type="button"
+                aria-label="List view"
+                aria-pressed={viewMode === "list"}
+                onClick={() => {
+                  setViewMode("list");
+                  localStorage.setItem("my-documents-view", "list");
+                }}
+                className={`flex w-12 items-center justify-center transition ${
+                  viewMode === "list"
+                    ? "bg-primary/15 text-primary"
+                    : "text-muted-foreground hover:bg-secondary"
+                }`}
+              >
+                <List className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                aria-label="Grid view"
+                aria-pressed={viewMode === "grid"}
+                onClick={() => {
+                  setViewMode("grid");
+                  localStorage.setItem("my-documents-view", "grid");
+                }}
+                className={`flex w-12 items-center justify-center border-l border-border transition ${
+                  viewMode === "grid"
+                    ? "bg-primary/15 text-primary"
+                    : "text-muted-foreground hover:bg-secondary"
+                }`}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+            </div>
+
             <Button
               type="button"
               variant="outline"
-              onClick={() => setIsBulkDeleteOpen(true)}
+              onClick={() => {
+                if (isSelectionMode) {
+                  handleExitSelectionMode();
+                } else {
+                  setIsSelectionMode(true);
+                }
+              }}
               className="h-11 cursor-pointer rounded-xl px-5 font-bold"
             >
-              <CheckSquare className="mr-2 h-4 w-4" />
-              {t("myDocuments.select", "Select Document")}
+              {isSelectionMode ? (
+                <X className="mr-2 h-4 w-4" />
+              ) : (
+                <CheckSquare className="mr-2 h-4 w-4" />
+              )}
+              {isSelectionMode
+                ? t("common.cancel", "Cancel")
+                : t("myDocuments.select", "Select Document")}
             </Button>
 
             <Button
@@ -456,6 +566,50 @@ function MyDocumentsPage() {
         }}
       />
 
+      {isSelectionMode && !isDocumentsLoading && !isDocumentsError && (
+        <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-primary/25 bg-primary/5 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-black text-card-foreground">
+              {selectedDocumentIds.length} document
+              {selectedDocumentIds.length === 1 ? "" : "s"} selected
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Select documents directly from the cards below.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10 rounded-xl font-bold"
+              onClick={
+                selectedDocumentIds.length === filteredDocuments.length &&
+                filteredDocuments.length > 0
+                  ? () => setSelectedDocumentIds([])
+                  : handleSelectAllDocuments
+              }
+              disabled={filteredDocuments.length === 0}
+            >
+              {selectedDocumentIds.length === filteredDocuments.length &&
+              filteredDocuments.length > 0
+                ? "Clear all"
+                : "Select all"}
+            </Button>
+
+            <Button
+              type="button"
+              className="h-10 rounded-xl bg-red-600 font-bold text-white hover:bg-red-700"
+              onClick={() => setIsBulkDeleteOpen(true)}
+              disabled={selectedDocumentIds.length === 0}
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete {selectedDocumentIds.length || ""}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {isDocumentsLoading ? (
         <div className="rounded-2xl border border-border bg-card p-10 text-center shadow-sm">
           <p className="text-lg font-bold text-card-foreground">
@@ -487,6 +641,12 @@ function MyDocumentsPage() {
           <DocumentGrid
             documents={paginatedDocuments}
             onView={(document) => handleViewDocument(document.documentId)}
+            selectionMode={isSelectionMode}
+            selectedDocumentIds={selectedDocumentIds}
+            onToggleSelect={(document) =>
+              handleToggleDocumentSelect(document.documentId)
+            }
+            viewMode={viewMode}
           />
 
           {filteredDocuments.length > 0 && (
@@ -603,6 +763,7 @@ function MyDocumentsPage() {
         onSelectAll={handleSelectAllDocuments}
         onClearSelection={() => setSelectedDocumentIds([])}
         onConfirmDelete={handleConfirmBulkDelete}
+        confirmationOnly
       />
     </section>
   );
