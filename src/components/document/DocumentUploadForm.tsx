@@ -87,16 +87,16 @@ function DocumentUploadForm({
   return (
     <form
       onSubmit={onSubmit}
-      className="grid gap-6 lg:grid-cols-[1fr_1.1fr] lg:items-start"
+      className="grid w-full min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:items-start"
     >
       {/* CỘT TRÁI: CHỌN FILE */}
-      <div className="space-y-4">
+      <div className="min-w-0 space-y-4">
         <p className="text-sm text-muted-foreground">
           {t("documentUpload.shareText", "Share your knowledge with the community and help others learn.")}
         </p>
 
         <div
-          className={`rounded-2xl border-2 border-dashed px-6 py-8 text-center transition ${
+          className={`flex min-h-[350px] min-w-0 flex-col justify-center overflow-hidden rounded-2xl border-2 border-dashed px-6 py-8 text-center transition ${
             selectedFile
               ? "border-primary/20 bg-card"
               : "border-primary/30 bg-primary/5 hover:border-primary/50 hover:bg-primary/10"
@@ -114,13 +114,16 @@ function DocumentUploadForm({
           />
 
           {selectedFile ? (
-            <div className="mx-auto flex max-w-2xl items-center gap-4 rounded-2xl border border-border bg-background p-4 text-left shadow-sm">
+            <div className="mx-auto flex w-full min-w-0 max-w-2xl items-center gap-4 overflow-hidden rounded-2xl border border-border bg-background p-4 text-left shadow-sm">
               <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
                 <FileText className="size-6" />
               </div>
 
               <div className="min-w-0 flex-1">
-                <p className="truncate text-base font-black text-card-foreground">
+                <p
+                  className="block max-w-full truncate text-base font-black text-card-foreground"
+                  title={selectedFile.name}
+                >
                   {selectedFile.name}
                 </p>
                 <p className="mt-1 text-sm font-medium text-muted-foreground">
@@ -174,7 +177,7 @@ function DocumentUploadForm({
       </div>
 
       {/* CỘT PHẢI: THÔNG TIN DOCUMENT */}
-      <div className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+      <div className="min-w-0 rounded-2xl border border-border bg-card p-6 shadow-sm">
         <h3 className="text-xl font-black text-card-foreground">
           {t("documentUpload.docInfo", "Document Information")}
         </h3>
@@ -317,9 +320,13 @@ function DocumentUploadForm({
             <div className="mb-4 w-full rounded-xl border border-border bg-background p-3">
               <div className="mb-2 flex items-center justify-between text-sm">
                 <span className="font-bold text-card-foreground">
-                  {uploadProgress >= 99
-                    ? t("documentUpload.processing", "Processing document...")
-                    : t("documentUpload.uploading", "Uploading document...")}
+                  {uploadProgress >= 100
+                    ? t("documentUpload.completed", "Upload completed")
+                    : uploadProgress >= 85
+                      ? t("documentUpload.finalizing", "Finalizing document...")
+                      : uploadProgress >= 70
+                        ? t("documentUpload.processing", "Processing document...")
+                        : t("documentUpload.uploading", "Uploading document...")}
                 </span>
                 <span className="font-bold text-primary">
                   {uploadProgress}%

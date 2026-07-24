@@ -67,7 +67,9 @@ export const uploadDocument = async (
     (progressEvent.loaded * 100) / progressEvent.total,
   );
 
-  onUploadProgress?.(Math.min(99, percent));
+  // Chỉ báo tiến độ truyền byte thực tế. UI sẽ quy đổi phần upload thành
+  // một giai đoạn riêng và giữ phần còn lại cho thời gian backend xử lý.
+  onUploadProgress?.(Math.min(100, percent));
 },
     },
   );

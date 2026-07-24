@@ -1,12 +1,28 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
-import { Bookmark, Search } from "lucide-react";
+import {
+  Bookmark,
+  CheckSquare,
+  LayoutGrid,
+  List,
+  Search,
+  Trash2,
+  X,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 
 import DocumentGrid from "@/components/document/DocumentGrid";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -24,7 +40,10 @@ import {
 import { ERROR_CODE } from "@/constants/errorCode";
 import { ROUTE } from "@/models/routePath";
 import type { SubjectResponse } from "@/types/academic.type";
-import type { DocumentResponse } from "@/types/document.type";
+import type {
+  BookmarkResponse,
+  DocumentResponse,
+} from "@/types/document.type";
 import type { RootState } from "@/redux/store";
 import type { User } from "@/models/user";
 
@@ -37,6 +56,13 @@ function BookmarksPage() {
   const [sortOrder, setSortOrder] = useState<BookmarkSort>("newest");
   const [ownerFilter, setOwnerFilter] =
     useState<BookmarkOwnerFilter>("all");
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedDocumentIds, setSelectedDocumentIds] = useState<number[]>([]);
+  const [isBulkRemoveOpen, setIsBulkRemoveOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"grid" | "list">(
+    () =>
+      (localStorage.getItem("bookmarks-view") as "grid" | "list") || "grid",
+  );
 
   const currentUser = useSelector(
     (state: RootState) => state.user as User | null,
@@ -52,8 +78,11 @@ function BookmarksPage() {
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ["bookmarks"],
+    queryKey: ["bookmarks", currentUserId],
     queryFn: getBookmarks,
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
 
   // Bookmark API currently returns only the document's basic owner fields.
@@ -63,6 +92,8 @@ function BookmarksPage() {
     queryKey: ["bookmarkPublicDocuments"],
     queryFn: () => searchPublicDocuments(""),
     retry: 1,
+    staleTime: 0,
+    refetchOnMount: "always",
   });
 
   const { data: academicSubjects = [] } = useQuery({
@@ -82,6 +113,14 @@ function BookmarksPage() {
 
     onSuccess: (_response, documentId) => {
       toast.success("Bookmark removed successfully");
+      queryClient.setQueriesData<BookmarkResponse[]>(
+        { queryKey: ["bookmarks"] },
+        (currentBookmarks) =>
+          currentBookmarks?.filter(
+            (bookmark) =>
+              Number(bookmark.document.documentId) !== Number(documentId),
+          ),
+      );
       queryClient.setQueryData<DocumentResponse>(
         ["document", documentId],
         (currentDocument) =>
@@ -115,6 +154,53 @@ function BookmarksPage() {
       });
     },
 
+    onError: (error: Error) => {
+      toast.error(error.message || t(ERROR_CODE.SERVER_ERROR));
+    },
+  });
+
+  const bulkRemoveBookmarkMutation = useMutation({
+    mutationFn: async (documentIds: number[]) => {
+      await Promise.all(documentIds.map((documentId) => removeBookmark(documentId)));
+    },
+    onSuccess: (_response, documentIds) => {
+      toast.success(
+        `${documentIds.length} bookmark${documentIds.length === 1 ? "" : "s"} removed successfully`,
+      );
+
+      documentIds.forEach((documentId) => {
+        queryClient.setQueryData<DocumentResponse>(
+          ["document", documentId],
+          (currentDocument) =>
+            currentDocument
+              ? { ...currentDocument, isBookmarked: false }
+              : currentDocument,
+        );
+      });
+
+      queryClient.setQueriesData<BookmarkResponse[]>(
+        { queryKey: ["bookmarks"] },
+        (currentBookmarks) =>
+          currentBookmarks?.filter(
+            (bookmark) =>
+              !documentIds.includes(Number(bookmark.document.documentId)),
+          ),
+      );
+      queryClient.setQueriesData<DocumentResponse[]>(
+        { queryKey: ["publicDocuments"] },
+        (currentDocuments) =>
+          currentDocuments?.map((document) =>
+            documentIds.includes(document.documentId)
+              ? { ...document, isBookmarked: false }
+              : document,
+          ),
+      );
+      queryClient.invalidateQueries({ queryKey: ["bookmarks"] });
+      queryClient.invalidateQueries({ queryKey: ["publicDocuments"] });
+      setSelectedDocumentIds([]);
+      setIsSelectionMode(false);
+      setIsBulkRemoveOpen(false);
+    },
     onError: (error: Error) => {
       toast.error(error.message || t(ERROR_CODE.SERVER_ERROR));
     },
@@ -199,6 +285,19 @@ function BookmarksPage() {
     navigate(`/${ROUTE.APP}/${ROUTE.COMMUNITY}/${documentId}`);
   };
 
+  const handleToggleDocumentSelect = (documentId: number) => {
+    setSelectedDocumentIds((currentIds) =>
+      currentIds.includes(documentId)
+        ? currentIds.filter((id) => id !== documentId)
+        : [...currentIds, documentId],
+    );
+  };
+
+  const handleExitSelectionMode = () => {
+    setIsSelectionMode(false);
+    setSelectedDocumentIds([]);
+  };
+
   if (isLoading) {
     return (
       <section className="w-full px-8 py-10">
@@ -240,8 +339,67 @@ function BookmarksPage() {
           </p>
         </div>
 
-        <div className="text-sm text-muted-foreground">
-          {t("bookmarks.showingDocs", { count: filteredBookmarks.length })}
+        <div className="flex flex-col items-start gap-3 md:items-end">
+          <div className="flex flex-wrap gap-3">
+            <div className="flex h-11 overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+              <button
+                type="button"
+                aria-label="List view"
+                aria-pressed={viewMode === "list"}
+                onClick={() => {
+                  setViewMode("list");
+                  localStorage.setItem("bookmarks-view", "list");
+                }}
+                className={`flex w-12 items-center justify-center transition ${
+                  viewMode === "list"
+                    ? "bg-primary/15 text-primary"
+                    : "text-muted-foreground hover:bg-secondary"
+                }`}
+              >
+                <List className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                aria-label="Grid view"
+                aria-pressed={viewMode === "grid"}
+                onClick={() => {
+                  setViewMode("grid");
+                  localStorage.setItem("bookmarks-view", "grid");
+                }}
+                className={`flex w-12 items-center justify-center border-l border-border transition ${
+                  viewMode === "grid"
+                    ? "bg-primary/15 text-primary"
+                    : "text-muted-foreground hover:bg-secondary"
+                }`}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() =>
+                isSelectionMode
+                  ? handleExitSelectionMode()
+                  : setIsSelectionMode(true)
+              }
+              className="h-11 cursor-pointer rounded-xl px-5 font-bold"
+            >
+              {isSelectionMode ? (
+                <X className="mr-2 h-4 w-4" />
+              ) : (
+                <CheckSquare className="mr-2 h-4 w-4" />
+              )}
+              {isSelectionMode
+                ? t("common.cancel", "Cancel")
+                : t("myDocuments.select", "Select Document")}
+            </Button>
+          </div>
+
+          <div className="text-sm text-muted-foreground">
+            {t("bookmarks.showingDocs", { count: filteredBookmarks.length })}
+          </div>
         </div>
       </div>
 
@@ -293,15 +451,72 @@ function BookmarksPage() {
         </div>
       </div>
 
+      {isSelectionMode && filteredDocuments.length > 0 && (
+        <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-primary/25 bg-primary/5 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="font-black text-card-foreground">
+              {selectedDocumentIds.length} document
+              {selectedDocumentIds.length === 1 ? "" : "s"} selected
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Select bookmarked documents directly from the cards below.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10 rounded-xl font-bold"
+              onClick={
+                selectedDocumentIds.length === filteredDocuments.length
+                  ? () => setSelectedDocumentIds([])
+                  : () =>
+                      setSelectedDocumentIds(
+                        filteredDocuments.map((document) => document.documentId),
+                      )
+              }
+            >
+              {selectedDocumentIds.length === filteredDocuments.length
+                ? "Clear all"
+                : "Select all"}
+            </Button>
+
+            <Button
+              type="button"
+              className="h-10 rounded-xl bg-red-600 font-bold text-white hover:bg-red-700"
+              onClick={() => setIsBulkRemoveOpen(true)}
+              disabled={selectedDocumentIds.length === 0}
+            >
+              <Bookmark className="mr-2 h-4 w-4 fill-current" />
+              Remove {selectedDocumentIds.length || ""}
+            </Button>
+          </div>
+        </div>
+      )}
+
       {filteredDocuments.length > 0 ? (
         <DocumentGrid
           documents={filteredDocuments}
-          isRemoving={removeBookmarkMutation.isPending}
+          isRemoving={
+            removeBookmarkMutation.isPending ||
+            bulkRemoveBookmarkMutation.isPending
+          }
           getBookmarkedAt={(document) =>
             bookmarkedAtMap.get(document.documentId)
           }
           onView={(document) => handleViewBookmark(document.documentId)}
-          onRemove={(document) => handleRemoveBookmark(document.documentId)}
+          onRemove={
+            isSelectionMode
+              ? undefined
+              : (document) => handleRemoveBookmark(document.documentId)
+          }
+          selectionMode={isSelectionMode}
+          selectedDocumentIds={selectedDocumentIds}
+          onToggleSelect={(document) =>
+            handleToggleDocumentSelect(document.documentId)
+          }
+          viewMode={viewMode}
         />
       ) : (
         <div className="rounded-3xl border border-border bg-card p-10 text-center shadow-sm">
@@ -316,6 +531,74 @@ function BookmarksPage() {
           </p>
         </div>
       )}
+
+      <Dialog open={isBulkRemoveOpen} onOpenChange={setIsBulkRemoveOpen}>
+        <DialogContent className="overflow-hidden rounded-3xl border border-red-500/20 p-0 shadow-2xl sm:max-w-[520px]">
+          <div className="bg-gradient-to-b from-red-500/10 to-card px-8 pb-7 pt-8">
+            <DialogHeader className="items-center text-center">
+              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/15 text-red-500 ring-8 ring-red-500/5">
+                <Trash2 className="h-6 w-6" />
+              </div>
+              <DialogTitle className="text-xl font-black text-card-foreground">
+                Remove Bookmarks
+              </DialogTitle>
+              <DialogDescription className="max-w-sm text-sm leading-6 text-muted-foreground">
+                Remove {selectedDocumentIds.length} selected document
+                {selectedDocumentIds.length === 1 ? "" : "s"} from your
+                bookmarks? The documents themselves will not be deleted.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="mt-5 max-h-40 space-y-2 overflow-y-auto rounded-2xl border border-border bg-card/70 p-3">
+              {filteredDocuments
+                .filter((document) =>
+                  selectedDocumentIds.includes(document.documentId),
+                )
+                .map((document) => (
+                  <div
+                    key={document.documentId}
+                    className="flex items-center gap-3 rounded-xl bg-secondary/70 px-3 py-2"
+                  >
+                    <Bookmark className="h-4 w-4 shrink-0 fill-primary text-primary" />
+                    <span className="min-w-0 flex-1 truncate text-sm font-bold text-card-foreground">
+                      {document.title}
+                    </span>
+                    <span className="shrink-0 text-xs font-semibold text-muted-foreground">
+                      {document.subjectCode ?? `#${document.subjectId}`}
+                    </span>
+                  </div>
+                ))}
+            </div>
+
+            <div className="mt-7 grid gap-3 sm:grid-cols-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="h-12 rounded-2xl border-transparent bg-secondary font-bold"
+                onClick={() => setIsBulkRemoveOpen(false)}
+                disabled={bulkRemoveBookmarkMutation.isPending}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className="h-12 rounded-2xl bg-red-600 font-black text-white shadow-lg shadow-red-500/20 hover:bg-red-700"
+                onClick={() =>
+                  bulkRemoveBookmarkMutation.mutate(selectedDocumentIds)
+                }
+                disabled={
+                  selectedDocumentIds.length === 0 ||
+                  bulkRemoveBookmarkMutation.isPending
+                }
+              >
+                {bulkRemoveBookmarkMutation.isPending
+                  ? "Removing..."
+                  : `Remove ${selectedDocumentIds.length}`}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

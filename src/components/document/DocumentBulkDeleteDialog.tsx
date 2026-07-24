@@ -21,6 +21,7 @@ type DocumentBulkDeleteDialogProps = {
   onSelectAll: () => void;
   onClearSelection: () => void;
   onConfirmDelete: () => void;
+  confirmationOnly?: boolean;
 };
 
 function DocumentBulkDeleteDialog({
@@ -33,6 +34,7 @@ function DocumentBulkDeleteDialog({
   onSelectAll,
   onClearSelection,
   onConfirmDelete,
+  confirmationOnly = false,
 }: DocumentBulkDeleteDialogProps) {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const selectedCount = selectedDocumentIds.length;
@@ -51,6 +53,72 @@ function DocumentBulkDeleteDialog({
 
     onOpenChange(open);
   };
+
+  if (confirmationOnly) {
+    const selectedDocuments = documents.filter((document) =>
+      selectedDocumentIds.includes(document.documentId),
+    );
+
+    return (
+      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+        <DialogContent className="overflow-hidden rounded-3xl border border-red-500/20 p-0 shadow-2xl sm:max-w-[520px]">
+          <div className="bg-gradient-to-b from-red-500/10 to-card px-8 pb-7 pt-8">
+            <DialogHeader className="items-center text-center">
+              <div className="mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-red-500/15 text-red-500 ring-8 ring-red-500/5">
+                <Trash2 className="h-6 w-6" />
+              </div>
+
+              <DialogTitle className="text-xl font-black text-card-foreground">
+                Delete Documents
+              </DialogTitle>
+              <DialogDescription className="max-w-sm text-sm leading-6 text-muted-foreground">
+                Delete {selectedCount} selected document
+                {selectedCount === 1 ? "" : "s"}? This action cannot be undone.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="mt-5 max-h-40 space-y-2 overflow-y-auto rounded-2xl border border-border bg-card/70 p-3">
+              {selectedDocuments.map((document) => (
+                <div
+                  key={document.documentId}
+                  className="flex items-center gap-3 rounded-xl bg-secondary/70 px-3 py-2"
+                >
+                  <FileText className="h-4 w-4 shrink-0 text-primary" />
+                  <span className="min-w-0 flex-1 truncate text-sm font-bold text-card-foreground">
+                    {document.title}
+                  </span>
+                  <span className="shrink-0 text-xs font-semibold text-muted-foreground">
+                    {document.subjectCode ?? `#${document.subjectId}`}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-7 grid gap-3 sm:grid-cols-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="h-12 rounded-2xl border-transparent bg-secondary font-bold"
+                onClick={() => onOpenChange(false)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                type="button"
+                className="h-12 rounded-2xl bg-red-600 font-black text-white shadow-lg shadow-red-500/20 hover:bg-red-700"
+                onClick={onConfirmDelete}
+                disabled={selectedCount === 0 || isDeleting}
+              >
+                {isDeleting ? "Deleting..." : `Delete ${selectedCount}`}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <>
