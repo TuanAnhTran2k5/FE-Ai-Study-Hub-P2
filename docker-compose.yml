@@ -2,6 +2,11 @@ services:
   frontend:
     image: ${DOCKER_USERNAME}/fe-ai-study-hub:${IMAGE_TAG:-latest}
     container_name: frontend-app
-    ports:
-      - "80:80"
     restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    external: true
+
