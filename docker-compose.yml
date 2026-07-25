@@ -3,6 +3,11 @@ services:
     image: ${DOCKER_USERNAME}/fe-ai-study-hub:${IMAGE_TAG:-latest}
     container_name: frontend-app
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - app-network
 

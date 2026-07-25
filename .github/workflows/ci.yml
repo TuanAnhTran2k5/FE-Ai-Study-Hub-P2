@@ -5,14 +5,8 @@ on:
     branches:
       - main
       - master
-      - TuanAnh-FE
       - 'feature/**'
       - 'ci/**'
-  pull_request:
-    branches:
-      - main
-      - master
-      - TuanAnh-FE
   workflow_dispatch:
     inputs:
       reason:
