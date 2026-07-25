@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowUp, FileText, Loader2, Plus, Sparkles } from "lucide-react";
+import { ArrowUp, Check, Copy, FileText, Loader2, Plus, Sparkles } from "lucide-react";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import AvtAI from "/img/AvtAI.png";
 
 import { Button } from "@/components/ui/button";
+import FormattedMarkdown from "@/components/ai-chat/FormattedMarkdown";
 import { ERROR_CODE } from "@/constants/errorCode";
 import {
   askRagSessionQuestion,
@@ -48,6 +49,42 @@ interface AskInSessionVariables {
   question: string;
   documentIds: number[];
 }
+
+const CopyAllButton: React.FC<{ text: string }> = ({ text }) => {
+  const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="flex items-center gap-1.5 rounded-lg border border-border/40 bg-muted/40 px-2.5 py-1 text-[11px] font-bold text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all cursor-pointer shadow-sm"
+      title={t("aiChat.copyAll", "Copy entire answer")}
+    >
+      {copied ? (
+        <>
+          <Check className="size-3 text-emerald-500 animate-in fade-in duration-150" />
+          <span className="text-emerald-500">{t("aiChat.copied", "Copied")}</span>
+        </>
+      ) : (
+        <>
+          <Copy className="size-3" />
+          <span>{t("aiChat.copyAll", "Copy All")}</span>
+        </>
+      )}
+    </button>
+  );
+};
 
 function ChatArea({
   activeSessionId,
@@ -336,7 +373,16 @@ function ChatArea({
                         : "rounded-bl-lg border border-border/60 bg-card text-card-foreground"
                     }`}
                   >
-                    <p className="whitespace-pre-line">{message.content}</p>
+                    {message.role === "user" ? (
+                      <p className="whitespace-pre-line">{message.content}</p>
+                    ) : (
+                      <div className="space-y-3">
+                        <FormattedMarkdown content={message.content} />
+                        <div className="flex justify-end pt-1 border-t border-border/20">
+                          <CopyAllButton text={message.content} />
+                        </div>
+                      </div>
+                    )}
 
                     {message.sources && message.sources.length > 0 && (
                       <div className="mt-3 border-t border-border/40 pt-2.5">

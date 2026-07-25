@@ -730,7 +730,10 @@
     "addStatus": "Thêm",
     "loadingMessages": "Đang tải tin nhắn...",
     "sendMessage": "Gửi tin nhắn",
-    "searchPlaceholder": "Tìm kiếm theo tiêu đề, môn học..."
+    "searchPlaceholder": "Tìm kiếm theo tiêu đề, môn học...",
+    "copyCode": "Sao chép mã",
+    "copyAll": "Sao chép tất cả",
+    "copied": "Đã sao chép"
   },
   "bookmarks": {
     "label": "Đã lưu",
