@@ -12,8 +12,7 @@ jobs:
     if: >
       github.event.workflow_run.conclusion == 'success' &&
       (github.event.workflow_run.head_branch == 'main' ||
-       github.event.workflow_run.head_branch == 'master' ||
-       github.event.workflow_run.head_branch == 'TuanAnh-FE')
+       github.event.workflow_run.head_branch == 'master')
 
     steps:
       - name: Checkout Code
@@ -44,5 +43,6 @@ jobs:
             echo "Deploying image: ${DOCKER_USERNAME}/fe-ai-study-hub:${IMAGE_TAG}"
             docker compose pull
             docker compose up -d --remove-orphans
+            docker exec nginx-proxy-manager-app-proxy-1 nginx -s reload || true
             echo "Deploy completed! Running containers:"
             docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
