@@ -730,7 +730,10 @@
     "addStatus": "Add",
     "loadingMessages": "Loading messages...",
     "sendMessage": "Send message",
-    "searchPlaceholder": "Search by title, subject..."
+    "searchPlaceholder": "Search by title, subject...",
+    "copyCode": "Copy Code",
+    "copyAll": "Copy All",
+    "copied": "Copied"
   },
   "bookmarks": {
     "label": "Bookmarks",
