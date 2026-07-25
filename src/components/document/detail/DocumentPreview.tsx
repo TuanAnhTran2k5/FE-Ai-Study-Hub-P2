@@ -277,19 +277,7 @@ function PdfPreview({ blob, title }: { blob: Blob; title: string }) {
   };
 
   if (renderError) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-        <FileText className="h-16 w-16 text-muted-foreground" />
-
-        <h2 className="mt-4 text-xl font-bold text-card-foreground">
-          Cannot preview this PDF
-        </h2>
-
-        <p className="mt-2 max-w-md text-muted-foreground">
-          The PDF content could not be rendered in the browser.
-        </p>
-      </div>
-    );
+    return <NativePdfPreview blob={blob} title={title} />;
   }
 
   return (
@@ -323,6 +311,42 @@ function PdfPreview({ blob, title }: { blob: Blob; title: string }) {
         <div ref={previewRef} className="mx-auto w-fit" />
       </div>
     </div>
+  );
+}
+
+function NativePdfPreview({ blob, title }: { blob: Blob; title: string }) {
+  const [pdfUrl, setPdfUrl] = useState("");
+
+  useEffect(() => {
+    const objectUrl = URL.createObjectURL(
+      blob.type === "application/pdf"
+        ? blob
+        : new Blob([blob], { type: "application/pdf" }),
+    );
+
+    setPdfUrl(objectUrl);
+
+    return () => {
+      URL.revokeObjectURL(objectUrl);
+    };
+  }, [blob]);
+
+  if (!pdfUrl) {
+    return (
+      <div className="flex h-full items-center justify-center bg-white px-6 text-center">
+        <p className="text-sm font-semibold text-slate-700">
+          Loading PDF preview...
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <iframe
+      src={pdfUrl}
+      title={`Preview of ${title}`}
+      className="h-full w-full border-0 bg-white"
+    />
   );
 }
 
