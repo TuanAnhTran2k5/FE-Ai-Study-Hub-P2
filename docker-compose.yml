@@ -1,17 +1,18 @@
+version: '3.8'
+
 services:
   frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: ${DOCKER_USERNAME}/fe-ai-study-hub:${IMAGE_TAG:-latest}
-    container_name: frontend-app
-    restart: unless-stopped
+    container_name: fe-ai-study-hub
+    restart: always
+    ports:
+      - "3000:80"
+    mem_limit: 150m
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    external: true
-

@@ -1,18 +1,27 @@
 name: Frontend CI Pipeline
+run-name: FE CI triggered by ${{ github.actor }}
 
 on:
   push:
     branches:
       - main
       - master
-      - 'feature/**'
-      - 'ci/**'
+      - TuanAnh-FE
+  pull_request:
+    branches:
+      - main
+      - master
+      - TuanAnh-FE
   workflow_dispatch:
     inputs:
       reason:
         description: 'Lý do chạy thủ công'
         required: false
         default: 'Manual test'
+
+concurrency:
+  group: fe-ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build-and-push:
