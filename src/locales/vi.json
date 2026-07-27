@@ -293,7 +293,8 @@
         "amber": "Vàng hổ phách",
         "rose": "Hồng đỏ",
         "pink": "Hồng thanh lịch",
-        "slate": "Xám tối giản"
+        "slate": "Xám tối giản",
+        "custom": "Tùy chỉnh RGB"
       }
     },
     "cache": {
@@ -890,7 +891,10 @@
     "subjectNamePlaceholder": "vd: C# .NET Programming",
     "selectType": "Chọn loại môn",
     "selectSemester": "Chọn học kỳ",
-    "detailsAboutSubject": "Chi tiết về môn học này..."
+    "detailsAboutSubject": "Chi tiết về môn học này...",
+    "comboSelectLabel": "Combo (Không bắt buộc)",
+    "selectComboPlaceholder": "Chọn combo (tùy chọn)",
+    "comboNone": "Không (Để trống)"
   },
   "documentUpload": {
     "shareText": "Chia sẻ kiến thức của bạn với cộng đồng và giúp đỡ người khác học tập.",
@@ -963,6 +967,17 @@
     "btnOpenTab": "Mở Tab mới",
     "btnDownload": "Tải xuống",
     "btnBack": "Quay lại",
+    "dialogUpdateTitle": "Cập nhật tài liệu",
+    "dialogUpdateDesc": "Chỉnh sửa thông tin tài liệu và lưu các thay đổi của bạn.",
+    "replaceFileLabel": "Thay thế tệp tài liệu (Tùy chọn)",
+    "replaceFileSwitch": "Thay thế tệp tin mới (Thay đổi nội dung tài liệu)",
+    "chooseFilePrompt": "Chọn tệp thay thế",
+    "mustBeFile": "Bắt buộc phải là tệp {{ext}}. Tối đa 20MB.",
+    "btnEditContent": "Chỉnh sửa nội dung",
+    "editTab": "Soạn thảo",
+    "previewTab": "Xem trước",
+    "noPreviewMarkdown": "Chưa có nội dung để hiển thị. Hãy nhập gì đó trong tab soạn thảo!",
+    "savingChanges": "Đang lưu...",
     "infoTitle": "Thông tin tài liệu",
     "statsTitle": "Thống kê",
     "statistics": {

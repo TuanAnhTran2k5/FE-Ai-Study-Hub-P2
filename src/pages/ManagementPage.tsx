@@ -38,6 +38,7 @@ import {
   deleteSubject,
   restoreComboSubject,
   restoreSubject,
+  getUnassignedComboSubjects,
 } from "@/services/adminCurriculumService";
 
 // Import Types & Constants
@@ -136,6 +137,12 @@ function ManagementPage() {
   const { data: subjects = [], isLoading: isLoadingSubjects } = useQuery({
     queryKey: ["admin-subjects"],
     queryFn: () => getAllSubjects(),
+  });
+
+  // Get Unassigned Combo Subjects
+  const { data: unassignedSubjects = [] } = useQuery({
+    queryKey: ["admin-unassigned-combo-subjects"],
+    queryFn: getUnassignedComboSubjects,
   });
 
   const normalizedSubjectSearch = subjectSearchKeyword.trim().toLowerCase();
@@ -237,6 +244,7 @@ function ManagementPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
       queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-unassigned-combo-subjects"] });
       toast.success(t("success.createCombo"));
       setIsComboDialogOpen(false);
     },
@@ -251,6 +259,7 @@ function ManagementPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
       queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-unassigned-combo-subjects"] });
       toast.success(t("success.updateCombo"));
       setIsComboDialogOpen(false);
       setIsSubjectDialogOpen(false);
@@ -267,6 +276,7 @@ function ManagementPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
       queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-unassigned-combo-subjects"] });
       toast.success(t("success.deleteCombo"));
       setDeleteConfirm(null);
     },
@@ -276,19 +286,19 @@ function ManagementPage() {
   });
 
   const restoreComboMutation = useMutation({
-  mutationFn: restoreComboSubject,
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
-    queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
-
-    toast.success(t("success.restoreCombo", "Combo restored successfully!"));
-  },
-  onError: (error: any) => {
-    toast.error(
-      error.response?.data?.message || "Failed to restore combo",
-    );
-  },
-});
+    mutationFn: restoreComboSubject,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-unassigned-combo-subjects"] });
+      toast.success(t("success.restoreCombo", "Combo restored successfully!"));
+    },
+    onError: (error: any) => {
+      toast.error(
+        error.response?.data?.message || "Failed to restore combo",
+      );
+    },
+  });
 
   // 3. Subject CRUD Mutations (Tab All Subjects)
   const createSubjectMutation = useMutation({
@@ -653,6 +663,7 @@ function ManagementPage() {
         onOpenChange={setIsComboDialogOpen}
         editingCombo={editingCombo}
         semesters={semesters}
+        unassignedSubjects={unassignedSubjects}
         onSubmit={handleComboSubmit}
         isPending={isPendingCombo}
       />
@@ -673,6 +684,7 @@ function ManagementPage() {
         onOpenChange={setIsSubjectDialogOpen}
         editingSubject={editingSubject}
         semesters={semesters}
+        combos={combos}
         onSubmit={handleSubjectSubmit}
         isPending={updateComboMutation.isPending}
       />
@@ -682,6 +694,7 @@ function ManagementPage() {
         onOpenChange={setIsSingleSubjectDialogOpen}
         editingSubject={editingSingleSubject ? { subject: editingSingleSubject } : null}
         semesters={semesters}
+        combos={combos}
         onSubmit={handleSingleSubjectSubmit}
         isPending={createSubjectMutation.isPending || updateSubjectMutation.isPending}
       />

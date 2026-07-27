@@ -27,6 +27,7 @@ import type {
   SubjectResponse,
   SemesterResponse,
   SubjectType,
+  ComboSubjectResponse,
 } from "@/types/curriculum.type";
 
 interface SubjectDialogProps {
@@ -34,6 +35,7 @@ interface SubjectDialogProps {
   onOpenChange: (open: boolean) => void;
   editingSubject: { subject: SubjectResponse | null } | null;
   semesters: SemesterResponse[];
+  combos?: ComboSubjectResponse[];
   onSubmit: (data: SubjectRequest) => void;
   isPending: boolean;
 }
@@ -43,6 +45,7 @@ export default function SubjectDialog({
   onOpenChange,
   editingSubject,
   semesters,
+  combos = [],
   onSubmit,
   isPending,
 }: SubjectDialogProps) {
@@ -51,6 +54,7 @@ export default function SubjectDialog({
   const [subjectName, setSubjectName] = useState("");
   const [subjectType, setSubjectType] = useState<SubjectType>("COMBO");
   const [semesterId, setSemesterId] = useState<number>(0);
+  const [comboId, setComboId] = useState<number | null>(null);
   const [description, setDescription] = useState("");
 
   useEffect(() => {
@@ -61,27 +65,29 @@ export default function SubjectDialog({
       setSubjectType(sub.subjectType);
       setSemesterId(sub.semesterId);
       setDescription(sub.description || "");
+      setComboId(sub.comboId || null);
     } else {
       setSubjectCode("");
       setSubjectName("");
       setSubjectType("COMBO");
       setSemesterId(semesters.length > 0 ? semesters[0].semesterId : 0);
       setDescription("");
+      setComboId(null);
     }
   }, [editingSubject, isOpen, semesters]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!subjectCode.trim()) {
-      toast.error(ERROR_CODE.SUBJECT_CODE_REQUIRED);
+      toast.error(t(ERROR_CODE.SUBJECT_CODE_REQUIRED));
       return;
     }
     if (!subjectName.trim()) {
-      toast.error(ERROR_CODE.SUBJECT_NAME_REQUIRED);
+      toast.error(t(ERROR_CODE.SUBJECT_NAME_REQUIRED));
       return;
     }
     if (!semesterId) {
-      toast.error(ERROR_CODE.SEMESTER_SELECT_REQUIRED);
+      toast.error(t(ERROR_CODE.SEMESTER_SELECT_REQUIRED));
       return;
     }
 
@@ -91,6 +97,7 @@ export default function SubjectDialog({
       subjectType,
       semesterId,
       description: description.trim(),
+      comboId: subjectType === "COMBO" ? comboId : null,
     });
   };
 
@@ -175,6 +182,36 @@ export default function SubjectDialog({
               </Select>
             </div>
           </div>
+
+          {subjectType === "COMBO" && (
+            <div className="space-y-2 animate-in fade-in duration-200">
+              <Label className="font-bold">
+                {t("curriculum.comboSelectLabel", "Combo (Optional)")}
+              </Label>
+              <Select
+                value={comboId ? String(comboId) : "NONE"}
+                onValueChange={(val) => setComboId(val === "NONE" ? null : Number(val))}
+                disabled={isPending}
+              >
+                <SelectTrigger className="h-11 w-full rounded-xl bg-card border-input">
+                  <SelectValue placeholder={t("curriculum.selectComboPlaceholder", "Select combo (optional)")} />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border border-border rounded-xl max-h-56 overflow-y-auto z-[9999]">
+                  <SelectItem value="NONE">
+                    {t("curriculum.comboNone", "None (Leave unassigned)")}
+                  </SelectItem>
+                  {combos.map((combo) => (
+                    <SelectItem
+                      key={combo.comboId}
+                      value={String(combo.comboId)}
+                    >
+                      {combo.comboCode} - {combo.comboName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="description" className="font-bold">

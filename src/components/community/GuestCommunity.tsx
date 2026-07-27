@@ -25,7 +25,7 @@ function normalizeSearchText(value?: string | null) {
 }
 
 const communityDocumentGridClassName =
-  "mx-auto max-w-[1600px] grid-cols-[repeat(auto-fill,382px)] justify-start";
+  "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
 
 interface GuestCommunityProps {
   documents: any[];
@@ -46,7 +46,7 @@ export function GuestCommunity({
   const [selectedGuestSubject, setSelectedGuestSubject] =
     useState<SubjectResponse | null>(null);
   const [guestPage, setGuestPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 20;
 
   // Reset guest pagination to page 1 when search keyword changes
   useEffect(() => {

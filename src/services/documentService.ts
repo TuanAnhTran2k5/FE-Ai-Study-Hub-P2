@@ -241,3 +241,35 @@ export const uploadReportEvidence = async (
   return response.data.result;
 };
 
+export const replaceDocumentFile = async (
+  documentId: number,
+  file: File,
+): Promise<DocumentUpdateResponse> => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await api.post<APIResponse<DocumentUpdateResponse>>(
+    `/user/document/${documentId}/replace-file`,
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    },
+  );
+
+  return response.data.result;
+};
+
+export const updateTextContent = async (
+  documentId: number,
+  content: string,
+): Promise<DocumentUpdateResponse> => {
+  const response = await api.put<APIResponse<DocumentUpdateResponse>>(
+    `/user/document/${documentId}/text-content`,
+    { content },
+  );
+
+  return response.data.result;
+};
+

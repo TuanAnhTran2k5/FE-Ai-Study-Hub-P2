@@ -177,3 +177,10 @@ export const restoreSubject = async (
 
   return response.data.result;
 };
+
+export const getUnassignedComboSubjects = async (): Promise<SubjectResponse[]> => {
+  const response = await api.get<APIResponse<SubjectResponse[]>>(
+    "/admin/curriculum/subjects/unassigned-combo",
+  );
+  return response.data.result;
+};

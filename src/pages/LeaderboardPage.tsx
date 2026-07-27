@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import { Trophy, Calendar } from "lucide-react";
 
 import LeaderboardHeader from "@/components/leaderboard/LeaderboardHeader";
 import MyLeaderboardRankCard from "@/components/leaderboard/MyLeaderboardRankCard";
@@ -18,8 +20,10 @@ import {
 } from "@/services/leaderboardService";
 
 function LeaderboardPage() {
+  const { t } = useTranslation();
   const [page, setPage] = useState(0);
-  const size = 10;
+  const [activeTab, setActiveTab] = useState<"global" | "weekly">("global");
+  const size = 20;
 
   const { data: globalLeaderboard, isLoading: isGlobalLoading } = useQuery({
     queryKey: ["globalLeaderboard", page, size],
@@ -76,15 +80,44 @@ function LeaderboardPage() {
         ))}
       </div>
 
-      <GlobalLeaderboardTable
-        users={users}
-        isLoading={isGlobalLoading}
-        page={page}
-        totalPages={globalLeaderboard?.totalPages ?? 0}
-        onPageChange={setPage}
-      />
+      {/* TABS CONTROL */}
+      <div className="mb-6 flex border-b border-border">
+        <button
+          onClick={() => setActiveTab("global")}
+          className={`flex cursor-pointer items-center gap-2 px-6 py-3.5 text-sm font-bold border-b-2 transition-all duration-300 ${
+            activeTab === "global"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-card-foreground"
+          }`}
+        >
+          <Trophy className="h-4 w-4" />
+          {t("leaderboard.globalTitle", "Global Leaderboard")}
+        </button>
 
-      <WeeklyLeaderboardTable users={weeklyUsers} />
+        <button
+          onClick={() => setActiveTab("weekly")}
+          className={`flex cursor-pointer items-center gap-2 px-6 py-3.5 text-sm font-bold border-b-2 transition-all duration-300 ${
+            activeTab === "weekly"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-card-foreground"
+          }`}
+        >
+          <Calendar className="h-4 w-4" />
+          {t("leaderboard.weeklyTitle", "Weekly Top Contributors")}
+        </button>
+      </div>
+
+      {activeTab === "global" ? (
+        <GlobalLeaderboardTable
+          users={users}
+          isLoading={isGlobalLoading}
+          page={page}
+          totalPages={globalLeaderboard?.totalPages ?? 0}
+          onPageChange={setPage}
+        />
+      ) : (
+        <WeeklyLeaderboardTable users={weeklyUsers} />
+      )}
     </section>
   );
 }

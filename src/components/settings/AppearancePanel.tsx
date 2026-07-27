@@ -1,16 +1,20 @@
 import { Check, Palette, Monitor, Sun, Moon } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useTheme } from "next-themes";
 import { Card, CardContent } from "@/components/ui/card";
 import { THEME_COLORS } from "@/constants/themeColors";
 import type { ThemeColor } from "@/constants/themeColors";
 import { toast } from "react-toastify";
 
+import { applyThemeColor } from "@/utils/themeHelper";
+
 export default function AppearancePanel() {
   const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
   const [currentColor, setCurrentColor] = useState(() => localStorage.getItem("theme-color") || "blue");
+  const [customColor, setCustomColor] = useState(() => localStorage.getItem("theme-custom-color") || "#3b82f6");
+  const colorInputRef = useRef<HTMLInputElement>(null);
 
   const handleThemeChange = (selectedTheme: string) => {
     setTheme(selectedTheme);
@@ -20,13 +24,16 @@ export default function AppearancePanel() {
   const handleColorChange = (color: ThemeColor) => {
     setCurrentColor(color.id);
     localStorage.setItem("theme-color", color.id);
-
-    const root = document.documentElement;
-    const themeClasses = THEME_COLORS.map((c) => c.colorClass);
-    themeClasses.forEach((cls) => root.classList.remove(cls));
-    root.classList.add(`theme-${color.id}`);
-
+    applyThemeColor(color.id);
     toast.success(t("settings.appearance.colorSuccess", "Đã thay đổi màu sắc chủ đạo của trang!"));
+  };
+
+  const handleCustomColorChange = (hexValue: string) => {
+    setCustomColor(hexValue);
+    setCurrentColor("custom");
+    localStorage.setItem("theme-color", "custom");
+    localStorage.setItem("theme-custom-color", hexValue);
+    applyThemeColor("custom", hexValue);
   };
 
   return (
@@ -136,6 +143,34 @@ export default function AppearancePanel() {
                     </span>
                   </button>
                 ))}
+
+                {/* Custom Color Button */}
+                <div
+                  onClick={() => colorInputRef.current?.click()}
+                  className={`relative flex flex-col items-center gap-2.5 p-3 rounded-2xl border transition-all duration-300 hover:-translate-y-0.5 cursor-pointer ${
+                    currentColor === "custom"
+                      ? "border-primary bg-primary/5 text-primary font-black shadow-sm"
+                      : "border-border bg-background hover:bg-secondary/10 text-muted-foreground hover:text-card-foreground font-bold"
+                  }`}
+                >
+                  <span
+                    className="relative size-7 rounded-full shrink-0 flex items-center justify-center shadow-inner border border-black/10 overflow-hidden"
+                    style={{ backgroundColor: customColor }}
+                  >
+                    <input
+                      ref={colorInputRef}
+                      type="color"
+                      value={customColor}
+                      onChange={(e) => handleCustomColorChange(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute inset-0 opacity-0 cursor-pointer w-full h-full scale-150"
+                    />
+                    {currentColor === "custom" && <Check className="h-4 w-4 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />}
+                  </span>
+                  <span className="text-[11px] truncate max-w-full">
+                    {t("settings.appearance.colors.custom", "Tùy chỉnh RGB")}
+                  </span>
+                </div>
               </div>
             </div>
           </div>

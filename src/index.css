@@ -325,7 +325,12 @@
 /* Custom scrollbar utility */
 .scrollbar-thin {
   scrollbar-width: thin;
+}
+.dark .scrollbar-thin {
   scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+:root:not(.dark) .scrollbar-thin {
+  scrollbar-color: rgba(15, 23, 42, 0.15) transparent;
 }
 
 .scrollbar-thin::-webkit-scrollbar {
@@ -338,12 +343,42 @@
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(15, 23, 42, 0.15);
   border-radius: 9999px;
+}
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.15);
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(15, 23, 42, 0.3);
+}
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Document preview scrollbar (always dark theme suited for light background) */
+.scrollbar-document {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15, 23, 42, 0.25) transparent;
+}
+
+.scrollbar-document::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-document::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-document::-webkit-scrollbar-thumb {
+  background-color: rgba(15, 23, 42, 0.25);
+  border-radius: 9999px;
+}
+
+.scrollbar-document::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(15, 23, 42, 0.45);
 }
 
 /* Accent Colors Themes */

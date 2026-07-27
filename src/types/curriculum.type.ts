@@ -38,6 +38,7 @@ export interface ComboSubjectRequest {
   comboCode: string;
   comboName: string;
   subjects: SubjectRequest[];
+  existingSubjectIds?: number[];
 }
 
 export interface ComboSubjectResponse {

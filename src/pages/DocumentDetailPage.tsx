@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileText, Image, X } from "lucide-react";
 import { useSelector } from "react-redux";
@@ -27,6 +27,7 @@ import DocumentDeleteDialog from "@/components/document/detail/DocumentDeleteDia
 import DocumentDetailSidebar from "@/components/document/detail/DocumentDetailSidebar";
 import DocumentPreview from "@/components/document/detail/DocumentPreview";
 import DocumentUpdateDialog from "@/components/document/detail/DocumentUpdateDialog";
+import ContentEditor from "@/components/document/detail/ContentEditor";
 import DocumentDetailHeader from "@/components/document/detail/DocumentDetailHeader";
 import BannedUserModal from "@/components/document/detail/BannedUserModal";
 import { VisibilityStatus } from "@/models/document.enum";
@@ -47,6 +48,8 @@ import {
   updateDocument,
   uploadReportEvidence,
   viewDocumentContent,
+  replaceDocumentFile,
+  updateTextContent,
 } from "@/services/documentService";
 import type { RootState } from "@/redux/store";
 import type { User } from "@/models/user";
@@ -205,7 +208,9 @@ function DocumentDetailPage() {
   );
   const [reportEvidencePreview, setReportEvidencePreview] = useState("");
   const [isBannedModalOpen, setIsBannedModalOpen] = useState(true);
-
+  const [isEditingContent, setIsEditingContent] = useState(false);
+  const [isSavingContent, setIsSavingContent] = useState(false);
+  const [editorInitialContent, setEditorInitialContent] = useState("");
   const {
     data: document,
     isLoading,
@@ -216,6 +221,35 @@ function DocumentDetailPage() {
     queryFn: () => getDocumentById(documentId as number),
     enabled: Number.isFinite(documentId),
   });
+
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const [sidebarHeight, setSidebarHeight] = useState<number>(850);
+  const [isLgScreen, setIsLgScreen] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(min-width: 1280px)");
+    setIsLgScreen(mediaQuery.matches);
+    const handler = (e: MediaQueryListEvent) => setIsLgScreen(e.matches);
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
+  }, []);
+
+  useEffect(() => {
+    const sidebar = sidebarRef.current;
+    if (!sidebar) return;
+
+    // Set initial height
+    setSidebarHeight(sidebar.clientHeight);
+
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setSidebarHeight(entry.target.clientHeight);
+      }
+    });
+
+    observer.observe(sidebar);
+    return () => observer.disconnect();
+  }, [document]);
 
   // Bản tải về My Documents có documentId riêng. Tìm bản PUBLIC gốc để
   // rating luôn được ghi vào tài liệu Community thay vì bản sao PRIVATE.
@@ -384,6 +418,11 @@ function DocumentDetailPage() {
   );
   const fileTypeLabel = formatFileType(document?.fileType);
   const shouldLoadBlobPreview = canPreviewWithBlob(fileTypeLabel);
+  const isEditableTextFormat = useMemo(() => {
+    if (!document) return false;
+    const name = document.fileName?.toLowerCase() || "";
+    return name.endsWith(".txt") || name.endsWith(".md") || fileTypeLabel === "TXT";
+  }, [document, fileTypeLabel]);
 
   const {
     data: previewBlob,
@@ -423,12 +462,26 @@ function DocumentDetailPage() {
 
   // Gọi API update document và cập nhật lại cache để UI đổi ngay sau khi lưu.
   const updateMutation = useMutation({
-    mutationFn: (data: {
+    mutationFn: async (data: {
       title: string;
       subjectId: number;
       visibilityStatus: VisibilityStatus;
-    }) => updateDocument(documentId as number, data),
+      replacementFile?: File | null;
+    }) => {
+      if (data.replacementFile) {
+        await replaceDocumentFile(documentId as number, data.replacementFile);
+      }
+      return updateDocument(documentId as number, {
+        title: data.title,
+        subjectId: data.subjectId,
+        visibilityStatus: data.visibilityStatus,
+      });
+    },
     onSuccess: async (updatedDocument, updatedValues) => {
+      if (updatedValues.replacementFile) {
+        queryClient.invalidateQueries({ queryKey: ["documentPreview", documentId] });
+      }
+
       queryClient.setQueryData<DocumentResponse>(
         ["document", documentId],
         (currentDocument) =>
@@ -439,6 +492,8 @@ function DocumentDetailPage() {
                 subjectId: updatedDocument.subjectId ?? updatedValues.subjectId,
                 visibilityStatus: updatedValues.visibilityStatus,
                 updatedAt: updatedDocument.updatedAt ?? currentDocument.updatedAt,
+                fileName: updatedValues.replacementFile ? updatedValues.replacementFile.name : currentDocument.fileName,
+                fileSize: updatedValues.replacementFile ? updatedValues.replacementFile.size : currentDocument.fileSize,
               }
             : currentDocument,
       );
@@ -456,6 +511,8 @@ function DocumentDetailPage() {
                   visibilityStatus: updatedValues.visibilityStatus,
                   updatedAt:
                     updatedDocument.updatedAt ?? currentDocument.updatedAt,
+                  fileName: updatedValues.replacementFile ? updatedValues.replacementFile.name : currentDocument.fileName,
+                  fileSize: updatedValues.replacementFile ? updatedValues.replacementFile.size : currentDocument.fileSize,
                 }
               : currentDocument,
           ),
@@ -768,38 +825,74 @@ function DocumentDetailPage() {
     deleteMutation.mutate();
   };
 
+  const handleEditContentClick = async () => {
+    if (!previewBlob) {
+      toast.error(t("document.noContentToEdit", "No content to edit or preview is loading."));
+      return;
+    }
+    try {
+      const text = await previewBlob.text();
+      setEditorInitialContent(text);
+      setIsEditingContent(true);
+    } catch (e) {
+      toast.error(t("document.failedToReadContent", "Failed to read document content."));
+    }
+  };
+
+  const handleSaveContent = async (newContent: string) => {
+    if (!documentId) return;
+    setIsSavingContent(true);
+    try {
+      await updateTextContent(documentId, newContent);
+      toast.success(t("document.saveContentSuccess", "Document content updated successfully"));
+      
+      // Invalidate queries to reload metadata and preview content
+      queryClient.invalidateQueries({ queryKey: ["document", documentId] });
+      queryClient.invalidateQueries({ queryKey: ["documentPreview", documentId] });
+      
+      setIsEditingContent(false);
+    } catch (error) {
+      toast.error(t("document.saveContentFailed", "Failed to save document content"));
+    } finally {
+      setIsSavingContent(false);
+    }
+  };
+
   // Xử lý form update: lấy title/visibility, validate title rồi gọi API update.
   const handleUpdateSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-  event.preventDefault();
+    event.preventDefault();
 
-  if (!document || updateMutation.isPending) return;
+    if (!document || updateMutation.isPending) return;
 
-  const formData = new FormData(event.currentTarget);
-  const title = String(formData.get("title") ?? "").trim();
-  const subjectId = Number(formData.get("subjectId"));
-  const visibilityStatus = String(
-    formData.get("visibilityStatus") ?? document.visibilityStatus,
-  );
+    const formData = new FormData(event.currentTarget);
+    const title = String(formData.get("title") ?? "").trim();
+    const subjectId = Number(formData.get("subjectId"));
+    const visibilityStatus = String(
+      formData.get("visibilityStatus") ?? document.visibilityStatus,
+    );
+    const replacementFile = formData.get("replacementFile") as File | null;
+    const fileToReplace = replacementFile && replacementFile.size > 0 ? replacementFile : null;
 
-  if (!title) {
-    toast.error(t("document.enterTitlePrompt", "Please enter document title"));
-    return;
-  }
+    if (!title) {
+      toast.error(t("document.enterTitlePrompt", "Please enter document title"));
+      return;
+    }
 
-  if (!Number.isFinite(subjectId) || subjectId <= 0) {
-    toast.error(t("document.selectSubjectPrompt", "Please select subject"));
-    return;
-  }
+    if (!Number.isFinite(subjectId) || subjectId <= 0) {
+      toast.error(t("document.selectSubjectPrompt", "Please select subject"));
+      return;
+    }
 
-  updateMutation.mutate({
-    title,
-    subjectId,
-    visibilityStatus:
-      visibilityStatus === VisibilityStatus.PUBLIC
-        ? VisibilityStatus.PUBLIC
-        : VisibilityStatus.PRIVATE,
-  });
-};
+    updateMutation.mutate({
+      title,
+      subjectId,
+      visibilityStatus:
+        visibilityStatus === VisibilityStatus.PUBLIC
+          ? VisibilityStatus.PUBLIC
+          : VisibilityStatus.PRIVATE,
+      replacementFile: fileToReplace,
+    });
+  };
 
   if (isLoading) {
     return (
@@ -928,6 +1021,8 @@ const subjectCode =
   onDelete={handleDelete}
   onOpenNewTab={() => blobPreviewUrl && window.open(blobPreviewUrl, "_blank")}
   onDownload={handleDownload}
+  isEditableTextFormat={isEditableTextFormat}
+  onEditContent={handleEditContentClick}
 />
 
       {isOwner && (
@@ -952,9 +1047,20 @@ const subjectCode =
       )}
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_260px] 2xl:grid-cols-[minmax(0,1fr)_280px]">
-        <Card className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
-          <div className="h-[calc(100vh-50px)] min-h-[1000px] w-full bg-white">
-            {isPreviewLoading ? (
+        <Card 
+          className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm flex flex-col min-h-[600px] transition-all duration-200"
+          style={isLgScreen ? { height: `${sidebarHeight}px` } : undefined}
+        >
+          <div className="h-full w-full bg-white flex flex-col overflow-hidden">
+            {isEditingContent ? (
+              <ContentEditor
+                initialContent={editorInitialContent}
+                isSaving={isSavingContent}
+                onSave={handleSaveContent}
+                onCancel={() => setIsEditingContent(false)}
+                fileName={document.fileName || document.title}
+              />
+            ) : isPreviewLoading ? (
               <div className="flex h-full items-center justify-center px-6 text-center">
                 <p className="text-sm font-semibold text-muted-foreground">
                   Loading preview...
@@ -995,26 +1101,28 @@ const subjectCode =
           </div>
         </Card>
 
-        <DocumentDetailSidebar
-          document={{
-            ...document,
-            ratingCount,
-            semesterNo: document.semesterNo ?? academicSubject?.semesterNo,
-          }}
-          averageRating={averageRating}
-          isOwner={isOwner}
-          isBookmarked={isBookmarked}
-          selectedRating={selectedRating}
-          isSavingToStorage={saveToStorageMutation.isPending}
-          isBookmarking={
-            bookmarkMutation.isPending || removeBookmarkMutation.isPending
-          }
-          isRating={ratingMutation.isPending}
-          onSaveToStorage={() => saveToStorageMutation.mutate()}
-          onBookmark={handleToggleBookmark}
-          onRate={(ratingValue: number) => ratingMutation.mutate(ratingValue)}
-          onReport={() => setIsReportOpen(true)}
-        />
+        <div ref={sidebarRef} className="h-fit">
+          <DocumentDetailSidebar
+            document={{
+              ...document,
+              ratingCount,
+              semesterNo: document.semesterNo ?? academicSubject?.semesterNo,
+            }}
+            averageRating={averageRating}
+            isOwner={isOwner}
+            isBookmarked={isBookmarked}
+            selectedRating={selectedRating}
+            isSavingToStorage={saveToStorageMutation.isPending}
+            isBookmarking={
+              bookmarkMutation.isPending || removeBookmarkMutation.isPending
+            }
+            isRating={ratingMutation.isPending}
+            onSaveToStorage={() => saveToStorageMutation.mutate()}
+            onBookmark={handleToggleBookmark}
+            onRate={(ratingValue: number) => ratingMutation.mutate(ratingValue)}
+            onReport={() => setIsReportOpen(true)}
+          />
+        </div>
       </div>
 
       <Dialog open={isReportOpen} onOpenChange={setIsReportOpen}>
