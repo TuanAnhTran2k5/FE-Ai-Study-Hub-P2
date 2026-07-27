@@ -34,6 +34,7 @@ import type {
   ComboSubjectResponse,
   SemesterResponse,
   SubjectRequest,
+  SubjectResponse,
   SubjectType,
 } from "@/types/curriculum.type";
 
@@ -42,6 +43,7 @@ interface ComboDialogProps {
   onOpenChange: (open: boolean) => void;
   editingCombo: ComboSubjectResponse | null;
   semesters: SemesterResponse[];
+  unassignedSubjects?: SubjectResponse[];
   onSubmit: (data: ComboSubjectRequest) => void;
   isPending: boolean;
 }
@@ -51,6 +53,7 @@ export default function ComboDialog({
   onOpenChange,
   editingCombo,
   semesters,
+  unassignedSubjects = [],
   onSubmit,
   isPending,
 }: ComboDialogProps) {
@@ -58,6 +61,7 @@ export default function ComboDialog({
   const [comboCode, setComboCode] = useState("");
   const [comboName, setComboName] = useState("");
   const [subjects, setSubjects] = useState<SubjectRequest[]>([]);
+  const [selectedExistingSubjectIds, setSelectedExistingSubjectIds] = useState<number[]>([]);
 
   const createEmptySubjectRequest = (): SubjectRequest => {
     const defaultSemesterId =
@@ -86,10 +90,12 @@ export default function ComboDialog({
           comboId: sub.comboId,
         })),
       );
+      setSelectedExistingSubjectIds([]);
     } else {
       setComboCode("");
       setComboName("");
       setSubjects([createEmptySubjectRequest()]);
+      setSelectedExistingSubjectIds([]);
     }
   }, [editingCombo, isOpen, semesters]);
 
@@ -119,37 +125,54 @@ export default function ComboDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!comboCode.trim()) {
-      toast.error(ERROR_CODE.COMBO_CODE_REQUIRED);
+      toast.error(t(ERROR_CODE.COMBO_CODE_REQUIRED));
       return;
     }
     if (!comboName.trim()) {
-      toast.error(ERROR_CODE.COMBO_NAME_REQUIRED);
+      toast.error(t(ERROR_CODE.COMBO_NAME_REQUIRED));
       return;
     }
 
-    if (subjects.length === 0) {
-      toast.error(ERROR_CODE.COMBO_SUBJECTS_REQUIRED);
+    const existingComboSubjectIdsCount = editingCombo
+      ? editingCombo.subjects.filter((s) => subjects.some((sub) => sub.subjectCode === s.subjectCode)).length
+      : 0;
+
+    const totalSelectedExistingCount = selectedExistingSubjectIds.length + existingComboSubjectIdsCount;
+
+    if (subjects.length === 0 && totalSelectedExistingCount === 0) {
+      toast.error(t(ERROR_CODE.COMBO_SUBJECTS_REQUIRED));
       return;
     }
 
-    // Validate each subject row
+    // Validate each subject row (only if there are new subjects created)
     for (let i = 0; i < subjects.length; i++) {
       const sub = subjects[i];
       if (!sub.subjectCode.trim()) {
-        toast.error(`Subject #${i + 1}: ${ERROR_CODE.SUBJECT_CODE_REQUIRED}`);
+        toast.error(`Subject #${i + 1}: ${t(ERROR_CODE.SUBJECT_CODE_REQUIRED)}`);
         return;
       }
       if (!sub.subjectName.trim()) {
-        toast.error(`Subject #${i + 1}: ${ERROR_CODE.SUBJECT_NAME_REQUIRED}`);
+        toast.error(`Subject #${i + 1}: ${t(ERROR_CODE.SUBJECT_NAME_REQUIRED)}`);
         return;
       }
       if (!sub.semesterId) {
         toast.error(
-          `Subject #${i + 1}: ${ERROR_CODE.SEMESTER_SELECT_REQUIRED}`,
+          `Subject #${i + 1}: ${t(ERROR_CODE.SEMESTER_SELECT_REQUIRED)}`,
         );
         return;
       }
     }
+
+    const existingComboSubjectIds = editingCombo
+      ? editingCombo.subjects
+          .filter((s) => subjects.some((sub) => sub.subjectCode === s.subjectCode))
+          .map((s) => s.subjectId)
+      : [];
+
+    const existingSubjectIds = [
+      ...selectedExistingSubjectIds,
+      ...existingComboSubjectIds,
+    ];
 
     onSubmit({
       comboCode: comboCode.trim(),
@@ -160,6 +183,7 @@ export default function ComboDialog({
         subjectName: sub.subjectName.trim(),
         description: sub.description?.trim() || "",
       })),
+      existingSubjectIds,
     });
   };
 
@@ -204,6 +228,52 @@ export default function ComboDialog({
                 required
               />
             </div>
+          </div>
+
+          {/* Add Existing Unassigned Subjects */}
+          <div className="space-y-3 rounded-2xl border border-border bg-secondary/10 p-4">
+            <Label className="text-base font-bold text-card-foreground">
+              {t("curriculum.addUnassignedComboSubjects", "Add Existing Unassigned Subjects (Optional)")}
+            </Label>
+            {unassignedSubjects.length === 0 ? (
+              <p className="text-sm text-muted-foreground">
+                {t("curriculum.noUnassignedSubjects", "No unassigned combo subjects available.")}
+              </p>
+            ) : (
+              <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 max-h-[150px] overflow-y-auto pr-2 scrollbar-thin">
+                {unassignedSubjects.map((sub) => {
+                  const isChecked = selectedExistingSubjectIds.includes(sub.subjectId);
+                  return (
+                    <label
+                      key={sub.subjectId}
+                      className="flex cursor-pointer items-center gap-2 rounded-xl border border-border bg-card p-3 transition hover:bg-secondary/40"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        disabled={isPending}
+                        onChange={() => {
+                          setSelectedExistingSubjectIds((prev) =>
+                            isChecked
+                              ? prev.filter((id) => id !== sub.subjectId)
+                              : [...prev, sub.subjectId]
+                          );
+                        }}
+                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                      />
+                      <div className="min-w-0 text-sm">
+                        <p className="font-bold text-card-foreground truncate">
+                          {sub.subjectCode}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {sub.subjectName}
+                        </p>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Dynamic Subjects List */}

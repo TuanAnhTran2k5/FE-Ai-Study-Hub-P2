@@ -27,6 +27,8 @@ type DocumentDetailHeaderProps = {
   onDelete: () => void;
   onOpenNewTab: () => void;
   onDownload: () => void;
+  isEditableTextFormat?: boolean;
+  onEditContent?: () => void;
 };
 
 function DocumentDetailHeader({
@@ -42,6 +44,8 @@ function DocumentDetailHeader({
   onDelete,
   onOpenNewTab,
   onDownload,
+  isEditableTextFormat,
+  onEditContent,
 }: DocumentDetailHeaderProps) {
   const { t } = useTranslation();
   return (
@@ -94,6 +98,19 @@ function DocumentDetailHeader({
           <div className="flex flex-wrap items-center gap-3 xl:justify-end">
             {isOwner && (
               <>
+                {isEditableTextFormat && onEditContent && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-11 cursor-pointer rounded-2xl border-primary/25 bg-primary/5 px-5 font-bold text-primary hover:bg-primary/10 hover:text-primary disabled:cursor-not-allowed"
+                    onClick={onEditContent}
+                    disabled={!canEdit}
+                  >
+                    <Pencil className="mr-2 h-4 w-4" />
+                    {t("document.btnEditContent", "Edit Content")}
+                  </Button>
+                )}
+
                 <Button
                   type="button"
                   variant="outline"

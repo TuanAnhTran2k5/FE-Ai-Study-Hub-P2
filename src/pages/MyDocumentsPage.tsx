@@ -106,7 +106,7 @@ function getDocumentsErrorMessage(error: any, t: any) {
 
 function MyDocumentsPage() {
   const { t } = useTranslation();
-  const itemsPerPage = 8;
+  const itemsPerPage = 20;
   const [currentPage, setCurrentPage] = useState(1);
   const [keyword, setKeyword] = useState("");
   const [subjectCode, setSubjectCode] = useState("ALL");

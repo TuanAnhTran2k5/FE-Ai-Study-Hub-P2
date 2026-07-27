@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import { Globe2, Lock } from "lucide-react";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { Globe2, Lock, FileText } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -33,31 +34,42 @@ type DocumentUpdateDialogProps = {
 };
 
 function DocumentUpdateDialog({
-  document,
+  document: docProp,
   subjects,
   isOpen,
   isSaving,
   onOpenChange,
   onSubmit,
 }: DocumentUpdateDialogProps) {
+  const { t } = useTranslation();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const currentSubject = useMemo(
     () =>
       subjects.find(
-        (subject) => Number(subject.subjectId) === Number(document.subjectId),
+        (subject) => Number(subject.subjectId) === Number(docProp.subjectId),
       ),
-    [document.subjectId, subjects],
+    [docProp.subjectId, subjects],
   );
 
   const [visibility, setVisibility] = useState<VisibilityStatus>(
-    document.visibilityStatus === VisibilityStatus.PUBLIC
+    docProp.visibilityStatus === VisibilityStatus.PUBLIC
       ? VisibilityStatus.PUBLIC
       : VisibilityStatus.PRIVATE,
   );
 
   const [selectedSemesterId, setSelectedSemesterId] = useState("");
   const [selectedSubjectId, setSelectedSubjectId] = useState(
-    String(document.subjectId),
+    String(docProp.subjectId),
   );
+
+  const [replacementFile, setReplacementFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState("");
+
+  const documentExtension = useMemo(() => {
+    const name = docProp.fileName || "";
+    return name.includes(".") ? name.substring(name.lastIndexOf(".")) : "";
+  }, [docProp.fileName]);
 
   const semesterOptions = useMemo(() => {
     const semesterMap = new Map<string, number | string>();
@@ -90,10 +102,17 @@ function DocumentUpdateDialog({
   }, [selectedSemesterId, subjects]);
 
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      setReplacementFile(null);
+      setFileError("");
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      return;
+    }
 
     setVisibility(
-      document.visibilityStatus === VisibilityStatus.PUBLIC
+      docProp.visibilityStatus === VisibilityStatus.PUBLIC
         ? VisibilityStatus.PUBLIC
         : VisibilityStatus.PRIVATE,
     );
@@ -105,8 +124,8 @@ function DocumentUpdateDialog({
         : "";
 
     setSelectedSemesterId(initialSemesterId);
-    setSelectedSubjectId(String(document.subjectId));
-  }, [currentSubject, document, isOpen]);
+    setSelectedSubjectId(String(docProp.subjectId));
+  }, [currentSubject, docProp, isOpen]);
 
   const handleSemesterChange = (semesterId: string) => {
     setSelectedSemesterId(semesterId);
@@ -120,26 +139,53 @@ function DocumentUpdateDialog({
     );
   };
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      setReplacementFile(null);
+      setFileError("");
+      return;
+    }
+
+    const newName = file.name || "";
+    const newExt = newName.includes(".") ? newName.substring(newName.lastIndexOf(".")).toLowerCase() : "";
+    if (newExt !== documentExtension.toLowerCase()) {
+      setFileError(t("document.unsupportedTypePrompt", "Unsupported file type"));
+      setReplacementFile(null);
+    } else {
+      setFileError("");
+      setReplacementFile(file);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setReplacementFile(null);
+    setFileError("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-2xl" onOpenAutoFocus={(e) => e.preventDefault()}>
         <form onSubmit={onSubmit}>
           <DialogHeader>
-            <DialogTitle>Update Document</DialogTitle>
+            <DialogTitle>{t("document.dialogUpdateTitle", "Update Document")}</DialogTitle>
             <DialogDescription>
-              Edit document information and save your changes.
+              {t("document.dialogUpdateDesc", "Edit document information and save your changes.")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="mt-6 space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="update-title">Title *</Label>
+              <Label htmlFor="update-title">{t("documentUpload.titleLabel", "Title *")}</Label>
               <Input
                 id="update-title"
                 name="title"
-                defaultValue={document.title}
-                placeholder="Enter document title"
-                className="h-11"
+                defaultValue={docProp.title}
+                placeholder={t("documentUpload.titlePlaceholder", "Enter document title")}
+                className="h-11 focus-visible:ring-primary/30"
                 disabled={isSaving}
                 required
               />
@@ -147,15 +193,15 @@ function DocumentUpdateDialog({
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label>Semester *</Label>
+                <Label>{t("documentUpload.semesterLabel", "Semester *")}</Label>
                 <Select
                   value={selectedSemesterId}
                   onValueChange={handleSemesterChange}
                   disabled={isSaving}
                   required
                 >
-                  <SelectTrigger className="h-11 w-full">
-                    <SelectValue placeholder="Select semester" />
+                  <SelectTrigger className="h-11 w-full focus:ring-primary/30">
+                    <SelectValue placeholder={t("documentUpload.semesterPlaceholder", "Select semester")} />
                   </SelectTrigger>
 
                   <SelectContent>
@@ -164,7 +210,7 @@ function DocumentUpdateDialog({
                         key={semester.semesterId}
                         value={semester.semesterId}
                       >
-                        Semester {semester.semesterNo}
+                        {t("documentUpload.semesterOption", { num: semester.semesterNo })}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -172,7 +218,7 @@ function DocumentUpdateDialog({
               </div>
 
               <div className="space-y-2">
-                <Label>Subject *</Label>
+                <Label>{t("documentUpload.subjectLabel", "Subject *")}</Label>
                 <Select
                   name="subjectId"
                   value={selectedSubjectId}
@@ -180,12 +226,12 @@ function DocumentUpdateDialog({
                   disabled={isSaving || !selectedSemesterId}
                   required
                 >
-                  <SelectTrigger className="h-11 w-full">
+                  <SelectTrigger className="h-11 w-full focus:ring-primary/30">
                     <SelectValue
                       placeholder={
                         selectedSemesterId
-                          ? "Select subject"
-                          : "Select semester first"
+                          ? t("documentUpload.subjectPlaceholder", "Select subject")
+                          : t("documentUpload.selectSemesterFirst", "Select semester first")
                       }
                     />
                   </SelectTrigger>
@@ -205,13 +251,13 @@ function DocumentUpdateDialog({
             </div>
 
             <div className="space-y-2">
-              <Label>Visibility *</Label>
+              <Label>{t("documentUpload.visibilityLabel", "Visibility *")}</Label>
 
               <div className="grid gap-3 sm:grid-cols-2">
                 <button
                   type="button"
                   disabled={isSaving}
-                  className={`rounded-2xl border p-4 text-left transition ${
+                  className={`rounded-2xl border p-4 text-left transition cursor-pointer ${
                     visibility === VisibilityStatus.PUBLIC
                       ? "border-primary bg-primary/5 ring-2 ring-primary/20"
                       : "border-border bg-background hover:bg-accent"
@@ -225,10 +271,10 @@ function DocumentUpdateDialog({
 
                     <div>
                       <p className="text-sm font-bold text-card-foreground">
-                        Public
+                        {t("documentUpload.publicTitle", "Public")}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Visible to everyone
+                        {t("documentUpload.publicDesc1", "Visible to everyone")}
                       </p>
                     </div>
                   </div>
@@ -237,7 +283,7 @@ function DocumentUpdateDialog({
                 <button
                   type="button"
                   disabled={isSaving}
-                  className={`rounded-2xl border p-4 text-left transition ${
+                  className={`rounded-2xl border p-4 text-left transition cursor-pointer ${
                     visibility === VisibilityStatus.PRIVATE
                       ? "border-primary bg-primary/5 ring-2 ring-primary/20"
                       : "border-border bg-background hover:bg-accent"
@@ -251,10 +297,10 @@ function DocumentUpdateDialog({
 
                     <div>
                       <p className="text-sm font-bold text-card-foreground">
-                        Private
+                        {t("documentUpload.privateTitle", "Private")}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Only visible to you
+                        {t("documentUpload.privateDesc1", "Only visible to you")}
                       </p>
                     </div>
                   </div>
@@ -267,6 +313,80 @@ function DocumentUpdateDialog({
                 value={visibility}
               />
             </div>
+
+            {/* Replace file content section (Only for original documents, not copies) */}
+            {(!docProp.originalUploaderId || Number(docProp.originalUploaderId) === Number(docProp.ownerId)) && (
+              <div className="space-y-3 border-t border-border pt-4">
+                <div className="flex flex-col gap-1">
+                  <Label className="text-sm font-bold text-card-foreground">
+                    {t("document.replaceFileLabel", "Replace Document File (Optional)")}
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    {t("document.replaceFileSwitch", "Replace with new file (Change document content)")}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <input
+                    type="file"
+                    id="replacement-file"
+                    name="replacementFile"
+                    ref={fileInputRef}
+                    accept={documentExtension}
+                    className="hidden"
+                    onChange={handleFileChange}
+                    disabled={isSaving}
+                  />
+
+                  {!replacementFile ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={isSaving}
+                      onClick={() => fileInputRef.current?.click()}
+                      className="rounded-xl border-dashed border-primary/45 bg-primary/5 hover:bg-primary/10 text-primary font-bold h-11 px-5"
+                    >
+                      {t("document.chooseFilePrompt", "Choose replacement file")}
+                    </Button>
+                  ) : (
+                    <div className="flex-1 flex items-center justify-between rounded-2xl border border-border bg-secondary/30 p-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                          <FileText className="size-5" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-bold text-card-foreground max-w-[200px] sm:max-w-md">
+                            {replacementFile.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {(replacementFile.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-9 rounded-xl text-xs font-bold text-destructive hover:bg-destructive/10 cursor-pointer px-3 shrink-0"
+                        onClick={handleRemoveFile}
+                      >
+                        {t("common.delete", "Remove")}
+                      </Button>
+                    </div>
+                  )}
+
+                  {!replacementFile && (
+                    <span className="text-xs text-muted-foreground">
+                      {t("document.mustBeFile", { ext: documentExtension })}
+                    </span>
+                  )}
+                </div>
+
+                {fileError && (
+                  <p className="text-xs font-semibold text-destructive">{fileError}</p>
+                )}
+              </div>
+            )}
           </div>
 
           <DialogFooter className="mt-6">
@@ -276,11 +396,11 @@ function DocumentUpdateDialog({
               disabled={isSaving}
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t("common.cancel", "Cancel")}
             </Button>
 
-            <Button type="submit" disabled={isSaving}>
-              {isSaving ? "Saving..." : "Save Changes"}
+            <Button type="submit" disabled={isSaving || (replacementFile === null && fileError !== "")}>
+              {isSaving ? t("document.savingChanges", "Saving... ") : t("document.btnSave", "Save Changes")}
             </Button>
           </DialogFooter>
         </form>

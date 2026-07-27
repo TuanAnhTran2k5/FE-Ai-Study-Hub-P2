@@ -34,7 +34,7 @@ const selectContentClassName =
 const selectItemClassName = "cursor-pointer truncate rounded-xl py-2.5";
 
 const communityDocumentGridClassName =
-  "mx-auto max-w-[1600px] grid-cols-[repeat(auto-fill,382px)] justify-start";
+  "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
 
 interface AuthenticatedCommunityProps {
   documents: any[];
@@ -58,7 +58,7 @@ export function AuthenticatedCommunity({
   const [communitySearchInput, setCommunitySearchInput] = useState("");
   const [communitySearchKeyword, setCommunitySearchKeyword] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 20;
 
   // Reset pagination to page 1 when filters or search keywords change
   useEffect(() => {

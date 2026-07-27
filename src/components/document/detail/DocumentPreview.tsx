@@ -1,11 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { renderAsync } from "docx-preview";
 import * as pdfjsLib from "pdfjs-dist";
-import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import * as XLSX from "xlsx";
 import { FileText, Minus, Plus } from "lucide-react";
 
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
 type DocumentPreviewProps = {
   blob: Blob;
@@ -287,7 +286,7 @@ function PdfPreview({ blob, title }: { blob: Blob; title: string }) {
     >
       <div
         ref={scrollContainerRef}
-        className="relative h-full overflow-auto bg-slate-100"
+        className="relative h-full overflow-auto bg-slate-100 scrollbar-document"
         onScroll={handleScroll}
       >
         <PreviewToolbar
@@ -388,7 +387,7 @@ function TextPreview({ blob }: { blob: Blob }) {
   }
 
   return (
-    <div className="h-full overflow-auto bg-white p-8">
+    <div className="h-full overflow-auto bg-white p-8 scrollbar-document">
       <pre className="whitespace-pre-wrap break-words font-mono text-sm leading-7 text-slate-800">
         {textContent || "This text file is empty."}
       </pre>
@@ -533,7 +532,7 @@ function DocxPreview({ blob, title }: { blob: Blob; title: string }) {
     >
       <div
         ref={scrollContainerRef}
-        className="relative h-full overflow-auto bg-slate-100"
+        className="relative h-full overflow-auto bg-slate-100 scrollbar-document"
         onScroll={handleScroll}
       >
         <PreviewToolbar
@@ -799,7 +798,7 @@ function ExcelPreview({ blob, title }: { blob: Blob; title: string }) {
         ))}
       </div>
 
-      <div className="relative min-h-0 flex-1 overflow-auto bg-slate-100 p-5">
+      <div className="relative min-h-0 flex-1 overflow-auto bg-slate-100 p-5 scrollbar-document">
         {isRendering ? (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-white/80 px-6 text-center">
             <p className="text-sm font-semibold text-slate-700">

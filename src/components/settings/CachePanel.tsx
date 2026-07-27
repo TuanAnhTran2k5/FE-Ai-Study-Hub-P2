@@ -58,11 +58,16 @@ export default function CachePanel() {
   };
 
   const handleResetSettings = () => {
-    const configKeys = ["theme-color", "default-semester", "language", "theme"];
+    const configKeys = ["theme-color", "theme-custom-color", "default-semester", "language", "theme"];
     configKeys.forEach((key) => localStorage.removeItem(key));
     
     const root = document.documentElement;
-    const themeClasses = ["theme-blue", "theme-indigo", "theme-purple", "theme-emerald", "theme-orange", "theme-rose"];
+    root.style.removeProperty("--primary");
+    root.style.removeProperty("--primary-hover");
+    root.style.removeProperty("--primary-bg-hover");
+    root.style.removeProperty("--ring");
+    
+    const themeClasses = ["theme-blue", "theme-indigo", "theme-purple", "theme-emerald", "theme-orange", "theme-rose", "theme-teal", "theme-amber", "theme-rose", "theme-pink", "theme-slate"];
     themeClasses.forEach((cls) => root.classList.remove(cls));
     root.classList.add("theme-blue");
     

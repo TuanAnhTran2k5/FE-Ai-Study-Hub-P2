@@ -293,7 +293,8 @@
         "amber": "Sunny Amber",
         "rose": "Rose Red",
         "pink": "Blossom Pink",
-        "slate": "Minimalist Slate"
+        "slate": "Minimalist Slate",
+        "custom": "Custom RGB"
       }
     },
     "cache": {
@@ -890,7 +891,10 @@
     "subjectNamePlaceholder": "e.g. C# .NET Programming",
     "selectType": "Select type",
     "selectSemester": "Select semester",
-    "detailsAboutSubject": "Details about this subject..."
+    "detailsAboutSubject": "Details about this subject...",
+    "comboSelectLabel": "Combo (Optional)",
+    "selectComboPlaceholder": "Select combo (optional)",
+    "comboNone": "None (Leave unassigned)"
   },
   "documentUpload": {
     "shareText": "Share your knowledge with the community and help others learn.",
@@ -963,6 +967,17 @@
     "btnOpenTab": "Open New Tab",
     "btnDownload": "Download",
     "btnBack": "Back",
+    "dialogUpdateTitle": "Update Document",
+    "dialogUpdateDesc": "Edit document information and save your changes.",
+    "replaceFileLabel": "Replace Document File (Optional)",
+    "replaceFileSwitch": "Replace with new file (Change document content)",
+    "chooseFilePrompt": "Choose replacement file",
+    "mustBeFile": "Must be a {{ext}} file. Max 20MB.",
+    "btnEditContent": "Edit Content",
+    "editTab": "Edit",
+    "previewTab": "Preview",
+    "noPreviewMarkdown": "Nothing to preview. Start typing in the edit tab!",
+    "savingChanges": "Saving changes...",
     "infoTitle": "Document Info",
     "statsTitle": "Statistics",
     "statistics": {

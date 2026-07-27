@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAuthCheck } from "@/hooks/useAuthCheck";
 import { Loader2 } from "lucide-react";
 
-import { THEME_COLORS } from "@/constants/themeColors";
+import { applyThemeColor } from "@/utils/themeHelper";
 
 interface AuthInitProps {
   children: React.ReactNode;
@@ -15,10 +15,8 @@ export default function AuthInit({ children }: AuthInitProps) {
 
   React.useEffect(() => {
     const savedColor = localStorage.getItem("theme-color") || "blue";
-    const root = document.documentElement;
-    const themeClasses = THEME_COLORS.map((color) => color.colorClass);
-    themeClasses.forEach((cls) => root.classList.remove(cls));
-    root.classList.add(`theme-${savedColor}`);
+    const customHex = localStorage.getItem("theme-custom-color") || "#3b82f6";
+    applyThemeColor(savedColor, customHex);
   }, []);
 
   if (isChecking) {

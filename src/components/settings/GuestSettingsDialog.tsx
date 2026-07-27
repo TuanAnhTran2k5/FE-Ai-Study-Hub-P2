@@ -1,6 +1,6 @@
 import { Settings, Globe, Sun, Palette, Check, Moon, Monitor } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useTheme } from "next-themes";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -8,11 +8,15 @@ import { THEME_COLORS } from "@/constants/themeColors";
 import type { ThemeColor } from "@/constants/themeColors";
 import { toast } from "react-toastify";
 
+import { applyThemeColor } from "@/utils/themeHelper";
+
 export default function GuestSettingsDialog() {
   const { t, i18n } = useTranslation();
   const { theme, setTheme } = useTheme();
   const [currentColor, setCurrentColor] = useState(() => localStorage.getItem("theme-color") || "blue");
+  const [customColor, setCustomColor] = useState(() => localStorage.getItem("theme-custom-color") || "#3b82f6");
   const [isOpen, setIsOpen] = useState(false);
+  const guestColorInputRef = useRef<HTMLInputElement>(null);
 
   const handleChangeLanguage = (lang: "en" | "vi") => {
     i18n.changeLanguage(lang);
@@ -28,13 +32,16 @@ export default function GuestSettingsDialog() {
   const handleColorChange = (color: ThemeColor) => {
     setCurrentColor(color.id);
     localStorage.setItem("theme-color", color.id);
-
-    const root = document.documentElement;
-    const themeClasses = THEME_COLORS.map((c) => c.colorClass);
-    themeClasses.forEach((cls) => root.classList.remove(cls));
-    root.classList.add(`theme-${color.id}`);
-
+    applyThemeColor(color.id);
     toast.success(t("settings.appearance.colorSuccess", "Đã thay đổi màu sắc chủ đạo của trang!"));
+  };
+
+  const handleCustomColorChange = (hexValue: string) => {
+    setCustomColor(hexValue);
+    setCurrentColor("custom");
+    localStorage.setItem("theme-color", "custom");
+    localStorage.setItem("theme-custom-color", hexValue);
+    applyThemeColor("custom", hexValue);
   };
 
   return (
@@ -165,6 +172,34 @@ export default function GuestSettingsDialog() {
                   </span>
                 </button>
               ))}
+
+              {/* Custom Color Button */}
+              <div
+                onClick={() => guestColorInputRef.current?.click()}
+                className={`relative flex items-center gap-2 px-2 py-2 rounded-xl border transition-all duration-300 cursor-pointer ${
+                  currentColor === "custom"
+                    ? "border-primary bg-primary/5 text-primary font-black shadow-sm"
+                    : "border-border bg-background hover:bg-secondary/15 text-muted-foreground hover:text-card-foreground font-bold"
+                }`}
+              >
+                <span
+                  className="relative size-5 rounded-full shrink-0 flex items-center justify-center shadow-inner border border-black/10 overflow-hidden"
+                  style={{ backgroundColor: customColor }}
+                >
+                  <input
+                    ref={guestColorInputRef}
+                    type="color"
+                    value={customColor}
+                    onChange={(e) => handleCustomColorChange(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute inset-0 opacity-0 cursor-pointer w-full h-full scale-150"
+                  />
+                  {currentColor === "custom" && <Check className="h-3 w-3 text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.5)]" />}
+                </span>
+                <span className="text-[10px] truncate max-w-full">
+                  {t("settings.appearance.colors.custom", "Tùy chỉnh")}
+                </span>
+              </div>
             </div>
           </div>
         </div>
