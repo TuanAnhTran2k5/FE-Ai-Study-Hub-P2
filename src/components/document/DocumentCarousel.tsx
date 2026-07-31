@@ -12,9 +12,10 @@ import {
 interface DocumentCarouselProps {
   documents: DocumentResponse[];
   onView?: (document: DocumentResponse) => void;
+  isPublic?: boolean;
 }
 
-function DocumentCarousel({ documents, onView }: DocumentCarouselProps) {
+function DocumentCarousel({ documents, onView, isPublic = true }: DocumentCarouselProps) {
   if (documents.length === 0) {
     return null;
   }
@@ -33,7 +34,7 @@ function DocumentCarousel({ documents, onView }: DocumentCarouselProps) {
             key={document.documentId}
             className="pl-6 md:basis-1/2 xl:basis-1/3"
           >
-            <DocumentCard document={document} onView={onView} />
+            <DocumentCard document={document} onView={onView} isPublic={isPublic} />
           </CarouselItem>
         ))}
       </CarouselContent>

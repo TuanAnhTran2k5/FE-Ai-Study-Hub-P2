@@ -1,3 +1,4 @@
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -55,10 +56,10 @@ export default function RankProgressCard({
                 borderColor: currentRankStyle.color,
               }}
             >
-              <CurrentRankIcon 
-                className="h-5.5 w-5.5" 
-                style={{ color: currentRankStyle.color }} 
-              />
+              {React.createElement(CurrentRankIcon, {
+                className: "h-5.5 w-5.5",
+                style: { color: currentRankStyle.color }
+              })}
             </div>
             <span className="text-[10px] font-bold text-card-foreground text-center truncate w-full">
               {currentRank?.rank.rankName}
@@ -99,13 +100,13 @@ export default function RankProgressCard({
                 borderColor: rankProgress.nextRank ? nextRankStyle.color : 'rgba(var(--border), 0.8)',
               }}
             >
-              <NextRankIcon 
-                className="h-5.5 w-5.5" 
-                style={{ 
+              {React.createElement(NextRankIcon, {
+                className: "h-5.5 w-5.5",
+                style: {
                   color: rankProgress.nextRank ? nextRankStyle.color : 'var(--muted-foreground)',
                   opacity: rankProgress.nextRank ? 0.7 : 0.4
-                }}
-              />
+                }
+              })}
             </div>
             <span className="text-[10px] font-bold text-muted-foreground text-center truncate w-full">
               {rankProgress.nextRank || "Max Rank"}

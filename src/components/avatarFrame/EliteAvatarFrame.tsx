@@ -68,9 +68,13 @@ function EliteAvatarFrame({
       <div className="absolute right-1 top-1/2 h-3 w-3 -translate-y-1/2 rotate-45 bg-violet-300 shadow-[0_0_15px_rgba(167,139,250,0.9)]" />
 
       {/* Sparkles */}
-      <div className="absolute left-3 top-3 h-2 w-2 rounded-full bg-white shadow-[0_0_15px_white]" />
-      <div className="absolute right-5 top-5 h-1.5 w-1.5 rounded-full bg-cyan-200 shadow-[0_0_12px_cyan]" />
-      <div className="absolute bottom-5 left-5 h-1.5 w-1.5 rounded-full bg-violet-200 shadow-[0_0_12px_violet]" />
+      {size !== "sm" && (
+        <>
+          <div className="absolute left-3 top-3 h-2 w-2 rounded-full bg-white shadow-[0_0_15px_white]" />
+          <div className="absolute right-5 top-5 h-1.5 w-1.5 rounded-full bg-cyan-200 shadow-[0_0_12px_cyan]" />
+          <div className="absolute bottom-5 left-5 h-1.5 w-1.5 rounded-full bg-violet-200 shadow-[0_0_12px_violet]" />
+        </>
+      )}
 
       {/* Avatar */}
       <div className="relative overflow-hidden rounded-full border-4 border-white bg-card">

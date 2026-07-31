@@ -13,6 +13,7 @@ interface DocumentGridProps {
   selectedDocumentIds?: number[];
   onToggleSelect?: (document: DocumentResponse) => void;
   viewMode?: "grid" | "list";
+  isPublic?: boolean;
 }
 
 function DocumentGrid({
@@ -26,6 +27,7 @@ function DocumentGrid({
   selectedDocumentIds = [],
   onToggleSelect,
   viewMode = "grid",
+  isPublic = false,
 }: DocumentGridProps) {
   const { t } = useTranslation();
 
@@ -69,6 +71,7 @@ function DocumentGrid({
                   isSelected={selectedDocumentIds.includes(document.documentId)}
                   onToggleSelect={onToggleSelect}
                   viewMode="list"
+                  isPublic={isPublic}
                 />
               ))}
             </div>
@@ -97,6 +100,7 @@ function DocumentGrid({
           isSelected={selectedDocumentIds.includes(document.documentId)}
           onToggleSelect={onToggleSelect}
           viewMode={viewMode}
+          isPublic={isPublic}
         />
       ))}
     </div>

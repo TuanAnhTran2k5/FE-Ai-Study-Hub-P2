@@ -24,6 +24,8 @@ import {
   Trophy,
 } from "lucide-react";
 
+import { getFormattedTitle } from "@/utils/documentHelper";
+
 interface DocumentCardProps {
   document: DocumentResponse;
   onView?: (document: DocumentResponse) => void;
@@ -34,6 +36,7 @@ interface DocumentCardProps {
   isSelected?: boolean;
   onToggleSelect?: (document: DocumentResponse) => void;
   viewMode?: "grid" | "list";
+  isPublic?: boolean;
 }
 
 function formatFileSize(bytes?: number) {
@@ -159,6 +162,7 @@ function DocumentCard({
   isSelected = false,
   onToggleSelect,
   viewMode = "grid",
+  isPublic = false,
 }: DocumentCardProps) {
   const fileType = formatFileType(document.fileType);
   const fileTheme = getFileTypeTheme(fileType);
@@ -203,15 +207,17 @@ function DocumentCard({
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h3 className="truncate text-sm font-bold text-card-foreground">
-                  {document.title}
+                  {getFormattedTitle(document.title, document.fileName)}
                 </h3>
                 <span className={`shrink-0 text-[9px] font-black ${fileTheme.accent.split(" ").find((className) => className.startsWith("text-")) ?? "text-primary"}`}>
                   {fileType}
                 </span>
               </div>
-              <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                {document.fileName}
-              </p>
+              {!isPublic && (
+                <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                  {document.fileName}
+                </p>
+              )}
             </div>
           </div>
 
@@ -314,7 +320,7 @@ function DocumentCard({
         </button>
       )}
 
-      <div className="flex w-full flex-col">
+      <div className="flex w-full flex-col flex-1">
         <div className="relative h-40 overflow-hidden bg-secondary">
           <div
             className={`absolute inset-0 bg-gradient-to-br ${fileTheme.background}`}
@@ -409,14 +415,16 @@ function DocumentCard({
           </div>
 
           <h3 className="line-clamp-2 min-h-[32px] text-xl font-black leading-tight text-card-foreground sm:text-[22px]">
-            {document.title}
+            {getFormattedTitle(document.title, document.fileName)}
           </h3>
 
-          <p className="mt-1.5 line-clamp-2 min-h-[52px] whitespace-normal [overflow-wrap:anywhere] text-base leading-7 text-muted-foreground">
-            {document.description || document.fileName}
-          </p>
+          {(!isPublic || document.description) && (
+            <p className="mt-1.5 line-clamp-2 min-h-[52px] whitespace-normal [overflow-wrap:anywhere] text-base leading-7 text-muted-foreground">
+              {isPublic ? document.description : (document.description || document.fileName)}
+            </p>
+          )}
 
-          <div className="mt-5 border-t border-border pt-4">
+          <div className="mt-auto border-t border-border pt-4">
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
                 <Popover>

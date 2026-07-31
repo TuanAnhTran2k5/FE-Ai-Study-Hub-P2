@@ -381,6 +381,34 @@
   background-color: rgba(15, 23, 42, 0.45);
 }
 
+/* Hide scrollbar utility class */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Sleek thin scrollbar for tabs */
+.scrollbar-tabs {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15, 23, 42, 0.12) transparent;
+}
+.scrollbar-tabs::-webkit-scrollbar {
+  height: 4px;
+}
+.scrollbar-tabs::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-tabs::-webkit-scrollbar-thumb {
+  background-color: rgba(15, 23, 42, 0.12);
+  border-radius: 9999px;
+}
+.scrollbar-tabs::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(15, 23, 42, 0.25);
+}
+
 /* Accent Colors Themes */
 
 /* Blue */

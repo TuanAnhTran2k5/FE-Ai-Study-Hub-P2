@@ -1,3 +1,4 @@
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { Cpu, HardDrive, ShieldCheck, Sparkles, Trophy, Crown, Milestone, ShieldAlert } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -125,7 +126,7 @@ export default function RankPrivilegesCard({ currentRank, rankProgress }: RankPr
               color: rankStyle.color
             }}
           >
-            <RankIcon className="h-6 w-6" />
+            {React.createElement(RankIcon, { className: "h-6 w-6" })}
           </div>
         </div>
 

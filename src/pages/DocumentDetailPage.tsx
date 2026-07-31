@@ -32,6 +32,7 @@ import DocumentDetailHeader from "@/components/document/detail/DocumentDetailHea
 import BannedUserModal from "@/components/document/detail/BannedUserModal";
 import { VisibilityStatus } from "@/models/document.enum";
 import { ROUTE } from "@/models/routePath";
+import { getFormattedTitle } from "@/utils/documentHelper";
 import { getAllAcademicSubjects } from "@/services/academicService";
 import {
   addBookmark,
@@ -958,7 +959,7 @@ function DocumentDetailPage() {
             userName={currentUser?.fullName || ""}
             moderatedByEmail={document.moderatedByEmail}
             moderationNote={document.moderationNote}
-            documentTitle={document.title}
+            documentTitle={getFormattedTitle(document.title, document.fileName)}
             documentId={document.documentId}
           />
         </section>
@@ -1037,7 +1038,7 @@ const subjectCode =
         />
 
           <DocumentDeleteDialog
-            documentTitle={document.title}
+            documentTitle={getFormattedTitle(document.title, document.fileName)}
             isOpen={isDeleteOpen}
             isDeleting={deleteMutation.isPending}
             onOpenChange={setIsDeleteOpen}
@@ -1082,7 +1083,7 @@ const subjectCode =
               <DocumentPreview
                 blob={normalizedPreviewBlob}
                 fileTypeLabel={fileTypeLabel}
-                title={document.title}
+                title={getFormattedTitle(document.title, document.fileName)}
               />
             ) : (
               <div className="flex h-full flex-col items-center justify-center px-6 text-center">

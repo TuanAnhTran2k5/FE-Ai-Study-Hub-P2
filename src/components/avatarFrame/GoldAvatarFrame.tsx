@@ -69,9 +69,13 @@ function GoldAvatarFrame({
         className={`absolute right-0 top-1/2 -translate-y-1/2 rounded-l-xl bg-gradient-to-l from-yellow-200 to-amber-500 shadow-[0_0_14px_rgba(234,179,8,0.85)] dark:from-yellow-100 dark:to-yellow-500 dark:shadow-[0_0_18px_rgba(250,204,21,0.95)] ${classes.nodeVertical}`}
       />
 
-      <div className="pointer-events-none absolute left-2 top-2 h-3 w-3 rounded-full bg-white shadow-[0_0_16px_rgba(255,255,255,0.95)] dark:bg-yellow-50" />
-      <div className="pointer-events-none absolute right-4 top-5 h-2 w-2 rounded-full bg-yellow-100 shadow-[0_0_14px_rgba(250,204,21,0.9)]" />
-      <div className="pointer-events-none absolute bottom-5 left-4 h-2 w-2 rounded-full bg-amber-200 shadow-[0_0_14px_rgba(245,158,11,0.9)]" />
+      {size !== "sm" && (
+        <>
+          <div className="pointer-events-none absolute left-2 top-2 h-3 w-3 rounded-full bg-white shadow-[0_0_16px_rgba(255,255,255,0.95)] dark:bg-yellow-50" />
+          <div className="pointer-events-none absolute right-4 top-5 h-2 w-2 rounded-full bg-yellow-100 shadow-[0_0_14px_rgba(250,204,21,0.9)]" />
+          <div className="pointer-events-none absolute bottom-5 left-4 h-2 w-2 rounded-full bg-amber-200 shadow-[0_0_14px_rgba(245,158,11,0.9)]" />
+        </>
+      )}
 
       <div className="relative overflow-hidden rounded-full border-4 border-yellow-50 bg-card shadow-[inset_0_0_16px_rgba(120,53,15,0.25)] dark:border-yellow-100/90">
         <img

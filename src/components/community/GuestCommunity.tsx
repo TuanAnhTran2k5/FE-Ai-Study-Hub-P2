@@ -12,6 +12,7 @@ import {
 import DocumentGrid from "@/components/document/DocumentGrid";
 import { useTranslation } from "react-i18next";
 import type { SubjectResponse } from "@/types/academic.type";
+import { getFormattedTitle } from "@/utils/documentHelper";
 
 function normalizeSearchText(value?: string | null) {
   return (value ?? "")
@@ -84,6 +85,9 @@ export function GuestCommunity({
           const comboCode = (document.comboCode ?? "").toLowerCase();
           const subjectName = (document.subjectName ?? "").toLowerCase();
           const comboName = (document.comboName ?? "").toLowerCase();
+
+          const formattedTitle = getFormattedTitle(document.title, document.fileName).toLowerCase();
+          if (formattedTitle.includes(word)) return true;
 
           if (subjectCode.startsWith(word)) return true;
           if (comboCode.startsWith(word)) return true;
@@ -254,6 +258,7 @@ export function GuestCommunity({
           documents={paginatedGuestDocuments}
           onView={(document) => onViewDocument(document.documentId)}
           gridClassName={communityDocumentGridClassName}
+          isPublic={true}
         />
 
         {/* Guest Pagination Section */}
