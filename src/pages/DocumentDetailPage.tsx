@@ -793,7 +793,7 @@ function DocumentDetailPage() {
     const link = window.document.createElement("a");
 
     link.href = downloadUrl;
-    link.download = document.fileName || document.title;
+    link.download = getFormattedTitle(document.title, document.fileName);
     link.click();
 
     URL.revokeObjectURL(downloadUrl);

@@ -152,6 +152,21 @@ function getOwnerScore(document: DocumentResponse) {
   );
 }
 
+function hasValidDescription(desc?: string | null, fileName?: string) {
+  if (!desc) return false;
+  const normalizedDesc = desc.trim().toLowerCase();
+  const normalizedFile = fileName?.trim().toLowerCase();
+
+  // If description matches filename exactly, hide it
+  if (normalizedDesc === normalizedFile) return false;
+
+  // If description is just a file name format (ends with document extensions)
+  const isFileFormat = /\.(pdf|docx|doc|xlsx|xls|png|jpg|jpeg|pptx|ppt|zip|rar|txt)$/i.test(normalizedDesc);
+  if (isFileFormat) return false;
+
+  return true;
+}
+
 function DocumentCard({
   document,
   onView,
@@ -166,6 +181,12 @@ function DocumentCard({
 }: DocumentCardProps) {
   const fileType = formatFileType(document.fileType);
   const fileTheme = getFileTypeTheme(fileType);
+  const treatAsPublic =
+    isPublic ||
+    Boolean(
+      document.originalUploaderId &&
+        Number(document.originalUploaderId) !== Number(document.ownerId)
+    );
 
   if (viewMode === "list") {
     return (
@@ -213,7 +234,7 @@ function DocumentCard({
                   {fileType}
                 </span>
               </div>
-              {!isPublic && (
+              {!treatAsPublic && (
                 <p className="mt-0.5 truncate text-xs text-muted-foreground">
                   {document.fileName}
                 </p>
@@ -418,9 +439,9 @@ function DocumentCard({
             {getFormattedTitle(document.title, document.fileName)}
           </h3>
 
-          {(!isPublic || document.description) && (
+          {(!treatAsPublic || hasValidDescription(document.description, document.fileName)) && (
             <p className="mt-1.5 line-clamp-2 min-h-[52px] whitespace-normal [overflow-wrap:anywhere] text-base leading-7 text-muted-foreground">
-              {isPublic ? document.description : (document.description || document.fileName)}
+              {treatAsPublic ? document.description : (document.description || document.fileName)}
             </p>
           )}
 
