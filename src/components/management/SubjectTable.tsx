@@ -25,6 +25,7 @@ interface SubjectTableProps {
   onDeleteClick?: (id: number, identifier: string) => void;
   onRestoreClick?: (id: number) => void;
   onManageSyllabusClick?: (subject: SubjectResponse) => void;
+  syllabusExistsIds?: number[];
 }
 
 export default function SubjectTable({
@@ -38,6 +39,7 @@ export default function SubjectTable({
   onDeleteClick,
   onRestoreClick,
   onManageSyllabusClick,
+  syllabusExistsIds = [],
 }: SubjectTableProps) {
   const { t } = useTranslation();
   // Sắp xếp danh sách môn học theo Học kỳ (semesterId) tăng dần
@@ -140,15 +142,28 @@ export default function SubjectTable({
                     <>
                       <TableCell>
                         {onManageSyllabusClick && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onManageSyllabusClick(subj)}
-                            className="cursor-pointer h-7 rounded-lg text-xs font-bold gap-1 hover:bg-primary hover:text-primary-foreground border-primary/30"
-                          >
-                            <FileText className="h-3.5 w-3.5" />
-                            {t("curriculum.btnSyllabus", "Syllabus")}
-                          </Button>
+                          (() => {
+                            const hasSyllabus = syllabusExistsIds.includes(subj.subjectId);
+                            return (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => onManageSyllabusClick(subj)}
+                                title={hasSyllabus ? t("curriculum.syllabusAdded", "Syllabus added as AI context") : t("curriculum.syllabusNotAdded", "No syllabus yet")}
+                                className={`cursor-pointer h-7 rounded-lg text-xs font-bold gap-1 transition-all ${
+                                  hasSyllabus
+                                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/40 hover:bg-emerald-500 hover:text-white"
+                                    : "hover:bg-primary hover:text-primary-foreground border-primary/30"
+                                }`}
+                              >
+                                <FileText className="h-3.5 w-3.5" />
+                                {t("curriculum.btnSyllabus", "Syllabus")}
+                                {hasSyllabus && (
+                                  <span className="ml-0.5 inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                )}
+                              </Button>
+                            );
+                          })()
                         )}
                       </TableCell>
                       <TableCell className="text-right">
