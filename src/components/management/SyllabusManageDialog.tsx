@@ -42,12 +42,14 @@ interface SyllabusManageDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   subject: SubjectResponse | null;
+  onSyllabusStatusKnown?: (subjectId: number, hasSyllabus: boolean) => void;
 }
 
 export default function SyllabusManageDialog({
   isOpen,
   onOpenChange,
   subject,
+  onSyllabusStatusKnown,
 }: SyllabusManageDialogProps) {
   const { t } = useTranslation();
 
@@ -87,6 +89,12 @@ export default function SyllabusManageDialog({
 
   const isNotFoundError = (syllabusError as any)?.response?.status === 404;
   const hasSyllabus = !!syllabus && !isNotFoundError;
+
+  // Notify parent when syllabus status is known
+  React.useEffect(() => {
+    if (!subject || isLoadingSyllabus) return;
+    onSyllabusStatusKnown?.(subject.subjectId, hasSyllabus);
+  }, [subject?.subjectId, hasSyllabus, isLoadingSyllabus]);
 
   // Tự động làm mới (Auto Refetch/Polling) mỗi 3 giây khi đang phân tích AI
   React.useEffect(() => {

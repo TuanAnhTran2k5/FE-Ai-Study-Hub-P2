@@ -103,6 +103,19 @@ function ManagementPage() {
   // 7. State quản lý Đề Cương (Syllabus)
   const [selectedSyllabusSubject, setSelectedSyllabusSubject] = useState<SubjectResponse | null>(null);
   const [isSyllabusDialogOpen, setIsSyllabusDialogOpen] = useState(false);
+  // Map lưu trạng thái syllabus của từng subject: subjectId -> hasSyllabus
+  const [syllabusExistsMap, setSyllabusExistsMap] = useState<Record<number, boolean>>({});
+
+  const handleSyllabusStatusKnown = (subjectId: number, hasSyllabus: boolean) => {
+    setSyllabusExistsMap((prev) => {
+      if (prev[subjectId] === hasSyllabus) return prev;
+      return { ...prev, [subjectId]: hasSyllabus };
+    });
+  };
+
+  const syllabusExistsIds = Object.entries(syllabusExistsMap)
+    .filter(([, exists]) => exists)
+    .map(([id]) => Number(id));
 
   // 8. State quản lý Môn học độc lập (Tab All Subjects)
   const [isSingleSubjectDialogOpen, setIsSingleSubjectDialogOpen] = useState(false);
@@ -636,6 +649,7 @@ function ManagementPage() {
                 setSelectedSyllabusSubject(subject);
                 setIsSyllabusDialogOpen(true);
               }}
+              syllabusExistsIds={syllabusExistsIds}
             />
           ) : (
             <DeletedHistoryTable
@@ -724,6 +738,7 @@ function ManagementPage() {
         isOpen={isSyllabusDialogOpen}
         onOpenChange={setIsSyllabusDialogOpen}
         subject={selectedSyllabusSubject}
+        onSyllabusStatusKnown={handleSyllabusStatusKnown}
       />
     </div>
   );
