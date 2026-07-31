@@ -1,3 +1,4 @@
+import React from "react";
 import { useTranslation } from "react-i18next";
 import { Sparkles, Shield } from "lucide-react";
 import { getRankIcon, getRankStyle } from "./rankIconHelper";
@@ -37,10 +38,10 @@ export default function DashboardHeader({ fullName, currentRank }: DashboardHead
             borderColor: rankStyle.color,
           }}
         >
-          <WelcomeRankIcon 
-            className="h-5 w-5 animate-bounce" 
-            style={{ color: rankStyle.color }} 
-          />
+          {React.createElement(WelcomeRankIcon, {
+            className: "h-5 w-5 animate-bounce",
+            style: { color: rankStyle.color }
+          })}
           <span 
             className="font-bold text-xs uppercase tracking-wider"
             style={{ color: rankStyle.color }}

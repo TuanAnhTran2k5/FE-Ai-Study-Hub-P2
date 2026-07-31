@@ -16,6 +16,7 @@ import {
 } from "@/components/community/CommunityFilters";
 import DocumentGrid from "@/components/document/DocumentGrid";
 import type { SubjectResponse } from "@/types/academic.type";
+import { getFormattedTitle } from "@/utils/documentHelper";
 
 function normalizeSearchText(value?: string | null) {
   return (value ?? "")
@@ -94,13 +95,9 @@ export function AuthenticatedCommunity({
 
     return documents.filter((document) => {
       const searchableText = [
-        document.title,
-        document.fileName,
+        getFormattedTitle(document.title, document.fileName),
         document.description,
         document.subjectCode,
-        document.subjectName,
-        document.comboCode,
-        document.comboName,
         document.ownerName,
       ]
         .filter(Boolean)
@@ -249,6 +246,7 @@ export function AuthenticatedCommunity({
           documents={paginatedDocuments}
           onView={(document) => onViewDocument(document.documentId)}
           gridClassName={communityDocumentGridClassName}
+          isPublic={true}
         />
 
         {/* Pagination Section */}

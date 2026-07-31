@@ -85,8 +85,12 @@ function SilverAvatarFrame({
         </div>
       </div>
 
-      <div className="pointer-events-none absolute left-3 top-3 h-2 w-2 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.9)] dark:bg-sky-100" />
-      <div className="pointer-events-none absolute bottom-5 right-4 h-1.5 w-1.5 rounded-full bg-sky-200 shadow-[0_0_10px_rgba(56,189,248,0.8)]" />
+      {size !== "sm" && (
+        <>
+          <div className="pointer-events-none absolute left-3 top-3 h-2 w-2 rounded-full bg-white shadow-[0_0_10px_rgba(255,255,255,0.9)] dark:bg-sky-100" />
+          <div className="pointer-events-none absolute bottom-5 right-4 h-1.5 w-1.5 rounded-full bg-sky-200 shadow-[0_0_10px_rgba(56,189,248,0.8)]" />
+        </>
+      )}
 
       {isOnline && (
         <span className="absolute bottom-0 right-1 z-20 flex h-3 w-3">

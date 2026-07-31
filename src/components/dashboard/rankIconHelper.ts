@@ -15,10 +15,10 @@ export const getRankStyle = (rankName?: string) => {
   const name = rankName?.toLowerCase() ?? "";
   if (name.includes("bronze")) {
     return {
-      color: "#d97706", // Amber-600: Cam đồng rực rỡ
-      badgeColor: "rgba(217, 119, 6, 0.15)",
-      glowClass: "shadow-[0_0_12px_rgba(217,119,6,0.4)]",
-      borderClass: "border-amber-500/30"
+      color: "#c2410c", // Orange-700: Đồng đỏ cổ điển (Copper Bronze)
+      badgeColor: "rgba(194, 65, 12, 0.15)",
+      glowClass: "shadow-[0_0_12px_rgba(194,65,12,0.45)]",
+      borderClass: "border-orange-500/30"
     };
   }
   if (name.includes("silver")) {

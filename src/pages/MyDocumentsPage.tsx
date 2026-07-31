@@ -681,6 +681,7 @@ function MyDocumentsPage() {
               handleToggleDocumentSelect(document.documentId)
             }
             viewMode={viewMode}
+            isPublic={false}
           />
 
           {filteredDocuments.length > 0 && (

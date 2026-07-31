@@ -4,13 +4,13 @@ import {
   Download,
   Flag,
   Star,
-  UserRound,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { DocumentResponse } from "@/types/document.type";
 import { useTranslation } from "react-i18next";
+import AvatarFrame from "@/components/avatarFrame/AvatarFrame";
 
 type DocumentDetailSidebarProps = {
   document: DocumentResponse;
@@ -68,19 +68,12 @@ function DocumentDetailSidebar({
           </h3>
 
           <div className="mt-5 flex items-center gap-3">
-            <div className="flex h-13 w-13 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-orange-500 to-red-500 text-lg font-black text-white">
-              {uploadedByAvatar ? (
-  <img
-    src={uploadedByAvatar}
-    alt={uploadedByName}
-    className="h-full w-full object-cover"
-  />
-) : uploadedByName ? (
-  uploadedByName.charAt(0).toUpperCase()
-) : (
-  <UserRound className="h-6 w-6" />
-)}
-            </div>
+            <AvatarFrame
+              score={document.ownerTotalScore ?? 0}
+              avatarUrl={uploadedByAvatar}
+              fullName={uploadedByName}
+              size="sm"
+            />
 
             <div className="min-w-0">
               <p className="truncate font-black text-card-foreground">

@@ -49,7 +49,6 @@ export default function SyllabusManageDialog({
   onOpenChange,
   subject,
 }: SyllabusManageDialogProps) {
-  if (!subject) return null;
   const { t } = useTranslation();
 
   const queryClient = useQueryClient();
@@ -69,9 +68,9 @@ export default function SyllabusManageDialog({
     error: syllabusError,
     refetch: refetchSyllabus,
   } = useQuery({
-    queryKey: ["admin-syllabus", subject.subjectId],
-    queryFn: () => getSyllabus(subject.subjectId),
-    enabled: isOpen && !!subject.subjectId,
+    queryKey: ["admin-syllabus", subject?.subjectId],
+    queryFn: () => getSyllabus(subject!.subjectId),
+    enabled: isOpen && !!subject?.subjectId,
     retry: false,
   });
 
@@ -81,9 +80,9 @@ export default function SyllabusManageDialog({
     isLoading: isLoadingHistory,
     refetch: refetchHistory,
   } = useQuery({
-    queryKey: ["admin-syllabus-history", subject.subjectId],
-    queryFn: () => getSyllabusHistory(subject.subjectId),
-    enabled: isOpen && !!subject.subjectId && !!syllabus,
+    queryKey: ["admin-syllabus-history", subject?.subjectId],
+    queryFn: () => getSyllabusHistory(subject!.subjectId),
+    enabled: isOpen && !!subject?.subjectId && !!syllabus,
   });
 
   const isNotFoundError = (syllabusError as any)?.response?.status === 404;
@@ -124,7 +123,7 @@ export default function SyllabusManageDialog({
 
   // 1. Upload/Update PDF Mutation
   const uploadMutation = useMutation({
-    mutationFn: (file: File) => uploadSyllabus(subject.subjectId, file),
+    mutationFn: (file: File) => uploadSyllabus(subject!.subjectId, file),
     onSuccess: () => {
       toast.success(t("success.createSubject"));
       refetchSyllabus();
@@ -140,7 +139,7 @@ export default function SyllabusManageDialog({
   // 2. Update JSON Mutation
   const updateMutation = useMutation({
     mutationFn: (data: { jsonContent: string; reason: string }) =>
-      updateSyllabus(subject.subjectId, data),
+      updateSyllabus(subject!.subjectId, data),
     onSuccess: () => {
       toast.success(t("success.updateSubject"));
       refetchSyllabus();
@@ -155,7 +154,7 @@ export default function SyllabusManageDialog({
 
   // 3. Rollback Mutation
   const rollbackMutation = useMutation({
-    mutationFn: (historyId: number) => rollbackSyllabus(subject.subjectId, historyId),
+    mutationFn: (historyId: number) => rollbackSyllabus(subject!.subjectId, historyId),
     onSuccess: (data) => {
       toast.success(t("success.rollbackVersion", { version: data.embeddingVersion, defaultValue: `Rolled back successfully to version ${data.embeddingVersion}!` }));
       refetchSyllabus();
@@ -170,7 +169,7 @@ export default function SyllabusManageDialog({
 
   // 4. Delete Mutation
   const deleteMutation = useMutation({
-    mutationFn: () => deleteSyllabus(subject.subjectId),
+    mutationFn: () => deleteSyllabus(subject!.subjectId),
     onSuccess: () => {
       toast.success(t("success.deleteSyllabus", "Syllabus deleted successfully!"));
       setIsDeleting(false);
@@ -217,6 +216,8 @@ export default function SyllabusManageDialog({
         );
     }
   };
+
+  if (!subject) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>

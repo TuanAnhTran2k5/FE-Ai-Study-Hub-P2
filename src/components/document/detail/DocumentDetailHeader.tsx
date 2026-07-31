@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { VisibilityStatus } from "@/models/document.enum";
 import type { DocumentResponse } from "@/types/document.type";
 import { useTranslation } from "react-i18next";
+import { getFormattedTitle } from "@/utils/documentHelper";
 
 type DocumentDetailHeaderProps = {
   document: DocumentResponse;
@@ -65,7 +66,7 @@ function DocumentDetailHeader({
 
             <div className="min-w-0 flex-1">
               <h1 className="truncate text-3xl font-black tracking-tight text-card-foreground">
-                {document.title}
+                {getFormattedTitle(document.title, document.fileName)}
               </h1>
 
               <div className="mt-2 flex flex-wrap items-center gap-2">

@@ -45,31 +45,31 @@ function BronzeAvatarFrame({
     <div
       className={`relative flex items-center justify-center ${classes.wrapper}`}
     >
-      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-200 via-orange-400 to-yellow-700 shadow-[0_0_22px_rgba(217,119,6,0.35)] dark:from-amber-300 dark:via-orange-500 dark:to-yellow-800 dark:shadow-[0_0_26px_rgba(251,146,60,0.45)]" />
+      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-orange-400 via-amber-600 to-orange-800 shadow-[0_0_22px_rgba(194,65,12,0.35)] dark:from-orange-500 dark:via-amber-700 dark:to-orange-950 dark:shadow-[0_0_26px_rgba(234,88,12,0.45)]" />
 
-      <div className="absolute inset-[3px] rounded-full bg-gradient-to-br from-amber-100/90 via-orange-300/80 to-yellow-700/70 dark:from-amber-200/80 dark:via-orange-500/50 dark:to-yellow-800/70" />
+      <div className="absolute inset-[3px] rounded-full bg-gradient-to-br from-orange-200/90 via-amber-500/80 to-orange-700/70 dark:from-orange-300/80 dark:via-amber-600/50 dark:to-orange-900/70" />
 
-      <div className="absolute inset-[6px] rounded-full border-2 border-amber-300/90 shadow-inner dark:border-orange-300/80" />
+      <div className="absolute inset-[6px] rounded-full border-2 border-orange-400/90 shadow-inner dark:border-orange-400/80" />
 
-      <div className="absolute inset-[11px] rounded-full border border-white/80 dark:border-orange-100/60" />
+      <div className="absolute inset-[11px] rounded-full border border-white/80 dark:border-orange-350/60" />
 
       <div
-        className={`absolute left-1/2 top-0 -translate-x-1/2 rounded-b-xl bg-gradient-to-b from-amber-300 to-orange-600 shadow-[0_0_12px_rgba(245,158,11,0.7)] dark:from-amber-300 dark:to-orange-500 dark:shadow-[0_0_14px_rgba(251,146,60,0.8)] ${classes.nodeHorizontal}`}
+        className={`absolute left-1/2 top-0 -translate-x-1/2 rounded-b-xl bg-gradient-to-b from-orange-300 to-orange-700 shadow-[0_0_12px_rgba(194,65,12,0.7)] dark:from-orange-400 dark:to-orange-600 dark:shadow-[0_0_14px_rgba(234,88,12,0.8)] ${classes.nodeHorizontal}`}
       />
 
       <div
-        className={`absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-xl bg-gradient-to-t from-amber-300 to-orange-600 shadow-[0_0_12px_rgba(245,158,11,0.7)] dark:from-amber-300 dark:to-orange-500 dark:shadow-[0_0_14px_rgba(251,146,60,0.8)] ${classes.nodeHorizontal}`}
+        className={`absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-xl bg-gradient-to-t from-orange-300 to-orange-700 shadow-[0_0_12px_rgba(194,65,12,0.7)] dark:from-orange-400 dark:to-orange-600 dark:shadow-[0_0_14px_rgba(234,88,12,0.8)] ${classes.nodeHorizontal}`}
       />
 
       <div
-        className={`absolute left-0 top-1/2 -translate-y-1/2 rounded-r-xl bg-gradient-to-r from-amber-300 to-orange-600 shadow-[0_0_12px_rgba(245,158,11,0.7)] dark:from-amber-300 dark:to-orange-500 dark:shadow-[0_0_14px_rgba(251,146,60,0.8)] ${classes.nodeVertical}`}
+        className={`absolute left-0 top-1/2 -translate-y-1/2 rounded-r-xl bg-gradient-to-r from-orange-300 to-orange-700 shadow-[0_0_12px_rgba(194,65,12,0.7)] dark:from-orange-400 dark:to-orange-600 dark:shadow-[0_0_14px_rgba(234,88,12,0.8)] ${classes.nodeVertical}`}
       />
 
       <div
-        className={`absolute right-0 top-1/2 -translate-y-1/2 rounded-l-xl bg-gradient-to-l from-amber-300 to-orange-600 shadow-[0_0_12px_rgba(245,158,11,0.7)] dark:from-amber-300 dark:to-orange-500 dark:shadow-[0_0_14px_rgba(251,146,60,0.8)] ${classes.nodeVertical}`}
+        className={`absolute right-0 top-1/2 -translate-y-1/2 rounded-l-xl bg-gradient-to-l from-orange-300 to-orange-700 shadow-[0_0_12px_rgba(194,65,12,0.7)] dark:from-orange-400 dark:to-orange-600 dark:shadow-[0_0_14px_rgba(234,88,12,0.8)] ${classes.nodeVertical}`}
       />
 
-      <div className="relative overflow-hidden rounded-full border-4 border-amber-50 bg-card shadow-[inset_0_0_16px_rgba(120,53,15,0.22)] dark:border-orange-100/80">
+      <div className="relative overflow-hidden rounded-full border-4 border-orange-50 bg-card shadow-[inset_0_0_16px_rgba(120,53,15,0.22)] dark:border-orange-200/80">
         <img
           src={avatarUrl || fallbackAvatar}
           alt={fullName}
@@ -79,14 +79,18 @@ function BronzeAvatarFrame({
 
       <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
         <div
-          className={`rounded-full border border-orange-400 bg-gradient-to-r from-amber-100 via-orange-100 to-yellow-200 font-black tracking-widest text-orange-800 shadow-[0_0_14px_rgba(245,158,11,0.35)] dark:border-orange-300 dark:from-amber-200 dark:via-orange-100 dark:to-yellow-300 dark:text-orange-900 dark:shadow-[0_0_16px_rgba(251,146,60,0.55)] ${classes.label}`}
+          className={`rounded-full border border-orange-500 bg-gradient-to-r from-orange-100 via-amber-100 to-orange-200 font-black tracking-widest text-orange-900 shadow-[0_0_14px_rgba(194,65,12,0.35)] dark:border-orange-400 dark:from-orange-200 dark:via-amber-100 dark:to-orange-300 dark:text-orange-950 dark:shadow-[0_0_16px_rgba(234,88,12,0.55)] ${classes.label}`}
         >
           BRONZE
         </div>
       </div>
 
-      <div className="pointer-events-none absolute left-3 top-3 h-2 w-2 rounded-full bg-amber-50 shadow-[0_0_10px_rgba(255,237,213,0.9)]" />
-      <div className="pointer-events-none absolute bottom-5 right-4 h-1.5 w-1.5 rounded-full bg-orange-200 shadow-[0_0_10px_rgba(251,146,60,0.8)]" />
+      {size !== "sm" && (
+        <>
+          <div className="pointer-events-none absolute left-3 top-3 h-2 w-2 rounded-full bg-amber-50 shadow-[0_0_10px_rgba(255,237,213,0.9)]" />
+          <div className="pointer-events-none absolute bottom-5 right-4 h-1.5 w-1.5 rounded-full bg-orange-200 shadow-[0_0_10px_rgba(251,146,60,0.8)]" />
+        </>
+      )}
 
       {isOnline && (
         <span className="absolute bottom-0 right-1 z-20 flex h-3 w-3">

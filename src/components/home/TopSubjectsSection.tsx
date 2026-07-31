@@ -64,7 +64,7 @@ function TopSubjectsSection() {
           </Link>
         </div>
 
-        <DocumentCarousel documents={topSubjectDocuments} />
+        <DocumentCarousel documents={topSubjectDocuments} isPublic={true} />
       </div>
     </section>
   );

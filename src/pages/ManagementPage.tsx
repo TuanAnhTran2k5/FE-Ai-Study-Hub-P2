@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
@@ -62,16 +62,7 @@ function ManagementPage() {
   );
 
   const hasToken = !!localStorage.getItem("accessToken");
-
-  // Nếu người dùng đã logout (xóa token), chuyển hướng lặng lẽ về trang chủ mà không báo lỗi
-  if (!hasToken) {
-    return <Navigate to={`/${ROUTE.HOME}`} replace />;
-  }
-
-  if (!currentUser || currentUser.role !== "AD") {
-    toast.error(t("curriculum.accessDenied", "Access denied. Admin role required."));
-    return <Navigate to={`/${ROUTE.APP}/${ROUTE.DASHBOARD}`} replace />;
-  }
+  const isAuthorized = hasToken && currentUser && currentUser.role === "AD";
 
   // 2. State điều hướng Tabs & Tìm kiếm
   const [activeTab, setActiveTab] = useState<
@@ -125,24 +116,28 @@ function ManagementPage() {
   const { data: semesters = [], isLoading: isLoadingSemesters } = useQuery({
     queryKey: ["admin-semesters"],
     queryFn: getAllSemesters,
+    enabled: !!isAuthorized,
   });
 
   // Get Combo Subjects
   const { data: combos = [], isLoading: isLoadingCombos } = useQuery({
     queryKey: ["admin-combos"],
     queryFn: () => getAllComboSubjects(),
+    enabled: !!isAuthorized,
   });
 
   // Get All Subjects (Core & Combo)
   const { data: subjects = [], isLoading: isLoadingSubjects } = useQuery({
     queryKey: ["admin-subjects"],
     queryFn: () => getAllSubjects(),
+    enabled: !!isAuthorized,
   });
 
   // Get Unassigned Combo Subjects
   const { data: unassignedSubjects = [] } = useQuery({
     queryKey: ["admin-unassigned-combo-subjects"],
     queryFn: getUnassignedComboSubjects,
+    enabled: !!isAuthorized,
   });
 
   const normalizedSubjectSearch = subjectSearchKeyword.trim().toLowerCase();
@@ -356,6 +351,21 @@ function ManagementPage() {
     );
   },
 });
+
+  useEffect(() => {
+    if (hasToken && (!currentUser || currentUser.role !== "AD")) {
+      toast.error(t("curriculum.accessDenied", "Access denied. Admin role required."));
+    }
+  }, [hasToken, currentUser, t]);
+
+  // Authorization & Redirection checks
+  if (!hasToken) {
+    return <Navigate to={`/${ROUTE.HOME}`} replace />;
+  }
+
+  if (!currentUser || currentUser.role !== "AD") {
+    return <Navigate to={`/${ROUTE.APP}/${ROUTE.DASHBOARD}`} replace />;
+  }
 
   // ==========================================
   // SAVING / DELETING ACTION DISPATCHERS

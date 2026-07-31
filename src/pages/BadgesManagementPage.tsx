@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
@@ -45,15 +45,8 @@ export default function BadgesManagementPage() {
     (state: RootState) => state.user as AuthUser | null
   );
   const hasToken = !!localStorage.getItem("accessToken");
-
-  if (!hasToken) {
-    return <Navigate to={`/${ROUTE.HOME}`} replace />;
-  }
-
-  if (!currentUser || currentUser.role !== "AD") {
-    toast.error("Access denied. Admin role required.");
-    return <Navigate to={`/${ROUTE.APP}/${ROUTE.DASHBOARD}`} replace />;
-  }
+  const isAuthorized = hasToken && currentUser && currentUser.role === "AD";
+  const cacheBuster = useRef(Date.now()).current;
 
   // 2. States quản lý giao diện
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -71,6 +64,7 @@ export default function BadgesManagementPage() {
   const { data: badges = [], isLoading } = useQuery({
     queryKey: ["admin-badges", searchKeyword],
     queryFn: () => getAllBadges(searchKeyword),
+    enabled: !!isAuthorized,
   });
 
   // ==========================================
@@ -120,6 +114,21 @@ export default function BadgesManagementPage() {
       toast.error(error.response?.data?.message || t("badges.messages.deleteFailed"));
     },
   });
+
+  useEffect(() => {
+    if (hasToken && (!currentUser || currentUser.role !== "AD")) {
+      toast.error("Access denied. Admin role required.");
+    }
+  }, [hasToken, currentUser]);
+
+  // Redirection checks (Safe after hooks)
+  if (!hasToken) {
+    return <Navigate to={`/${ROUTE.HOME}`} replace />;
+  }
+
+  if (!currentUser || currentUser.role !== "AD") {
+    return <Navigate to={`/${ROUTE.APP}/${ROUTE.DASHBOARD}`} replace />;
+  }
 
   // ==========================================
   // HANDLERS
@@ -234,7 +243,7 @@ export default function BadgesManagementPage() {
                         src={
                           badge.iconUrl.startsWith("data:")
                             ? badge.iconUrl
-                            : `${badge.iconUrl}?t=${Date.now()}`
+                            : `${badge.iconUrl}?t=${cacheBuster}`
                         }
                         alt={badge.badgeName}
                         className="size-full object-contain transition-transform duration-300 group-hover:scale-105"

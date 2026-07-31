@@ -523,6 +523,7 @@ function BookmarksPage() {
             handleToggleDocumentSelect(document.documentId)
           }
           viewMode={viewMode}
+          isPublic={true}
         />
       ) : (
         <div className="rounded-3xl border border-border bg-card p-10 text-center shadow-sm">

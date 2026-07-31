@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Award, Calendar, Medal } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -12,6 +12,7 @@ interface ProfileBadgesCardProps {
 export default function ProfileBadgesCard({ badges }: ProfileBadgesCardProps) {
   const { t, i18n } = useTranslation();
   const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
+  const cacheBuster = useRef(Date.now()).current;
 
   const formatDate = (dateString?: string | null) => {
     if (!dateString) return "N/A";
@@ -68,7 +69,7 @@ export default function ProfileBadgesCard({ badges }: ProfileBadgesCardProps) {
                             src={
                               item.badge.iconUrl.startsWith("data:")
                                 ? item.badge.iconUrl
-                                : `${item.badge.iconUrl}?t=${Date.now()}`
+                                : `${item.badge.iconUrl}?t=${cacheBuster}`
                             }
                             alt={item.badge.badgeName}
                             className="size-full object-contain transition-transform duration-500 group-hover:scale-110"
