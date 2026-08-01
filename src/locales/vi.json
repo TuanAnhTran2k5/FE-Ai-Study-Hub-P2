@@ -331,7 +331,10 @@
     "deleteCombo": "Xóa môn combo và các môn học thành công!",
     "createSubject": "Thêm môn học thành công!",
     "updateSubject": "Cập nhật môn học thành công!",
-    "deleteSubject": "Xóa môn học thành công!"
+    "deleteSubject": "Xóa môn học thành công!",
+    "uploadSyllabus": "Tải đề cương lên thành công và đang phân tích!",
+    "updateSyllabus": "Cập nhật đề cương thành công!",
+    "deleteSyllabus": "Xóa đề cương thành công!"
   },
   "error": {
     "accountBanned": "Tài khoản của bạn đã bị khóa",
@@ -373,6 +376,9 @@
     "createSubjectFailed": "Thêm môn học thất bại",
     "updateSubjectFailed": "Cập nhật môn học thất bại",
     "deleteSubjectFailed": "Xóa môn học thất bại",
+    "uploadSyllabusFailed": "Tải đề cương lên thất bại",
+    "updateSyllabusFailed": "Cập nhật đề cương thất bại",
+    "deleteSyllabusFailed": "Xóa đề cương thất bại",
     "serverError": "Có lỗi xảy ra. Vui lòng thử lại sau",
     "loginPrompt": "Vui lòng đăng nhập lại.",
     "subjectNotFound": "Không tìm thấy môn học đã chọn.",

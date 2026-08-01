@@ -133,14 +133,14 @@ export default function SyllabusManageDialog({
   const uploadMutation = useMutation({
     mutationFn: (file: File) => uploadSyllabus(subject!.subjectId, file),
     onSuccess: () => {
-      toast.success(t("success.createSubject"));
+      toast.success(t("success.uploadSyllabus", "Syllabus uploaded and parsing started successfully!"));
       refetchSyllabus();
       refetchHistory();
       queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || t(ERROR_CODE.CREATE_SUBJECT_FAILED));
+      toast.error(error.response?.data?.message || t(ERROR_CODE.UPLOAD_SYLLABUS_FAILED));
     },
   });
 
@@ -149,14 +149,14 @@ export default function SyllabusManageDialog({
     mutationFn: (data: { jsonContent: string; reason: string }) =>
       updateSyllabus(subject!.subjectId, data),
     onSuccess: () => {
-      toast.success(t("success.updateSubject"));
+      toast.success(t("success.updateSyllabus", "Syllabus updated successfully!"));
       refetchSyllabus();
       refetchHistory();
       queryClient.invalidateQueries({ queryKey: ["admin-subjects"] });
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || t(ERROR_CODE.UPDATE_SUBJECT_FAILED));
+      toast.error(error.response?.data?.message || t(ERROR_CODE.UPDATE_SYLLABUS_FAILED));
     },
   });
 
@@ -186,7 +186,7 @@ export default function SyllabusManageDialog({
       queryClient.invalidateQueries({ queryKey: ["admin-combos"] });
     },
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || t(ERROR_CODE.DELETE_SUBJECT_FAILED));
+      toast.error(error.response?.data?.message || t(ERROR_CODE.DELETE_SYLLABUS_FAILED));
     },
   });
 
@@ -229,7 +229,7 @@ export default function SyllabusManageDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-3xl border border-border bg-card sm:max-w-5xl max-h-[90vh] overflow-y-auto flex flex-col p-6">
+      <DialogContent className="rounded-3xl border border-border bg-card sm:max-w-5xl max-h-[90vh] overflow-y-auto scrollbar-thin flex flex-col p-6">
         <DialogHeader className="flex flex-row items-start justify-between">
           <div>
             <div className="flex items-center gap-2">

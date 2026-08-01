@@ -8,24 +8,45 @@ interface GoldAvatarFrameProps {
 const sizeClass = {
   sm: {
     wrapper: "h-10 w-10",
-    avatar: "h-[30px] w-[30px]",
+    container: "absolute inset-[3px] border-2",
+    avatar: "h-full w-full",
     label: "hidden",
     nodeHorizontal: "h-1 w-3",
     nodeVertical: "h-3 w-1",
+    shift: {
+      top: "top-0.5",
+      bottom: "bottom-0.5",
+      left: "left-0.5",
+      right: "right-0.5",
+    },
   },
   md: {
     wrapper: "h-28 w-28",
-    avatar: "h-[88px] w-[88px]",
+    container: "absolute inset-[11px] border-4",
+    avatar: "h-full w-full",
     label: "text-[10px] px-3 py-1",
     nodeHorizontal: "h-3 w-8",
     nodeVertical: "h-8 w-3",
+    shift: {
+      top: "top-1.5",
+      bottom: "bottom-1.5",
+      left: "left-1.5",
+      right: "right-1.5",
+    },
   },
   lg: {
     wrapper: "h-36 w-36",
-    avatar: "h-[116px] w-[116px]",
+    container: "absolute inset-[14px] border-[5px]",
+    avatar: "h-full w-full",
     label: "text-xs px-4 py-1",
     nodeHorizontal: "h-3.5 w-10",
     nodeVertical: "h-10 w-3.5",
+    shift: {
+      top: "top-2",
+      bottom: "bottom-2",
+      left: "left-2",
+      right: "right-2",
+    },
   },
 };
 
@@ -43,7 +64,7 @@ function GoldAvatarFrame({
 
   return (
     <div
-      className={`relative flex items-center justify-center ${classes.wrapper}`}
+      className={`relative flex shrink-0 items-center justify-center ${classes.wrapper}`}
     >
       <div className="absolute inset-0 rounded-full bg-gradient-to-br from-yellow-200 via-yellow-400 to-amber-700 shadow-[0_0_26px_rgba(234,179,8,0.45)] dark:from-yellow-200 dark:via-yellow-500 dark:to-amber-600 dark:shadow-[0_0_32px_rgba(250,204,21,0.65)]" />
 
@@ -54,19 +75,19 @@ function GoldAvatarFrame({
       <div className="absolute inset-[11px] rounded-full border border-white/90 dark:border-yellow-100/70" />
 
       <div
-        className={`absolute left-1/2 top-0 -translate-x-1/2 rounded-b-xl bg-gradient-to-b from-yellow-200 to-amber-500 shadow-[0_0_14px_rgba(234,179,8,0.85)] dark:from-yellow-100 dark:to-yellow-500 dark:shadow-[0_0_18px_rgba(250,204,21,0.95)] ${classes.nodeHorizontal}`}
+        className={`absolute left-1/2 -translate-x-1/2 rounded-b-xl bg-gradient-to-b from-yellow-200 to-amber-500 shadow-[0_0_14px_rgba(234,179,8,0.85)] dark:from-yellow-100 dark:to-yellow-500 dark:shadow-[0_0_18px_rgba(250,204,21,0.95)] ${classes.shift.top} ${classes.nodeHorizontal}`}
       />
 
       <div
-        className={`absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-xl bg-gradient-to-t from-yellow-200 to-amber-500 shadow-[0_0_14px_rgba(234,179,8,0.85)] dark:from-yellow-100 dark:to-yellow-500 dark:shadow-[0_0_18px_rgba(250,204,21,0.95)] ${classes.nodeHorizontal}`}
+        className={`absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-xl bg-gradient-to-t from-yellow-200 to-amber-500 shadow-[0_0_14px_rgba(234,179,8,0.85)] dark:from-yellow-100 dark:to-yellow-500 dark:shadow-[0_0_18px_rgba(250,204,21,0.95)] ${classes.shift.bottom} ${classes.nodeHorizontal}`}
       />
 
       <div
-        className={`absolute left-0 top-1/2 -translate-y-1/2 rounded-r-xl bg-gradient-to-r from-yellow-200 to-amber-500 shadow-[0_0_14px_rgba(234,179,8,0.85)] dark:from-yellow-100 dark:to-yellow-500 dark:shadow-[0_0_18px_rgba(250,204,21,0.95)] ${classes.nodeVertical}`}
+        className={`absolute left-0 top-1/2 -translate-y-1/2 rounded-r-xl bg-gradient-to-r from-yellow-200 to-amber-500 shadow-[0_0_14px_rgba(234,179,8,0.85)] dark:from-yellow-100 dark:to-yellow-500 dark:shadow-[0_0_18px_rgba(250,204,21,0.95)] ${classes.nodeVertical} ${classes.shift.left}`}
       />
 
       <div
-        className={`absolute right-0 top-1/2 -translate-y-1/2 rounded-l-xl bg-gradient-to-l from-yellow-200 to-amber-500 shadow-[0_0_14px_rgba(234,179,8,0.85)] dark:from-yellow-100 dark:to-yellow-500 dark:shadow-[0_0_18px_rgba(250,204,21,0.95)] ${classes.nodeVertical}`}
+        className={`absolute right-0 top-1/2 -translate-y-1/2 rounded-l-xl bg-gradient-to-l from-yellow-200 to-amber-500 shadow-[0_0_14px_rgba(234,179,8,0.85)] dark:from-yellow-100 dark:to-yellow-500 dark:shadow-[0_0_18px_rgba(250,204,21,0.95)] ${classes.nodeVertical} ${classes.shift.right}`}
       />
 
       {size !== "sm" && (
@@ -77,7 +98,7 @@ function GoldAvatarFrame({
         </>
       )}
 
-      <div className="relative overflow-hidden rounded-full border-4 border-yellow-50 bg-card shadow-[inset_0_0_16px_rgba(120,53,15,0.25)] dark:border-yellow-100/90">
+      <div className={`overflow-hidden rounded-full border-yellow-50 bg-card shadow-[inset_0_0_16px_rgba(120,53,15,0.25)] dark:border-yellow-100/90 ${classes.container}`}>
         <img
           src={avatarUrl || fallbackAvatar}
           alt={fullName}

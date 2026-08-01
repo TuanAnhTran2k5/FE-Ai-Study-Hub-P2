@@ -10,7 +10,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 
@@ -72,6 +72,7 @@ function BookmarksPage() {
 
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const {
     data: bookmarks = [],
@@ -288,7 +289,7 @@ function BookmarksPage() {
   };
 
   const handleViewBookmark = (documentId: number) => {
-    navigate(`/${ROUTE.APP}/${ROUTE.COMMUNITY}/${documentId}`);
+    navigate(`/${ROUTE.APP}/${ROUTE.COMMUNITY}/${documentId}`, { state: { from: location.pathname } });
   };
 
   const handleToggleDocumentSelect = (documentId: number) => {

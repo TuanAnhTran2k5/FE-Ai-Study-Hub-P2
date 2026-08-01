@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { BookOpen, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,7 @@ interface RecentDocsTableProps {
 export default function RecentDocsTable({ documents }: RecentDocsTableProps) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Sort and take 5 most recent documents
   const recentDocuments = [...documents]
@@ -76,7 +77,7 @@ export default function RecentDocsTable({ documents }: RecentDocsTableProps) {
                   <tr 
                     key={doc.documentId}
                     className="hover:bg-secondary/5 transition-colors cursor-pointer group"
-                    onClick={() => navigate(`/${ROUTE.APP}/${ROUTE.DOCUMENT_DETAIL.replace(":id", String(doc.documentId))}`)}
+                    onClick={() => navigate(`/${ROUTE.APP}/${ROUTE.DOCUMENT_DETAIL.replace(":id", String(doc.documentId))}`, { state: { from: location.pathname } })}
                   >
                     <td className="py-3 px-6 min-w-[200px]">
                       <div className="font-bold text-xs text-card-foreground group-hover:text-primary transition-colors line-clamp-1">

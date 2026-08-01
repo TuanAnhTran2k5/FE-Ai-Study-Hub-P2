@@ -9,7 +9,7 @@ import {
   X,
 } from "lucide-react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useTranslation } from "react-i18next";
 
@@ -387,8 +387,10 @@ function MyDocumentsPage() {
     [activePage, filteredDocuments],
   );
 
+  const location = useLocation();
+
   const handleViewDocument = (documentId: number) => {
-    navigate(`/app/mydocuments/${documentId}`);
+    navigate(`/app/mydocuments/${documentId}`, { state: { from: location.pathname } });
   };
 
   const handleBulkDeleteOpenChange = (open: boolean) => {

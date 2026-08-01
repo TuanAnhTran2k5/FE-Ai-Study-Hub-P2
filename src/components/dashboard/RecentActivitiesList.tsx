@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Bell, Award, BookOpen, MessageSquare, ExternalLink, Calendar, CheckCircle2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
@@ -52,6 +52,7 @@ const getNotificationIcon = (type?: string, className = "h-4.5 w-4.5") => {
 export default function RecentActivitiesList() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const [selectedNotif, setSelectedNotif] = useState<NotificationResponse | null>(null);
 
@@ -81,7 +82,7 @@ export default function RecentActivitiesList() {
 
   const handleNavigateToDocument = (docId: number) => {
     setSelectedNotif(null);
-    navigate(`/${ROUTE.APP}/${ROUTE.DOCUMENT_DETAIL.replace(":id", String(docId))}`);
+    navigate(`/${ROUTE.APP}/${ROUTE.DOCUMENT_DETAIL.replace(":id", String(docId))}`, { state: { from: location.pathname } });
   };
 
   if (isLoading) {

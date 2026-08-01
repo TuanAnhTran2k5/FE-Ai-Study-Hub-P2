@@ -8,24 +8,45 @@ interface SilverAvatarFrameProps {
 const sizeClass = {
   sm: {
     wrapper: "h-10 w-10",
-    avatar: "h-[30px] w-[30px]",
+    container: "absolute inset-[3px] border-2",
+    avatar: "h-full w-full",
     label: "hidden",
     nodeHorizontal: "h-1 w-3",
     nodeVertical: "h-3 w-1",
+    shift: {
+      top: "top-0.5",
+      bottom: "bottom-0.5",
+      left: "left-0.5",
+      right: "right-0.5",
+    },
   },
   md: {
     wrapper: "h-28 w-28",
-    avatar: "h-[88px] w-[88px]",
+    container: "absolute inset-[11px] border-4",
+    avatar: "h-full w-full",
     label: "text-[10px] px-3 py-1",
     nodeHorizontal: "h-3 w-8",
     nodeVertical: "h-8 w-3",
+    shift: {
+      top: "top-1.5",
+      bottom: "bottom-1.5",
+      left: "left-1.5",
+      right: "right-1.5",
+    },
   },
   lg: {
     wrapper: "h-36 w-36",
-    avatar: "h-[116px] w-[116px]",
+    container: "absolute inset-[14px] border-[5px]",
+    avatar: "h-full w-full",
     label: "text-xs px-4 py-1",
     nodeHorizontal: "h-3.5 w-10",
     nodeVertical: "h-10 w-3.5",
+    shift: {
+      top: "top-2",
+      bottom: "bottom-2",
+      left: "left-2",
+      right: "right-2",
+    },
   },
 };
 
@@ -43,7 +64,7 @@ function SilverAvatarFrame({
 
   return (
     <div
-      className={`relative flex items-center justify-center ${classes.wrapper}`}
+      className={`relative flex shrink-0 items-center justify-center ${classes.wrapper}`}
     >
       <div className="absolute inset-0 rounded-full bg-gradient-to-br from-slate-50 via-slate-300 to-sky-300 shadow-[0_0_24px_rgba(2,132,199,0.35)] dark:from-slate-200 dark:via-slate-400 dark:to-sky-400 dark:shadow-[0_0_28px_rgba(56,189,248,0.5)]" />
 
@@ -54,22 +75,22 @@ function SilverAvatarFrame({
       <div className="absolute inset-[11px] rounded-full border border-white/90 dark:border-white/50" />
 
       <div
-        className={`absolute left-1/2 top-0 -translate-x-1/2 rounded-b-xl bg-gradient-to-b from-sky-300 to-sky-500 shadow-[0_0_12px_rgba(14,165,233,0.75)] dark:from-sky-200 dark:to-sky-400 dark:shadow-[0_0_16px_rgba(56,189,248,0.9)] ${classes.nodeHorizontal}`}
+        className={`absolute left-1/2 -translate-x-1/2 rounded-b-xl bg-gradient-to-b from-sky-300 to-sky-500 shadow-[0_0_12px_rgba(14,165,233,0.75)] dark:from-sky-200 dark:to-sky-400 dark:shadow-[0_0_16px_rgba(56,189,248,0.9)] ${classes.shift.top} ${classes.nodeHorizontal}`}
       />
 
       <div
-        className={`absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-xl bg-gradient-to-t from-sky-300 to-sky-500 shadow-[0_0_12px_rgba(14,165,233,0.75)] dark:from-sky-200 dark:to-sky-400 dark:shadow-[0_0_16px_rgba(56,189,248,0.9)] ${classes.nodeHorizontal}`}
+        className={`absolute bottom-0 left-1/2 -translate-x-1/2 rounded-t-xl bg-gradient-to-t from-sky-300 to-sky-500 shadow-[0_0_12px_rgba(14,165,233,0.75)] dark:from-sky-200 dark:to-sky-400 dark:shadow-[0_0_16px_rgba(56,189,248,0.9)] ${classes.shift.bottom} ${classes.nodeHorizontal}`}
       />
 
       <div
-        className={`absolute left-0 top-1/2 -translate-y-1/2 rounded-r-xl bg-gradient-to-r from-sky-300 to-sky-500 shadow-[0_0_12px_rgba(14,165,233,0.75)] dark:from-sky-200 dark:to-sky-400 dark:shadow-[0_0_16px_rgba(56,189,248,0.9)] ${classes.nodeVertical}`}
+        className={`absolute left-0 top-1/2 -translate-y-1/2 rounded-r-xl bg-gradient-to-r from-sky-300 to-sky-500 shadow-[0_0_12px_rgba(14,165,233,0.75)] dark:from-sky-200 dark:to-sky-400 dark:shadow-[0_0_16px_rgba(56,189,248,0.9)] ${classes.nodeVertical} ${classes.shift.left}`}
       />
 
       <div
-        className={`absolute right-0 top-1/2 -translate-y-1/2 rounded-l-xl bg-gradient-to-l from-sky-300 to-sky-500 shadow-[0_0_12px_rgba(14,165,233,0.75)] dark:from-sky-200 dark:to-sky-400 dark:shadow-[0_0_16px_rgba(56,189,248,0.9)] ${classes.nodeVertical}`}
+        className={`absolute right-0 top-1/2 -translate-y-1/2 rounded-l-xl bg-gradient-to-l from-sky-300 to-sky-500 shadow-[0_0_12px_rgba(14,165,233,0.75)] dark:from-sky-200 dark:to-sky-400 dark:shadow-[0_0_16px_rgba(56,189,248,0.9)] ${classes.nodeVertical} ${classes.shift.right}`}
       />
 
-      <div className="relative overflow-hidden rounded-full border-4 border-white bg-card shadow-[inset_0_0_16px_rgba(15,23,42,0.18)] dark:border-slate-100/80 dark:bg-card">
+      <div className={`overflow-hidden rounded-full border-white bg-card shadow-[inset_0_0_16px_rgba(15,23,42,0.18)] dark:border-slate-100/80 dark:bg-card ${classes.container}`}>
         <img
           src={avatarUrl || fallbackAvatar}
           alt={fullName}

@@ -32,6 +32,7 @@ export interface SubjectResponse {
   comboCode: string | null;
   comboName: string | null;
   isDeleted: boolean;
+  hasSyllabus?: boolean;
 }
 
 export interface ComboSubjectRequest {

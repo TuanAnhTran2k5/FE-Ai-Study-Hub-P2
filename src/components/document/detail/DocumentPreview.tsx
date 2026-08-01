@@ -11,9 +11,80 @@ type DocumentPreviewProps = {
   blob: Blob;
   fileTypeLabel: string;
   title: string;
+  fileUrl?: string;
 };
 
-function DocumentPreview({ blob, fileTypeLabel, title }: DocumentPreviewProps) {
+function PptxPreview({
+  blob,
+  fileUrl,
+  title,
+}: {
+  blob: Blob;
+  fileUrl?: string;
+  title: string;
+}) {
+  const isPublicFileUrl =
+    fileUrl &&
+    fileUrl.startsWith("http") &&
+    !fileUrl.includes("localhost") &&
+    !fileUrl.includes("127.0.0.1") &&
+    !fileUrl.includes("192.168.") &&
+    !fileUrl.includes("10.");
+
+  const handleDownloadFallback = () => {
+    const downloadUrl = URL.createObjectURL(blob);
+    const link = window.document.createElement("a");
+    link.href = downloadUrl;
+    link.download = title;
+    link.click();
+    URL.revokeObjectURL(downloadUrl);
+  };
+
+  if (isPublicFileUrl) {
+    const encodedUrl = encodeURIComponent(fileUrl);
+    const iframeUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodedUrl}`;
+
+    return (
+      <div className="h-full w-full border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+        <iframe
+          src={iframeUrl}
+          className="h-full w-full border-0"
+          title={`Preview of ${title}`}
+          allowFullScreen
+          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-pointer-lock allow-presentation allow-downloads"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex h-full flex-col items-center justify-center p-8 text-center bg-slate-50/50 border border-slate-200 rounded-2xl">
+      <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-950/20 text-orange-600 ring-8 ring-orange-50 dark:ring-orange-950/10 mb-6">
+        <FileText className="h-7 w-7" />
+      </div>
+      <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+        Tính năng xem trước PowerPoint
+      </h2>
+      <p className="mt-2 max-w-md text-sm text-slate-500 leading-relaxed font-semibold">
+        Khi deploy ứng dụng lên server thực tế, file PowerPoint sẽ được lưu trữ trực tuyến và hiển thị trực tiếp tại đây thông qua **Microsoft Office Online Viewer**.
+      </p>
+      <p className="mt-1 max-w-md text-xs text-slate-400 font-semibold italic">
+        (Do đang chạy ở môi trường Local / URL chưa công khai, Microsoft không thể truy cập trực tiếp file này).
+      </p>
+      <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
+        <button
+          type="button"
+          onClick={handleDownloadFallback}
+          className="h-10 px-6 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-xs font-black shadow-lg shadow-orange-600/10 cursor-pointer transition-colors"
+        >
+          Tải xuống để xem trên thiết bị
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function DocumentPreview({ blob, fileTypeLabel, title, fileUrl }: DocumentPreviewProps) {
   if (fileTypeLabel === "PDF") {
     return <PdfPreview blob={blob} title={title} />;
   }
@@ -28,6 +99,10 @@ function DocumentPreview({ blob, fileTypeLabel, title }: DocumentPreviewProps) {
 
   if (fileTypeLabel === "XLS" || fileTypeLabel === "XLSX") {
     return <ExcelPreview blob={blob} title={title} />;
+  }
+
+  if (fileTypeLabel === "PPTX") {
+    return <PptxPreview blob={blob} fileUrl={fileUrl} title={title} />;
   }
 
   return (
