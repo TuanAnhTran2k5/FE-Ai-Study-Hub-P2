@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef, Component } from "react";
+import type { ErrorInfo, ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileText, Image, X } from "lucide-react";
 import { useSelector } from "react-redux";
@@ -56,6 +57,37 @@ import type { RootState } from "@/redux/store";
 import type { User } from "@/models/user";
 import type { BookmarkResponse, DocumentResponse } from "@/types/document.type";
 
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
+  public state = {
+    hasError: false,
+    error: null as Error | null,
+  };
+
+  public static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
+  }
+
+  public render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-6 bg-red-50 text-red-900 border border-red-200 rounded-xl m-4 font-mono text-xs overflow-auto max-h-[400px] w-full">
+          <h3 className="font-bold text-sm mb-2 text-red-700">React Render Error:</h3>
+          <p className="font-bold">{this.state.error?.toString()}</p>
+          <pre className="mt-2 text-[10px] opacity-80 whitespace-pre-wrap text-left">
+            {this.state.error?.stack}
+          </pre>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 // Chuyển MIME type hoặc loại file từ BE thành nhãn ngắn để hiển thị trên giao diện.
 function formatFileType(fileType?: string) {
   if (!fileType) return "FILE";
@@ -98,7 +130,7 @@ function formatFileType(fileType?: string) {
 // Kiểm tra loại file nào có thể lấy dạng Blob từ API và preview trực tiếp trong web.
 function canPreviewWithBlob(fileTypeLabel: string) {
   // Các định dạng này có thể lấy file từ API dạng Blob rồi render trực tiếp trong trang.
-  return ["PDF", "TXT", "DOCX","XLS", "XLSX"].includes(fileTypeLabel);
+  return ["PDF", "TXT", "DOCX", "XLS", "XLSX", "PPTX"].includes(fileTypeLabel);
 }
 
 // Chuẩn hóa MIME type cho Blob để browser/thư viện biết cách render file.
@@ -1013,7 +1045,15 @@ const subjectCode =
   canEdit={canEdit}
   isDeleting={deleteMutation.isPending}
   canOpenInNewTab={!!canOpenInNewTab}
-  onBack={() => navigate(-1)}
+  onBack={() => {
+    // Fix: Office Online iframe adds extra entries to browser history, causing Back to require 2 clicks.
+    // Instead of navigate(-1), we navigate directly to the previous page URL if available.
+    if (location.state?.from) {
+      navigate(location.state.from);
+    } else {
+      navigate(-1);
+    }
+  }}
   onUpdate={() => {
     if (canEdit) {
       setIsUpdateOpen(true);
@@ -1080,11 +1120,14 @@ const subjectCode =
                 </p>
               </div>
             ) : normalizedPreviewBlob ? (
-              <DocumentPreview
-                blob={normalizedPreviewBlob}
-                fileTypeLabel={fileTypeLabel}
-                title={getFormattedTitle(document.title, document.fileName)}
-              />
+              <ErrorBoundary>
+                <DocumentPreview
+                  blob={normalizedPreviewBlob}
+                  fileTypeLabel={fileTypeLabel}
+                  title={getFormattedTitle(document.title, document.fileName)}
+                  fileUrl={document.fileUrl}
+                />
+              </ErrorBoundary>
             ) : (
               <div className="flex h-full flex-col items-center justify-center px-6 text-center">
                 <FileText className="h-16 w-16 text-muted-foreground" />

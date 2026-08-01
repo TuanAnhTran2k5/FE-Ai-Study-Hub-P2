@@ -189,7 +189,7 @@ export default function ComboDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-3xl border border-border bg-card sm:max-w-4xl max-h-[85vh] overflow-y-auto">
+      <DialogContent className="rounded-3xl border border-border bg-card sm:max-w-4xl max-h-[85vh] overflow-y-auto scrollbar-thin">
         <DialogHeader>
           <DialogTitle className="text-2xl font-black text-card-foreground">
             {editingCombo ? t("curriculum.editCombo", "Edit Combo Subject") : t("curriculum.addCombo", "Add Combo Subject")}

@@ -15,6 +15,7 @@ export interface SubjectResponse {
   comboId?: number | null;
   comboCode?: string | null;
   comboName?: string | null;
+  hasSyllabus?: boolean;
 }
 
 export interface ComboSubjectResponse {

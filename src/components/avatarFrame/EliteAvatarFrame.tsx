@@ -39,7 +39,7 @@ function EliteAvatarFrame({
 
   return (
     <div
-      className={`relative flex items-center justify-center ${classes.wrapper}`}
+      className={`relative flex shrink-0 items-center justify-center ${classes.wrapper}`}
     >
       {/* Aura ngoài */}
       <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-300 via-violet-500 to-indigo-700 opacity-90 blur-[1px] shadow-[0_0_40px_rgba(99,102,241,0.8)]" />

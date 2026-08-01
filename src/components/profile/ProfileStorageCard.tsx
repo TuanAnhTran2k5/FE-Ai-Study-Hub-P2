@@ -67,10 +67,13 @@ function ProfileStorageCard({ user }: ProfileStorageCardProps) {
         <StorageInfo label={t("profile.remaining", "Remaining")} value={formatStorage(storageRemaining)} />
       </div>
 
-      <div className="mt-5 h-3 overflow-hidden rounded-full bg-muted">
+      <div className="mt-5 h-3 overflow-hidden rounded-full bg-muted-foreground/10 dark:bg-muted-foreground/20">
         <div
           className="h-full rounded-full bg-gradient-to-r from-primary-start to-primary-end"
-          style={{ width: `${Math.min(100, storagePercent)}%` }}
+          style={{
+            width: `${Math.min(100, storagePercent)}%`,
+            minWidth: storagePercent > 0 ? "12px" : "0",
+          }}
         />
       </div>
 

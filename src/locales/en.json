@@ -331,7 +331,10 @@
     "deleteCombo": "Combo subject and its subjects deleted successfully!",
     "createSubject": "Subject added successfully to this combo!",
     "updateSubject": "Subject updated successfully!",
-    "deleteSubject": "Subject deleted successfully from this combo!"
+    "deleteSubject": "Subject deleted successfully from this combo!",
+    "uploadSyllabus": "Syllabus uploaded and parsing started successfully!",
+    "updateSyllabus": "Syllabus updated successfully!",
+    "deleteSyllabus": "Syllabus deleted successfully!"
   },
   "error": {
     "accountBanned": "Your account has been banned",
@@ -373,6 +376,9 @@
     "createSubjectFailed": "Failed to add subject",
     "updateSubjectFailed": "Failed to update subject",
     "deleteSubjectFailed": "Failed to delete subject",
+    "uploadSyllabusFailed": "Failed to upload syllabus",
+    "updateSyllabusFailed": "Failed to update syllabus",
+    "deleteSyllabusFailed": "Failed to delete syllabus",
     "serverError": "Something went wrong. Please try again later",
     "loginPrompt": "Please login again.",
     "subjectNotFound": "Selected subject was not found.",

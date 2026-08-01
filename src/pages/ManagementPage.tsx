@@ -146,6 +146,17 @@ function ManagementPage() {
     enabled: !!isAuthorized,
   });
 
+  // Đồng bộ trạng thái syllabus từ backend vào local state
+  useEffect(() => {
+    if (subjects && subjects.length > 0) {
+      const initialMap: Record<number, boolean> = {};
+      subjects.forEach((subj) => {
+        initialMap[subj.subjectId] = !!subj.hasSyllabus;
+      });
+      setSyllabusExistsMap(initialMap);
+    }
+  }, [subjects]);
+
   // Get Unassigned Combo Subjects
   const { data: unassignedSubjects = [] } = useQuery({
     queryKey: ["admin-unassigned-combo-subjects"],

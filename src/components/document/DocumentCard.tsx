@@ -464,7 +464,7 @@ function DocumentCard({
                     </button>
                   </PopoverTrigger>
 
-                  <PopoverContent align="start" className="w-64 rounded-2xl p-4">
+                  <PopoverContent align="start" className="w-80 rounded-2xl p-4">
                     <div className="flex items-center gap-3">
                       <AvatarFrame
                         score={getOwnerScore(document)}
@@ -473,7 +473,7 @@ function DocumentCard({
                         size="md"
                       />
                       <div className="min-w-0">
-                        <p className="truncate font-bold text-card-foreground">
+                        <p className="break-words whitespace-normal font-bold text-card-foreground leading-snug">
                           {document.ownerName ?? `User ${document.ownerId}`}
                         </p>
                         <p className="text-sm text-muted-foreground">Uploader</p>

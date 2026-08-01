@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { AuthenticatedCommunity } from "@/components/community/AuthenticatedCommunity";
@@ -16,6 +16,7 @@ import type { SubjectResponse } from "@/types/academic.type";
 function CommunityPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Retrieve current user
   const currentUser = useSelector(
@@ -91,6 +92,7 @@ function CommunityPage() {
 
     navigate(
       `/${ROUTE.APP}/${isMyDocument ? ROUTE.MY_DOCUMENTS : ROUTE.COMMUNITY}/${documentId}`,
+      { state: { from: location.pathname } },
     );
   };
 

@@ -39,5 +39,8 @@ export const ERROR_CODE = {
   CREATE_SUBJECT_FAILED: "error.createSubjectFailed",
   UPDATE_SUBJECT_FAILED: "error.updateSubjectFailed",
   DELETE_SUBJECT_FAILED: "error.deleteSubjectFailed",
+  UPLOAD_SYLLABUS_FAILED: "error.uploadSyllabusFailed",
+  UPDATE_SYLLABUS_FAILED: "error.updateSyllabusFailed",
+  DELETE_SYLLABUS_FAILED: "error.deleteSyllabusFailed",
   SERVER_ERROR: "error.serverError",
 };

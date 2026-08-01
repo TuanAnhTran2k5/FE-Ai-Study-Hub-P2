@@ -65,7 +65,7 @@ function NotificationPage() {
     useState<NotificationFilterType>("ALL");
   const [isDeleteAllConfirmOpen, setIsDeleteAllConfirmOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 20;
 
   // Reset pagination to page 1 when activeFilter changes
   useEffect(() => {
